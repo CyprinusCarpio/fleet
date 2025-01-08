@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.15.0)
+
+set (CMAKE_CXX_STANDARD 11)
+
+project(FleetDemo VERSION 0.1.0)
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
+
+find_package(FLTK CONFIG REQUIRED)
+
+add_executable(FleetDemo main.cpp 
+	src/Fle_Flat_Button.cpp
+	src/Fle_Dock_Group.cpp 
+	src/Fle_Dock_Host.cpp
+)
+
+target_include_directories(FleetDemo PUBLIC ${CMAKE_SOURCE_DIR}/include )
+
+target_link_libraries(FleetDemo PRIVATE fltk)
+
