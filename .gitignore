@@ -2,9 +2,11 @@
 .vscode
 CodeAnalysis
 out
-CMakeSettings.json
 bin
+Makefile
+build
+
 CMakeFiles
 CMakeCache.txt
+CMakeSettings.json
 cmake_install.cmake
-Makefile
