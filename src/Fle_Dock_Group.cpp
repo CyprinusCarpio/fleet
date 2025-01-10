@@ -5,7 +5,7 @@
 
 #include <FLE/Fle_Dock_Host.hpp>
 
-#define PREVIEW_TIMEOUT 0.5f
+#define PREVIEW_TIMEOUT 0.25f
 
 #include <iostream>
 

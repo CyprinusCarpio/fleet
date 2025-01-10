@@ -13,6 +13,11 @@ add_executable(FleetDemo main.cpp
 	src/Fle_Dock_Host.cpp
 )
 
+file(GLOB FLE_HEADER_FILES "${CMAKE_SOURCE_DIR}/include/FLE/*.hpp")
+target_sources(FleetDemo PRIVATE
+	${FLE_HEADER_FILES}
+)
+
 target_include_directories(FleetDemo PUBLIC ${CMAKE_SOURCE_DIR}/include )
 
 target_link_libraries(FleetDemo PRIVATE fltk)

@@ -52,6 +52,8 @@ class Fle_Dock_Host : public Fl_Group
 	// Used for:
 	// - try_attach
 	// - detached_drag
+	// - hide_group
+	// - show_group
 	friend class Fle_Dock_Group;
 
 	// TODO: ensure that the dock host works properly if it's X and Y coords aren't 0, 0
@@ -118,14 +120,15 @@ class Fle_Dock_Host : public Fl_Group
 	int get_line_min_breadth(std::list<Fle_Dock_Group*>* line);
 	int line_set_breadth(std::list<Fle_Dock_Group*>* line, int newBreadth, bool setToMinSize);
 	int get_direction_breadth(int direction);
-	int try_attach(Fle_Dock_Group* group, int screenX, int screenY, bool force = false); // returns direction
-	int try_attach_case2n3(int direction, Fle_Dock_Group* group, int X, int Y, bool& needCalcMinSize /* out */);
+	int try_attach(Fle_Dock_Group* group, int screenX, int screenY, bool force = false, bool preview = false); // returns direction
+	int try_attach_case2n3(int direction, Fle_Dock_Group* group, int X, int Y, bool& needCalcMinSize /* out */, bool preview);
 
 	bool is_host_visible_at(int X, int Y); // checks if the view of host at X, Y is obstructed by other wnds
 
 protected:
 	// FLTK overrides
 	void draw() override;
+	virtual void draw_preview(int X, int Y, int W, int H);
 
 public:
 	// Constructor and destructor
