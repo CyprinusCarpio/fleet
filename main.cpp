@@ -4,6 +4,9 @@
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Scheme_Choice.H>
+
+#include <iostream>
 
 #include "FLE/Fle_Flat_Button.hpp"
 #include "FLE/Fle_Dock_Host.hpp"
@@ -121,37 +124,6 @@ Fl_Tree* make_tree()
     return tree;
 }
 
-void goButtonCb(Fl_Widget* w, void* d)
-{
-    Fle_Dock_Group* parent = (Fle_Dock_Group*)w->parent()->parent();
-    Fle_Dock_Host* dh = parent->get_host();
-
-    static int i = 0;
-    std::string* label = new std::string( "Box " + std::to_string(i));
-    std::string* label1 = new std::string( "TestBar " + std::to_string(i));
-
-    if(i % 2 == 0)
-    //if(true)
-    {
-        Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, label1->c_str(), FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 140, 26, false);
-        Fl_Box* box = new Fl_Box(0, 0, 0, 0, label->c_str());
-        box->box(FL_FLAT_BOX);
-        box->color(FL_MAGENTA);
-        toolbar->add_band_widget(box);
-        i++;
-    }
-    else
-    {
-        Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, label1->c_str(), FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_RIGHT, FLE_DOCK_RIGHT | FLE_DOCK_LEFT, 90, 120, false);
-        Fl_Box* box = new Fl_Box(0, 0, 0, 0, label->c_str());
-        box->box(FL_FLAT_BOX);
-        box->color(FL_CYAN);
-        toolbar->add_band_widget(box);
-        i++;
-    }
-    
-}
-
 class FlatMenuBar : public Fl_Menu_Bar
 {
 public:
@@ -171,7 +143,7 @@ protected:
 void min_size_cb(Fle_Dock_Host* host, int W, int H)
 {
     //std::cout << "min_size_cb " << W << " " << H << std::endl;
-
+    
     host->window()->size_range(W, H);
 }
 Fle_Dock_Group* vertGroup1;
@@ -190,7 +162,7 @@ void showFoldersCb(Fl_Widget* w, void* d)
 
 Fle_Dock_Group* make_toolbar(Fle_Dock_Host* dh)
 {
-    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, "Toolbar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 270, 26, true);
+    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 7, "Toolbar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 270, 26, true);
     Fl_Group* tbg = new Fl_Group(0, 0, 280, 24);
     Fle_Flat_Button* btn1 = new Fle_Flat_Button(0, 0, 50, 24, "@<- Back");
     Fle_Flat_Button* btn2 = new Fle_Flat_Button(50, 0, 24, 24, "@->");
@@ -202,6 +174,52 @@ Fle_Dock_Group* make_toolbar(Fle_Dock_Host* dh)
     btn5->callback(showFoldersCb);
 
     Fl_Box* r = new Fl_Box(278, 0, 2, 24);
+    tbg->resizable(r);
+
+    tb->add_band_widget(tbg);
+
+    return tb;
+}
+
+const int* layout = nullptr;
+
+void saveLayoutCb(Fl_Widget* w, void* d)
+{
+    Fle_Dock_Group* parent = (Fle_Dock_Group*)w->parent()->parent();
+    Fle_Dock_Host* dh = parent->get_host();
+    int size;
+    if (layout) delete[] layout;
+    layout = dh->save_layout(size);
+
+    /*for (int i = 0; i < size; i++)
+    {
+        std::cout << layout[i] << ", ";
+    }
+    std::cout << std::endl;*/
+}
+
+void loadLayoutCb(Fl_Widget* w, void* d)
+{
+    if (!layout) return;
+
+    Fle_Dock_Group* parent = (Fle_Dock_Group*)w->parent()->parent();
+    Fle_Dock_Host* dh = parent->get_host();
+    
+    dh->load_layout(layout);
+}
+
+Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
+{
+    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 9, "Debug", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 270, 26, true);
+    Fl_Group* tbg = new Fl_Group(0, 0, 85 * 3 + 2, 24);
+    Fle_Flat_Button* btn1 = new Fle_Flat_Button(0, 0, 85, 24, "Save layout");
+    btn1->callback(saveLayoutCb);
+    Fle_Flat_Button* btn2 = new Fle_Flat_Button(85, 0, 85, 24, "Load layout");
+    btn2->callback(loadLayoutCb);
+
+    Fl_Scheme_Choice* schemeChoice = new Fl_Scheme_Choice(85 * 2, 0, 85, 24, "");
+
+    Fl_Box* r = new Fl_Box(85 * 3, 0, 2, 24);
     tbg->resizable(r);
 
     tb->add_band_widget(tbg);
@@ -234,36 +252,35 @@ int main(int argc, char** argv)
 	win->end();
 	win->resizable(dh);
 
-    vertGroup1 = new Fle_Dock_Group(dh, "Folders", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 120, 180, false);
+    vertGroup1 = new Fle_Dock_Group(dh, 1, "Folders", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 120, 180, false);
     Fl_Tree* tree = make_tree();
 	vertGroup1->add_band_widget(tree);
 
-    Fle_Dock_Group* vertGroup4 = new Fle_Dock_Group(dh, "Inflexible 1", FLE_DOCK_LOCKED | FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT,  FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 75, 180, false);
+    Fle_Dock_Group* vertGroup4 = new Fle_Dock_Group(dh, 2, "Inflexible 1", FLE_DOCK_LOCKED | FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT,  FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 75, 180, false);
     Fl_Box* sthBox = new Fl_Box(0, 0, 0, 0, "Inflexible group 1");
     sthBox->box(FL_DOWN_BOX);
     sthBox->color(FL_BACKGROUND2_COLOR);
     vertGroup4->add_band_widget(sthBox);
 
-    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, "Sth", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 75, 180, false);
+    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Sth", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 75, 180, false);
     Fl_Box* sthBox1 = new Fl_Box(0, 0, 0, 0, "Something");
     sthBox1->box(FL_DOWN_BOX);
     sthBox1->color(FL_BACKGROUND2_COLOR);
     vertGroup5->add_band_widget(sthBox1);
 
-    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, "Favourites", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 120, 180, false);
+    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Favourites", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 120, 180, false);
     Fl_Box* favs = new Fl_Box(0, 0, 0, 0, "");
     favs->box(FL_DOWN_BOX);
     favs->color(FL_BACKGROUND2_COLOR);
     vertGroup2->add_band_widget(favs);
 
-
-    Fle_Dock_Group* vertGroup3 = new Fle_Dock_Group(dh, "Inflexible 2", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 220, 180, false);
+    Fle_Dock_Group* vertGroup3 = new Fle_Dock_Group(dh, 5, "Inflexible 2", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 220, 180, false);
     Fl_Box* large = new Fl_Box(0, 0, 0, 0, "Inflexible group 2");
     large->box(FL_DOWN_BOX);
     large->color(FL_BACKGROUND2_COLOR);
     vertGroup3->add_band_widget(large);
 
-    Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, "Menubar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL| FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 240, 26, true);
+    Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, 6, "Menubar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL| FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 240, 26, true);
     FlatMenuBar* menu = new FlatMenuBar(0, 0, 0, 0, "");
     menu->add("File/Open");
     menu->add("File/Properties");
@@ -278,15 +295,19 @@ int main(int argc, char** argv)
 
     make_toolbar(dh);
 
-    Fle_Dock_Group* horGroup = new Fle_Dock_Group(dh, "Address: ", FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 180, 26, true);
+    Fle_Dock_Group* horGroup = new Fle_Dock_Group(dh, 8, "Address: ", FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 180, 26, true);
     Fl_Group* addressGroup = new Fl_Group(0, 0, 100, 30);
     Fl_Input* input = new Fl_Input(0, 0, 50, 30);
     input->append("/etc/network/");
     Fle_Flat_Button* btn = new Fle_Flat_Button(50, 0, 50, 30, "@redo  Go");
-    btn->callback(goButtonCb);
     addressGroup->end();
     addressGroup->resizable(input);
     horGroup->add_band_widget(addressGroup, 0, 1, 1, 1);
+
+    make_debug_toolbar(dh);
+
+    int s;
+    layout = dh->save_layout(s);
 
 #ifdef WIN32
     win->show(argc, argv);

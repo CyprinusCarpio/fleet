@@ -39,8 +39,6 @@ Fle_Dock_Host::~Fle_Dock_Host()
 {
 }
 
-// Private member functions
-
 void Fle_Dock_Host::position_work_widget()
 {
 	m_workWidget->resize(x() + m_breadthLeft,
@@ -183,7 +181,7 @@ void Fle_Dock_Host::squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, boo
 				smallestGroup = group;
 		}
 
-		line->erase(std::find(line->begin(), line->end(), smallestGroup));
+		line->remove(smallestGroup);
 
 		add_dock_group(smallestGroup, smallestGroup->get_direction(), 0);
 		alreadyFixed->push_back(smallestGroup);
@@ -580,26 +578,7 @@ void Fle_Dock_Host::resize(int X, int Y, int W, int H)
 
 	Fl_Widget::resize(X, Y, W, H);
 
-	int dW = W - oldW;
-	int dH = H - oldH;
-
-	if (m_workWidget != nullptr)
-	{
-		position_work_widget();
-	}
-
-	// Scaling up goes left to right, top to bottom
-	// scaling down right to left, bottom to top
-	// last group always needs to fill the remaining space
-
-	resize_direction(&m_topLines, dW, 0);
-	resize_direction(&m_leftLines, dH, 0);
-	resize_direction(&m_rightLines, dH, dW);
-	resize_direction(&m_bottomLines, dW, dH);
-	// TODO: find if user is interacting with host to avoid calling find_edges when not needed
-	find_edges();
-
-	return;
+	resize_host(oldW, oldH, W, H);
 }
 
 int Fle_Dock_Host::handle(int e)
@@ -700,26 +679,50 @@ int Fle_Dock_Host::handle(int e)
 		int ey = Fl::event_y();
 
 		// type 1:
-		int i = 0; // direction as defined in enum
-		for (std::list<Fle_Edge_Helper>::iterator it = m_edges.begin(); i < 4; it++)
+		int active = 0;
+		if (is_direction_flexible(FLE_DOCK_TOP))
 		{
-			// So we don't dereference something invalid
-			// TODO: crashes here if all groups detached
-			if (!is_direction_flexible(1 << i))
+			if (std::next(m_edges.begin(), active)->is_close(ex, ey))
 			{
-				if(it != m_edges.begin())
-					it--;
-				i++;
-				continue;
-			}
-			if (it->is_close(ex, ey))
-			{
-				scalingDirection = 1 << i;
+				scalingDirection = FLE_DOCK_TOP;
 				offsetX = ex;
 				offsetY = ey;
 				return 1;
 			}
-			i++;
+			active++;
+		}
+		if (is_direction_flexible(FLE_DOCK_RIGHT))
+		{
+			if (std::next(m_edges.begin(), active)->is_close(ex, ey))
+			{
+				scalingDirection = FLE_DOCK_RIGHT;
+				offsetX = ex;
+				offsetY = ey;
+				return 1;
+			}
+			active++;
+		}
+		if (is_direction_flexible(FLE_DOCK_BOTTOM))
+		{
+			if (std::next(m_edges.begin(), active)->is_close(ex, ey))
+			{
+				scalingDirection = FLE_DOCK_BOTTOM;
+				offsetX = ex;
+				offsetY = ey;
+				return 1;
+			}
+			active++;
+		}
+		if (is_direction_flexible(FLE_DOCK_LEFT))
+		{
+			if (std::next(m_edges.begin(), active)->is_close(ex, ey))
+			{
+				scalingDirection = FLE_DOCK_LEFT;
+				offsetX = ex;
+				offsetY = ey;
+				return 1;
+			}
+			active++;
 		}
 		// type 1 end
 
@@ -1029,8 +1032,6 @@ void Fle_Dock_Host::draw_preview(int X, int Y, int W, int H)
 	fl_pop_clip();
 }
 
-// Fle_Dock_Host member functions
-
 bool Fle_Dock_Host::add_work_widget(Fl_Widget* widget)
 {
 	if (m_workWidget != nullptr)
@@ -1049,6 +1050,10 @@ bool Fle_Dock_Host::add_dock_group(Fle_Dock_Group* group, int direction, int new
 	if (direction == 0)
 	{
 		m_detachedGroups.push_back(group);
+
+		// Erase group from hidden list
+		m_hiddenGroups.remove(group);
+
 		return true;
 	}
 
@@ -1208,7 +1213,10 @@ bool Fle_Dock_Host::add_dock_group(Fle_Dock_Group* group, int direction, int new
 			group->resize(x() + offsetInLine, y() + offsetInHost, availableSpaceInLine, lineBreadth);
 			reposition_vertical_groups();
 		}
-		
+
+		// Erase group from hidden list
+		m_hiddenGroups.remove(group);
+
 		calculate_min_size();
 		find_edges();
 		position_work_widget();
@@ -1301,7 +1309,7 @@ bool Fle_Dock_Host::is_direction_flexible(int direction)
 
 void Fle_Dock_Host::detach(Fle_Dock_Group* group, bool addToDetached)
 {
-	// if addToDetached == true then we're just hiding the group
+	// if addToDetached == false then we're just hiding the group
 
 	std::list<std::list<Fle_Dock_Group*>>* direction;
 
@@ -1364,7 +1372,7 @@ void Fle_Dock_Host::detach(Fle_Dock_Group* group, bool addToDetached)
 		shouldEraseLines = false;
 	}
 
-	line->erase(std::find(line->begin(), line->end(), group));
+	line->remove(group);
 
 	remove(group);
 
@@ -1373,6 +1381,7 @@ void Fle_Dock_Host::detach(Fle_Dock_Group* group, bool addToDetached)
 
 	if(addToDetached)
 		m_detachedGroups.push_back(group);
+
 	calculate_min_size();
 	find_edges();
 }
@@ -1389,7 +1398,7 @@ void Fle_Dock_Host::hide_group(Fle_Dock_Group* group)
 {
 	if (group->detached())
 	{
-		m_detachedGroups.erase(std::find(m_detachedGroups.begin(), m_detachedGroups.end(), group));
+		m_detachedGroups.remove(group);
 	}
 	else
 	{
@@ -1401,20 +1410,7 @@ void Fle_Dock_Host::hide_group(Fle_Dock_Group* group)
 
 void Fle_Dock_Host::show_group(Fle_Dock_Group* group)
 {
-	if(group->hidden())
-	{
-		m_hiddenGroups.erase(std::find(m_hiddenGroups.begin(), m_hiddenGroups.end(), group));
-
-		group->m_state &= ~FLE_DOCK_HIDDEN;
-
-		if (group->detached())
-		{
-			group->create_detached_window();
-			add_dock_group(group, 0, 0);
-		}
-		else
-			add_dock_group(group, group->get_direction(), 0);
-	}
+	add_dock_group(group, group->detached() ? 0 : group->get_direction(), 0);
 }
 
 void Fle_Dock_Host::resize_direction(std::list<std::list<Fle_Dock_Group*>>* lines, int resizeDelta, int resizeDeltaSecondary)
@@ -1512,6 +1508,30 @@ void Fle_Dock_Host::resize_direction(std::list<std::list<Fle_Dock_Group*>>* line
 	}
 }
 
+void Fle_Dock_Host::resize_host(int oldW, int oldH, int newW, int newH)
+{
+	// This function is used when resizing occurs and when a layout is loaded
+
+	int dW = newW - oldW;
+	int dH = newH - oldH;
+
+	if (m_workWidget != nullptr)
+	{
+		position_work_widget();
+	}
+
+	// Scaling up goes left to right, top to bottom
+	// scaling down right to left, bottom to top
+	// last group always needs to fill the remaining space
+
+	resize_direction(&m_topLines, dW, 0);
+	resize_direction(&m_leftLines, dH, 0);
+	resize_direction(&m_rightLines, dH, dW);
+	resize_direction(&m_bottomLines, dW, dH);
+	// TODO: find if user is interacting with host to avoid calling find_edges when not needed
+	find_edges();
+}
+
 void Fle_Dock_Host::set_min_size_callback(const std::function<void(Fle_Dock_Host* host, int, int)>& cb)
 {
 	m_minSizeCallback = cb;
@@ -1520,6 +1540,364 @@ void Fle_Dock_Host::set_min_size_callback(const std::function<void(Fle_Dock_Host
 void Fle_Dock_Host::set_preview_color(const Fl_Color& color)
 {
 	m_previewColor = color;
+}
+
+int const * const Fle_Dock_Host::save_layout(int& size)
+{
+	// The buffer is a array of ints in a format like this:
+
+	// reserved = 0, w, h, min w, min h,
+
+	// topLines = 2,
+	//   lineGroups = 2,
+	//     id, state, direction, preferredSize, x, y, w, h,
+	//     id, state, direction, preferredSize, x, y, w, h,
+	//   lineGroups = 1,
+	//     id, state, direction, preferredSize, x, y, w, h,
+
+	// rightLines = 0,
+
+	// bottomLines = 0,
+
+	// leftLines = 0,
+
+	// detachedGroups = 1,
+	//   id, state, preferredSize, screenX, screenY, w, h,
+	
+	// hiddenGroups = 2
+	//   id,
+	//   id
+
+	// The x, y of attached groups is in relation to the host x, y
+
+	int bufSize = 11;
+	
+	// Calculate the buffer size
+	// Attached groups
+	std::list<std::list<std::list<Fle_Dock_Group*>>*> directions;
+	directions.push_back(&m_topLines);
+	directions.push_back(&m_rightLines);
+	directions.push_back(&m_bottomLines);
+	directions.push_back(&m_leftLines);
+	for (std::list<std::list<std::list<Fle_Dock_Group*>>*>::iterator direction = directions.begin(); direction != directions.end(); direction++)
+	{
+		for (std::list<std::list<Fle_Dock_Group*>>::iterator it = (*direction)->begin(); it != (*direction)->end(); it++)
+		{
+			bufSize++; // lineGroups
+			bufSize += it->size() * 8;
+		}
+	}
+
+	// Detached groups
+	bufSize += m_detachedGroups.size() * 7;
+
+	// Hidden groups
+	bufSize += m_hiddenGroups.size();
+
+	// Create and fill the buffer
+	int* buf = new int[bufSize];
+
+	buf[0] = 0;
+
+	// The w, h gets saved so that we can reuse the custom resize impl
+	// to position everything in the new bounds
+	buf[1] = w();
+	buf[2] = h();
+	// The min w and h gets saved so that we can set it after load
+	buf[3] = m_oldMinW;
+	buf[4] = m_oldMinH;
+
+	int i = 5;
+
+	// Attached groups
+	for (std::list<std::list<std::list<Fle_Dock_Group*>>*>::iterator direction = directions.begin(); direction != directions.end(); direction++)
+	{
+		buf[i] = (*direction)->size(); i++;
+
+		for (std::list<std::list<Fle_Dock_Group*>>::iterator it = (*direction)->begin(); it != (*direction)->end(); it++)
+		{
+			buf[i] = it->size(); i++;
+
+			for (std::list<Fle_Dock_Group*>::iterator ita = it->begin(); ita != it->end(); ita++)
+			{
+				buf[i] = (*ita)->get_id(); i++;
+				buf[i] = (*ita)->m_state; i++;
+				buf[i] = (*ita)->m_direction; i++;
+				buf[i] = (*ita)->m_preferredSize; i++;
+				buf[i] = (*ita)->x() - x(); i++;
+				buf[i] = (*ita)->y() - y(); i++;
+				buf[i] = (*ita)->w(); i++;
+				buf[i] = (*ita)->h(); i++;
+			}
+		}
+	}
+
+	// Detached groups
+	buf[i] = m_detachedGroups.size(); i++;
+	for (std::list<Fle_Dock_Group*>::iterator ita = m_detachedGroups.begin(); ita != m_detachedGroups.end(); ita++)
+	{
+		buf[i] = (*ita)->get_id(); i++;
+		buf[i] = (*ita)->m_state; i++;
+		buf[i] = (*ita)->m_preferredSize; i++;
+		buf[i] = (*ita)->window()->x(); i++;
+		buf[i] = (*ita)->window()->y(); i++;
+		buf[i] = (*ita)->w(); i++;
+		buf[i] = (*ita)->h(); i++;
+	}
+
+	// Hidden groups
+	buf[i] = m_hiddenGroups.size(); i++;
+	for (std::list<Fle_Dock_Group*>::iterator ita = m_hiddenGroups.begin(); ita != m_hiddenGroups.end(); ita++)
+	{
+		buf[i] = (*ita)->get_id(); i++;
+	}
+
+	size = bufSize;
+
+	return buf;
+}
+
+void Fle_Dock_Host::load_layout(int const * const layout)
+{
+	// TODO: what if a incompatible or not entirely compatible layout is loaded?
+
+	int reserved = layout[0];
+
+	// First clear all directions. The currently attached groups remain as children of the host.
+	m_topLines.clear();
+	m_rightLines.clear();
+	m_bottomLines.clear();
+	m_leftLines.clear();
+
+	// Load w, h, and min w, min h
+
+	int savedW = layout[1];
+	int savedH = layout[2];
+
+	m_oldMinW = layout[3];
+	m_oldMinH = layout[4];
+
+	// Do min size callback
+	if (m_minSizeCallback)
+		m_minSizeCallback(this, m_oldMinW, m_oldMinH);
+
+	// Load everything
+	int i = 5;
+
+	// Attached groups
+	for(int d = 0; d < 4; d++)
+	{
+		int lineCount = layout[i];
+		i++;
+		if (lineCount > 0)
+		{
+			std::list<std::list<Fle_Dock_Group*>>* lines;
+			switch (d)
+			{
+			case 0:
+				lines = &m_topLines;
+				break;
+			case 1:
+				lines = &m_rightLines;
+				break;
+			case 2:
+				lines = &m_bottomLines;
+				break;
+			case 3:
+				lines = &m_leftLines;
+				break;
+			}
+
+			for (int line = 0; line < lineCount; line++)
+			{
+				int groupCount = layout[i];
+				lines->push_back(std::list<Fle_Dock_Group*>());
+				for (int group = 0; group < groupCount; group++)
+				{
+					int id, state, direction, preferredSize, X, Y, W, H;
+					i++; id = layout[i];
+					i++; state = layout[i];
+					i++; direction = layout[i];
+					i++; preferredSize = layout[i];
+					i++; X = layout[i] + x();
+					i++; Y = layout[i] + y();
+					i++; W = layout[i];
+					i++; H = layout[i];
+
+					Fle_Dock_Group* g = nullptr;
+
+					// Find the group with this id
+					// First check the hidden list
+					for (std::list<Fle_Dock_Group*>::iterator it = m_hiddenGroups.begin(); it != m_hiddenGroups.end(); it++)
+					{
+						if ((*it)->get_id() == id)
+						{
+							// Unhide this group and attach it somewhere
+							g = (*it);
+							add(g);
+							m_hiddenGroups.erase(it);
+							g->m_state = state;
+							g->m_direction = direction;
+							g->m_preferredSize = preferredSize;
+							g->show_group();
+							g->resize(X, Y, W, H);
+							break;
+						}
+					}
+					if (!g)
+					{
+						// Next check the detached list
+						for (std::list<Fle_Dock_Group*>::iterator it = m_detachedGroups.begin(); it != m_detachedGroups.end(); it++)
+						{
+							if ((*it)->get_id() == id)
+							{
+								// Attach this group
+								g = (*it);
+								add(g);
+								m_detachedGroups.erase(it);
+								g->delete_detached_wnd();
+								g->m_state = state;
+								g->m_direction = direction;
+								g->m_preferredSize = preferredSize;
+								g->resize(X, Y, W, H);
+								break;
+							}
+						}
+						if (!g)
+						{
+							// Lastly check currently attached groups, that is
+							// children of the dock host
+
+							for (int c = 0; c < children(); c++)
+							{
+								if (child(c) == m_workWidget) continue;
+
+								if (((Fle_Dock_Group*)child(c))->get_id() == id)
+								{
+									g = (Fle_Dock_Group*)child(c);
+									g->m_state = state;
+									g->m_direction = direction;
+									g->m_preferredSize = preferredSize;
+									g->resize(X, Y, W, H);
+									break;
+								}
+							}
+						}
+					}
+					if (g)
+					{
+						lines->back().push_back(g);
+						g->update_decoration_btns();
+					}
+				}
+				i++;
+			}
+		}
+	}
+
+	// Detached groups
+	int detachedCount = layout[i];
+	for (int group = 0; group < detachedCount; group++)
+	{
+		int id, state, preferredSize, screenX, screenY, W, H;
+		i++; id = layout[i];
+		i++; state = layout[i];
+		i++; preferredSize = layout[i];
+		i++; screenX = layout[i];
+		i++; screenY = layout[i];
+		i++; W = layout[i];
+		i++; H = layout[i];
+
+		Fle_Dock_Group* g = nullptr;
+
+		// Find the group with this id
+		// First check the hidden list
+		for (std::list<Fle_Dock_Group*>::iterator it = m_hiddenGroups.begin(); it != m_hiddenGroups.end(); it++)
+		{
+			if ((*it)->get_id() == id)
+			{
+				// Unhide this group
+				g = (*it);
+				m_hiddenGroups.erase(it);
+				g->m_state = state | FLE_DOCK_HIDDEN;
+				g->m_direction = 0;
+				g->m_preferredSize = preferredSize;
+				g->show_group();
+				//g->size(W, H);
+				g->window()->position(screenX, screenY);
+				break;
+			}
+		}
+
+		// Check attached groups
+		for (int c = 0; c < children(); c++)
+		{
+			if (child(c) == m_workWidget) continue;
+
+			if (((Fle_Dock_Group*)child(c))->get_id() == id)
+			{
+				g = (Fle_Dock_Group*)child(c);
+				g->m_state = state;
+				g->m_direction = 0;
+				g->m_preferredSize = preferredSize;
+				//g->size(W, H);
+				g->detach(screenX, screenY);
+				break;
+			}
+		}
+
+		if(g)
+		{
+			m_detachedGroups.push_back(g);
+			g->update_decoration_btns();
+		}
+	}
+	i++;
+
+	// Hidden groups
+	int hiddenCount = layout[i];
+	for (int group = 0; group < hiddenCount; group++)
+	{
+		int id;
+		i++; id = layout[i];
+
+		Fle_Dock_Group* g = nullptr;
+		// First check detached groups
+		for (std::list<Fle_Dock_Group*>::iterator it = m_detachedGroups.begin(); it != m_detachedGroups.end(); it++)
+		{
+			if ((*it)->get_id() == id)
+			{
+				// Hide this group
+				g = (*it);
+				// hide_group erases it from the detached list
+				// and adds to hidden list
+				g->hide_group();
+				break;
+			}
+		}
+		// Check attached groups
+		for (int c = 0; c < children(); c++)
+		{
+			if (child(c) == m_workWidget) continue;
+
+			if (((Fle_Dock_Group*)child(c))->get_id() == id)
+			{
+				g = (Fle_Dock_Group*)child(c);
+				// Can't use hide_group because the direction lists are cleared
+				remove(g);
+				g->m_state |= FLE_DOCK_HIDDEN;
+				m_hiddenGroups.push_back(g);
+				break;
+			}
+		}
+	}
+
+	resize_host(savedW, savedH, w(), h());
+
+	// Recalculate everything needed
+	recalculate_direction_breadths();
+	position_work_widget();
+	find_edges();
 }
 
 void Fle_Dock_Host::detached_drag(Fle_Dock_Group* group, int screenX, int screenY)
@@ -1756,7 +2134,7 @@ int Fle_Dock_Host::try_attach(Fle_Dock_Group* group, int screenX, int screenY, b
 	if (addedToDirection != 0)
 	{
 		// Remove the group from the detached list
-		m_detachedGroups.erase(std::find(m_detachedGroups.begin(), m_detachedGroups.end(), group));
+		m_detachedGroups.remove(group);
 		group->m_direction = addedToDirection;
 		//init_sizes();
 		find_edges();

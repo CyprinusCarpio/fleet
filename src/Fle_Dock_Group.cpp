@@ -7,8 +7,6 @@
 
 #define PREVIEW_TIMEOUT 0.25f
 
-#include <iostream>
-
 std::string Fle_Dock_Group::m_closeText = u8"Close group";
 std::string Fle_Dock_Group::m_pinText = u8"Pin";
 std::string Fle_Dock_Group::m_unpinText = u8"Unpin";
@@ -84,20 +82,7 @@ void Fle_Dock_Group::try_attach_to_host(int X, int Y)
 
 	if (addedToDirection != 0)
 	{
-		// TODO: should dock host remove the group from the detached window?
-		Fl::remove_timeout(Fle_Dock_Group::preview_timeout_cb, this);
-		m_detachedWindow->hide();
-		delete m_detachedWindow;
-		m_detachedWindow = nullptr;
-
-		if (m_state & FLE_DOCK_VERTICAL)
-		{
-			m_pinButton->activate();
-		}
-
-		m_state &= ~FLE_DOCK_DETACHED;
-
-		position_everything();
+		delete_detached_wnd();
 	}
 }
 
@@ -127,11 +112,29 @@ void Fle_Dock_Group::create_detached_window()
 	m_detachedWindow->clear_border();
 	m_detachedWindow->set_non_modal();
 	m_detachedWindow->show();
+	m_detachedWindow->wait_for_expose();
+}
+
+void Fle_Dock_Group::delete_detached_wnd()
+{
+	// Hides and removes the detached window
+	Fl::remove_timeout(Fle_Dock_Group::preview_timeout_cb, this);
+	m_detachedWindow->hide();
+	delete m_detachedWindow;
+	m_detachedWindow = nullptr;
+
+	if (m_state & FLE_DOCK_VERTICAL)
+	{
+		m_pinButton->activate();
+	}
+
+	m_state &= ~FLE_DOCK_DETACHED;
+
+	position_everything();
 }
 
 void Fle_Dock_Group::detach(int X, int Y)
 {
-	m_host->detach(this);
 	create_detached_window();
 	m_state |= FLE_DOCK_DETACHED;
 	position_everything();
@@ -151,13 +154,30 @@ void Fle_Dock_Group::update_preferred_size()
 	m_preferredSize = get_size();
 }
 
+void Fle_Dock_Group::update_decoration_btns()
+{
+	if (m_state & FLE_DOCK_VERTICAL)
+	{
+		m_pinButton->label(locked() ? "@-28->" : "@-22->");
+		m_pinButton->tooltip(locked() ? m_unpinText.c_str() : m_pinText.c_str());
+
+		if (detached())
+		{
+			m_pinButton->deactivate();
+		}
+		else
+			m_pinButton->activate();
+	}
+}
+
 // Constructor and destructor
 
-Fle_Dock_Group::Fle_Dock_Group(Fle_Dock_Host* host, const char* l, int state, int direction, int allowedDirections, int minSize, int breadth, bool newline) : Fl_Group(0, 0, 0, 0, l)
+Fle_Dock_Group::Fle_Dock_Group(Fle_Dock_Host* host, int id, const char* label, int state, int direction, int allowedDirections, int minSize, int breadth, bool newline) : Fl_Group(0, 0, 0, 0, label)
 {
 	// TODO: parameter validation
 	// TODO: clean up argument order
 	// TODO: allow custom decoration breadth and appearance via a virtual method
+	m_ID = id;
 	m_host = host;
 
 	m_closeButton = nullptr;
@@ -474,6 +494,7 @@ int Fle_Dock_Group::handle(int e)
 			// See if user moved the pointer far enough to detach
 			if (std::abs(m_offsetX - Fl::event_x() + x()) >= 6 || std::abs(m_offsetY - Fl::event_y() + y()) >= 6)
 			{
+				m_host->detach(this);
 				detach(Fl::event_x_root(), Fl::event_y_root());
 				return 1;
 			}
@@ -620,6 +641,11 @@ int Fle_Dock_Group::get_allowed_directions() const
 	return m_allowedDirections;
 }
 
+int Fle_Dock_Group::get_id() const
+{
+	return m_ID;
+}
+
 bool Fle_Dock_Group::hidden() const
 {
 	return m_state & FLE_DOCK_HIDDEN;
@@ -651,11 +677,7 @@ void Fle_Dock_Group::locked(bool l)
 		m_state &= ~FLE_DOCK_LOCKED;
 
 
-	if (m_state & FLE_DOCK_VERTICAL)
-	{
-		m_pinButton->label(locked() ? "@-28->" : "@-22->");
-		m_pinButton->tooltip(locked() ? m_unpinText.c_str() : m_pinText.c_str());
-	}
+	update_decoration_btns();
 
 	redraw();
 }
@@ -683,15 +705,10 @@ void Fle_Dock_Group::show_group()
 	{
 		m_state &= ~FLE_DOCK_HIDDEN;
 
+		m_host->show_group(this);
+
 		if (detached())
-		{
-			m_host->add_dock_group(this, 0, 0);
 			create_detached_window();
-		}
-		else
-		{
-			m_host->add_dock_group(this, get_direction(), 0);
-		}
 	}
 }
 

@@ -111,6 +111,7 @@ class Fle_Dock_Host : public Fl_Group
 	void calculate_min_size();
 	void line_reset_preferred_sizes(std::list<Fle_Dock_Group*>* line);
 	void resize_direction(std::list<std::list<Fle_Dock_Group*>>* lines, int resizeDelta, int resizeDeltaSecondary);
+	void resize_host(int oldW, int oldH, int newW, int newH);
 	void detach(Fle_Dock_Group* group, bool addToDetached);
 	// The following two should only be called by the group itself
 	void hide_group(Fle_Dock_Group* group);
@@ -153,6 +154,14 @@ public:
 
 	// Set the color of preview displayed when user tries to attach a group
 	void set_preview_color(const Fl_Color& color);
+
+	// Layout save and load functions
+
+	// Saves the layout of groups to a buffer. The user is responsible for freeing the buffer afterwards
+	int const * const save_layout(int& size);
+
+	// Loads the layout from a buffer.
+	void load_layout(int const * const layout);
 };
 
 #endif

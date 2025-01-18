@@ -43,10 +43,14 @@ class Fle_Dock_Group : public Fl_Group
 	// - set_size
 	// - set_breadth
 	// - update_preferred_size
+	// - saving/loading group data from a layout buffer
+	// - detach and delete_detached_wnd when loading layout
+	// - update_decoration_btns when loading layout
 	friend class Fle_Dock_Host;
 
 protected:
 
+	int m_ID;
 	int m_state;
 	int m_direction;
 	int m_allowedDirections;
@@ -92,8 +96,10 @@ protected:
 	virtual int get_label_width();
 	void try_attach_to_host(int X, int Y); // Screen coords
 	void create_detached_window();
+	void delete_detached_wnd();
 	void detach(int X, int Y); // Screen coords
 	void update_preferred_size();
+	void update_decoration_btns();
 	bool set_size(int newsize); // ret false if size is smaller than min size
 	bool set_breadth(int newbreadth);
 
@@ -103,7 +109,7 @@ public:
 	static std::string m_unpinText;
 
 	// Constructor and destructor
-	Fle_Dock_Group(Fle_Dock_Host* host, const char* l, int state, int direction, int allowedDirections, int minSize, int breadth, bool newLine = false);
+	Fle_Dock_Group(Fle_Dock_Host* host, int id, const char* label, int state, int direction, int allowedDirections, int minSize, int breadth, bool newLine = false);
 	~Fle_Dock_Group();
 
 	// FLTK overrides
@@ -120,6 +126,7 @@ public:
 	int get_size() const;
 	int get_direction() const;
 	int get_allowed_directions() const;
+	int get_id() const;
 	bool hidden() const;
 	bool detached() const;
 	bool detachable() const;
