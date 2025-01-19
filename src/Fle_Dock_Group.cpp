@@ -96,7 +96,6 @@ void Fle_Dock_Group::create_detached_window()
 		m_detachedWindow->resizable(this);
 		m_detachedWindow->size_range(flexible() ? get_min_breadth() : get_breadth(), get_min_size());
 		m_pinButton->deactivate();
-		m_detachedWindow->position(80, 200);
 	}
 	if (m_state & FLE_DOCK_HORIZONTAL)
 	{
@@ -105,8 +104,19 @@ void Fle_Dock_Group::create_detached_window()
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
 		m_detachedWindow->size_range(get_min_size(), flexible() ? get_min_breadth() : get_breadth());
-		m_detachedWindow->position(380, 200);
 	}
+
+#ifdef FLTK_USE_WAYLAND
+	if (fl_wl_display())
+	{
+		// Under Wayland, the detached window is a child of the topmost wnd.
+		m_host->top_window()->add(m_detachedWindow);
+		m_detachedWindow->allow_expand_outside_parent();
+		resize(0, 0, m_detachedWindow->w(), m_detachedWindow->h());
+		m_detachedWindow->show();
+		return;
+	}
+#endif
 
 	resize(0, 0, m_detachedWindow->w(), m_detachedWindow->h());
 	m_detachedWindow->clear_border();
