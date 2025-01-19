@@ -2,6 +2,9 @@
 
 #include <FL/fl_draw.H>
 #include <FL/Fl_Menu.H>
+#ifdef FLTK_USE_WAYLAND
+#include <FL/platform.H>
+#endif
 
 #include <FLE/Fle_Dock_Host.hpp>
 
