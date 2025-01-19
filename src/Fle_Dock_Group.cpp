@@ -5,7 +5,7 @@
 #ifdef FLTK_USE_WAYLAND
 #include <FL/platform.H>
 #endif
-
+#include <iostream>
 #include <FLE/Fle_Dock_Host.hpp>
 
 #define PREVIEW_TIMEOUT 0.25f
@@ -13,6 +13,46 @@
 std::string Fle_Dock_Group::m_closeText = u8"Close group";
 std::string Fle_Dock_Group::m_pinText = u8"Pin";
 std::string Fle_Dock_Group::m_unpinText = u8"Unpin";
+
+Fle_Detached_Window::Fle_Detached_Window(int W, int H, const char* l) : Fl_Double_Window(W, H, l)
+{
+#ifdef FLTK_USE_WAYLAND
+	if (fl_wl_display())
+	{
+		m_resizeAllowed = false;
+	}
+#endif
+}
+
+void Fle_Detached_Window::resize(int X, int Y, int W, int H)
+{
+#ifdef FLTK_USE_WAYLAND
+	if (fl_wl_display())
+	{
+		if (m_resizeAllowed)
+		{
+			return Fl_Double_Window::resize(X, Y, W, H);
+		}
+		else
+			return;
+	}
+#endif
+	return Fl_Double_Window::resize(X, Y, W, H);
+}
+
+void Fle_Detached_Window::fle_resize(int X, int Y, int W, int H)
+{
+#ifdef FLTK_USE_WAYLAND
+	if (fl_wl_display())
+	{
+		m_resizeAllowed = true;
+		resize(X, Y, W, H);
+		m_resizeAllowed = false;
+		return;
+	}
+#endif
+	resize(X, Y, W, H);
+}
 
 // static callback function
 void Fle_Dock_Group::decoration_cb(Fl_Widget* widget, void* data)
@@ -23,7 +63,7 @@ void Fle_Dock_Group::decoration_cb(Fl_Widget* widget, void* data)
 	{
 		g->hide_group();
 	}
-	else if(data == (void*)1) // Pin/Unpin
+	else if (data == (void*)1) // Pin/Unpin
 	{
 		g->locked(!g->locked());
 	}
@@ -93,7 +133,7 @@ void Fle_Dock_Group::create_detached_window()
 {
 	if (m_state & FLE_DOCK_VERTICAL)
 	{
-		m_detachedWindow = new Fl_Double_Window(get_breadth(), get_size(), label());
+		m_detachedWindow = new Fle_Detached_Window(get_breadth(), get_size(), label());
 		m_detachedWindow->end();
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
@@ -102,7 +142,7 @@ void Fle_Dock_Group::create_detached_window()
 	}
 	if (m_state & FLE_DOCK_HORIZONTAL)
 	{
-		m_detachedWindow = new Fl_Double_Window(get_size(), get_breadth(), label());
+		m_detachedWindow = new Fle_Detached_Window(get_size(), get_breadth(), label());
 		m_detachedWindow->end();
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
@@ -151,10 +191,10 @@ void Fle_Dock_Group::detach(int X, int Y)
 	create_detached_window();
 	m_state |= FLE_DOCK_DETACHED;
 	position_everything();
-	if(detachable())
+	if (detachable())
 		m_direction = 0;
 	m_detaching = false;
-	m_detachedWindow->position(X - m_offsetX, Y - m_offsetY);
+	m_detachedWindow->fle_resize(X - m_offsetX, Y - m_offsetY, m_detachedWindow->w(), m_detachedWindow->h());
 
 	m_movingGroup = true;
 	m_detachedWindow->cursor(FL_CURSOR_MOVE);
@@ -226,7 +266,7 @@ Fle_Dock_Group::Fle_Dock_Group(Fle_Dock_Host* host, int id, const char* label, i
 
 	m_minBreadth = breadth;
 
-	if(m_state & FLE_DOCK_VERTICAL)
+	if (m_state & FLE_DOCK_VERTICAL)
 	{
 		m_decorationSize = 20;
 		size(breadth, m_minSize);
@@ -373,7 +413,7 @@ int Fle_Dock_Group::handle(int e)
 				return 1;
 		}
 		// If attached, store window coords
-		if(!locked())
+		if (!locked())
 		{
 			if ((m_state & FLE_DOCK_VERTICAL && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - 38) ||
 				(m_state & FLE_DOCK_HORIZONTAL && Fl::event_x() <= x() + m_decorationSize))
@@ -395,10 +435,10 @@ int Fle_Dock_Group::handle(int e)
 			if (m_movingGroup)
 			{
 				m_movingGroup = false;
-				
+
 				// Don't try attaching to host if less than PREVIEW_TIMEOUT seconds
 				// have elapsed since last mouse movement
-				if(!m_previewTimeoutActive)
+				if (!m_previewTimeoutActive)
 				{
 					try_attach_to_host(Fl::event_x_root(), Fl::event_y_root());
 				}
@@ -438,28 +478,28 @@ int Fle_Dock_Group::handle(int e)
 			bool resized = false;
 			if (m_resizingTop)
 			{
-				m_detachedWindow->resize(m_detachedWindow->x(), Fl::event_y_root(), m_detachedWindow->w(), m_detachedWindow->h() - (Fl::event_y_root() - m_offsetY));
+				m_detachedWindow->fle_resize(m_detachedWindow->x(), Fl::event_y_root(), m_detachedWindow->w(), m_detachedWindow->h() - (Fl::event_y_root() - m_offsetY));
 				m_offsetX = Fl::event_x_root();
 				m_offsetY = Fl::event_y_root();
 				resized = true;
 			}
 			if (m_resizingBottom)
 			{
-				m_detachedWindow->resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w(), m_detachedWindow->h() + (Fl::event_y_root() - m_offsetY));
+				m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w(), m_detachedWindow->h() + (Fl::event_y_root() - m_offsetY));
 				m_offsetX = Fl::event_x_root();
 				m_offsetY = Fl::event_y_root();
 				resized = true;
 			}
 			else if (m_resizingLeft)
 			{
-				m_detachedWindow->resize(Fl::event_x_root(), m_detachedWindow->y(), m_detachedWindow->w() - (Fl::event_x_root() - m_offsetX), m_detachedWindow->h());
+				m_detachedWindow->fle_resize(Fl::event_x_root(), m_detachedWindow->y(), m_detachedWindow->w() - (Fl::event_x_root() - m_offsetX), m_detachedWindow->h());
 				m_offsetX = Fl::event_x_root();
 				m_offsetY = Fl::event_y_root();
 				resized = true;
 			}
 			else if (m_resizingRight)
 			{
-				m_detachedWindow->resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w() + (Fl::event_x_root() - m_offsetX), m_detachedWindow->h());
+				m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w() + (Fl::event_x_root() - m_offsetX), m_detachedWindow->h());
 				m_offsetX = Fl::event_x_root();
 				m_offsetY = Fl::event_y_root();
 				resized = true;
@@ -471,27 +511,27 @@ int Fle_Dock_Group::handle(int e)
 				if (m_state & FLE_DOCK_VERTICAL)
 				{
 					if (m_detachedWindow->w() < m_minBreadth)
-						m_detachedWindow->size(m_minBreadth, m_detachedWindow->h());
+						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_minBreadth, m_detachedWindow->h());
 					if (m_detachedWindow->h() < m_minSize)
-						m_detachedWindow->size(m_detachedWindow->w(), m_minSize);
+						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w(), m_minSize);
 				}
 				else
 				{
 					if (m_detachedWindow->w() < m_minSize)
-						m_detachedWindow->size(m_minSize, m_detachedWindow->h());
+						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_minSize, m_detachedWindow->h());
 					if (m_detachedWindow->h() < m_minBreadth)
-						m_detachedWindow->size(m_detachedWindow->w(), m_minBreadth);
+						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w(), m_minBreadth);
 				}
 				return 1;
 			}
 
 			if (m_movingGroup)
 			{
-				m_detachedWindow->position(m_offsetX + Fl::event_x_root(), m_offsetY + Fl::event_y_root());
+				m_detachedWindow->fle_resize(m_offsetX + Fl::event_x_root(), m_offsetY + Fl::event_y_root(), m_detachedWindow->w(), m_detachedWindow->h());
 				// If the preview is active, remove it so that we can set it again
 				// so that the preview only appears if PREVIEW_TIMEOUT seconds have
 				// elapsed since last mouse movement.
-				if(m_previewTimeoutActive)
+				if (m_previewTimeoutActive)
 				{
 					Fl::remove_timeout(Fle_Dock_Group::preview_timeout_cb, this);
 				}
@@ -513,7 +553,7 @@ int Fle_Dock_Group::handle(int e)
 			}
 		}
 	}
-	
+
 	return ret;
 }
 void Fle_Dock_Group::draw()
@@ -526,7 +566,7 @@ void Fle_Dock_Group::draw()
 		fl_font(FL_HELVETICA, 14);
 		fl_draw(label(), x() + 6, y() + 13);
 
-		if(!locked())
+		if (!locked())
 		{
 			// Draw gripper dots
 			for (int X = x() + 12 + get_label_width(); X <= x() + w() - 44; X += 12)
@@ -546,7 +586,7 @@ void Fle_Dock_Group::draw()
 
 		fl_color(FL_FOREGROUND_COLOR);
 		fl_font(FL_HELVETICA, 14);
-		if(detached() || (m_state & FLE_DOCK_NO_HOR_LABEL) == false)
+		if (detached() || (m_state & FLE_DOCK_NO_HOR_LABEL) == false)
 		{
 			fl_color(labelcolor());
 			fl_draw(label(), x() + m_decorationSize + 3, y(), get_label_width() + 3, h(), FL_ALIGN_LEFT);
@@ -697,7 +737,7 @@ void Fle_Dock_Group::locked(bool l)
 
 void Fle_Dock_Group::hide_group()
 {
-	if(!hidden())
+	if (!hidden())
 	{
 		m_state |= FLE_DOCK_HIDDEN;
 		// If the group is detached, hide the window, but don't move the group
@@ -714,7 +754,7 @@ void Fle_Dock_Group::hide_group()
 
 void Fle_Dock_Group::show_group()
 {
-	if(hidden())
+	if (hidden())
 	{
 		m_state &= ~FLE_DOCK_HIDDEN;
 

@@ -35,6 +35,28 @@ enum Fle_Dock_State
 	FLE_DOCK_NO_HOR_LABEL = 1 << 7
 };
 
+class Fle_Detached_Window : public Fl_Double_Window
+{
+	// This class is needed for proper function of
+	// detachable groups on Wayland. Detachable
+	// groups on Wayland are sub-windows of the top-most
+	// window and therefore subject to it's resizing which
+	// if not for this wrapper class would mess up
+	// the size and layout of detached groups
+private:
+
+	friend class Fle_Dock_Group;
+#ifdef FLTK_USE_WAYLAND
+	bool m_resizeAllowed;
+#endif
+
+	Fle_Detached_Window(int W, int H, const char* l);
+
+	void resize(int X, int Y, int W, int H) override;
+
+	void fle_resize(int X, int Y, int W, int H);
+};
+
 class Fle_Dock_Group : public Fl_Group
 {
 	// Used for:
@@ -58,7 +80,7 @@ protected:
 	int m_preferredSize;
 	int m_minBreadth;
 	int m_decorationSize;
-	
+
 	// Band widget offsets from edges of client area
 	int m_bandOffsetX;
 	int m_bandOffsetY;
@@ -80,7 +102,7 @@ protected:
 	Fle_Flat_Button* m_pinButton;
 
 	Fl_Widget* m_bandWidget;
-	Fl_Window* m_detachedWindow;
+	Fle_Detached_Window* m_detachedWindow;
 
 	Fle_Dock_Host* m_host;
 
