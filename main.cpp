@@ -240,7 +240,7 @@ int main(int argc, char** argv)
 	Fl_Double_Window* win = new Fl_Double_Window(600, 600, "Fake File Manager Demo");
 
 	Fle_Dock_Host* dh = new Fle_Dock_Host(0, 0, 600, 600, "Dock Host", FLE_DOCK_ALLDIRS);
-    dh->set_min_size_callback(std::function<void(Fle_Dock_Host * host, int, int)>(min_size_cb));
+    dh->set_min_size_callback(min_size_cb);
     //dh->set_preview_color(FL_MAGENTA);
 
     Fl_Box* box = new Fl_Box(0, 0, 0, 0);

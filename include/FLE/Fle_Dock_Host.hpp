@@ -1,14 +1,14 @@
 #ifndef Fle_DOCK_HOST_H
 #define Fle_DOCK_HOST_H
 
-#include <functional>
-
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_Group.H>
 
 #include <FLE/Fle_Dock_Group.hpp>
 
 #define Fle_GRIP_SIZE 3
+
+typedef void (Fle_Dock_Host_Min_Size_Callback)(Fle_Dock_Host*, int, int);
 
 class Fle_Edge_Helper
 {
@@ -26,7 +26,7 @@ protected:
 	std::list<std::list<Fle_Dock_Group*>>::iterator line_it;
 	std::list<std::list<Fle_Dock_Group*>>* direction;
 
-	bool is_close(int X, int Y)
+	const bool is_close(int X, int Y)
 	{
 		if (v && Y > y && Y < y + l && std::abs(X - x) <= Fle_GRIP_SIZE)
 		{
@@ -56,7 +56,6 @@ class Fle_Dock_Host : public Fl_Group
 	// - show_group
 	friend class Fle_Dock_Group;
 
-	// TODO: ensure that the dock host works properly if it's X and Y coords aren't 0, 0
 	// TODO: a way for hidden groups and temporarily detached non-detachable groups to remember their attached pos
 	// TODO: clean up redundand includes from both the host and group files
 
@@ -75,7 +74,7 @@ class Fle_Dock_Host : public Fl_Group
 
 	Fl_Color m_previewColor;
 
-	std::function<void(Fle_Dock_Host* host, int, int)> m_minSizeCallback;
+	Fle_Dock_Host_Min_Size_Callback* m_minSizeCallback;
 
 	// All attached dock groups are children on this widget, and all dock groups
 	// added to this host, detached or not, are stored in those lists
@@ -150,7 +149,7 @@ public:
 	// The callback gets called when a new min size is calculated for the dock host
 	// Dev may use it to set the min size of the main window taking into account
 	// other widgets that aren't part of the dock host
-	void set_min_size_callback(const std::function<void(Fle_Dock_Host* host, int, int)>& cb);
+	void set_min_size_callback(Fle_Dock_Host_Min_Size_Callback* cb);
 
 	// Set the color of preview displayed when user tries to attach a group
 	void set_preview_color(const Fl_Color& color);

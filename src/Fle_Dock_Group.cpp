@@ -193,7 +193,7 @@ void Fle_Dock_Group::detach(int X, int Y)
 	position_everything();
 	if (detachable())
 		m_direction = 0;
-	m_detaching = false;
+
 	m_detachedWindow->fle_resize(X - m_offsetX, Y - m_offsetY, m_detachedWindow->w(), m_detachedWindow->h());
 
 	m_movingGroup = true;
@@ -547,6 +547,7 @@ int Fle_Dock_Group::handle(int e)
 			// See if user moved the pointer far enough to detach
 			if (std::abs(m_offsetX - Fl::event_x() + x()) >= 6 || std::abs(m_offsetY - Fl::event_y() + y()) >= 6)
 			{
+				m_detaching = false;
 				m_host->detach(this);
 				detach(Fl::event_x_root(), Fl::event_y_root());
 				return 1;
@@ -564,7 +565,7 @@ void Fle_Dock_Group::draw()
 	{
 		fl_color(labelcolor());
 		fl_font(FL_HELVETICA, 14);
-		fl_draw(label(), x() + 6, y() + 13);
+		fl_draw(label(), x() + 6, y(), get_label_width() + 3, m_decorationSize, FL_ALIGN_LEFT);
 
 		if (!locked())
 		{

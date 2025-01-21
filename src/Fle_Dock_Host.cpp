@@ -94,7 +94,7 @@ void Fle_Dock_Host::reposition_vertical_groups(int _oldBreadthTop, int _oldBread
 			if (oldBreadthTop > m_breadthTop)
 			{
 				Fle_Dock_Group* group = *line->begin();
-				group->position(group->x(), m_breadthTop);
+				group->position(group->x(), m_breadthTop + y());
 				group->set_size(oldBreadthTop - m_breadthTop + group->get_size());
 				continue;
 			}
@@ -118,7 +118,7 @@ void Fle_Dock_Host::reposition_vertical_groups(int _oldBreadthTop, int _oldBread
 				// Check if it was fixed already as part of moving it into another line
 				if(std::find(alreadyFixed.begin(), alreadyFixed.end(), group) == alreadyFixed.end())
 				{
-					group->position(group->x(), m_breadthTop);
+					group->position(group->x(), m_breadthTop + y());
 
 					if (!group->set_size(group->get_size() - d))
 					{
@@ -1038,7 +1038,7 @@ bool Fle_Dock_Host::add_work_widget(Fl_Widget* widget)
 		return false;
 	m_workWidget = widget;
 	add(m_workWidget);
-	//resizable(m_workWidget);
+
 	position_work_widget();
 	return true;
 }
@@ -1160,11 +1160,11 @@ bool Fle_Dock_Host::add_dock_group(Fle_Dock_Group* group, int direction, int new
 			(*it)->set_size((*it)->get_min_size());
 			if (direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT)
 			{
-				(*it)->position((*it)->x(), m_breadthTop + offsetInLine);
+				(*it)->position((*it)->x(), m_breadthTop + offsetInLine + y());
 			}
 			else if (direction == FLE_DOCK_TOP || direction == FLE_DOCK_BOTTOM)
 			{
-				(*it)->position(offsetInLine, (*it)->y());
+				(*it)->position(offsetInLine + x(), (*it)->y());
 			}
 			offsetInLine += (*it)->get_size();
 		}
@@ -1341,6 +1341,7 @@ void Fle_Dock_Host::detach(Fle_Dock_Group* group, bool addToDetached)
 		if (std::find(it->begin(), it->end(), group) != it->end())
 		{
 			line = &(*it);
+			break;
 		}
 	}
 
@@ -1532,7 +1533,7 @@ void Fle_Dock_Host::resize_host(int oldW, int oldH, int newW, int newH)
 	find_edges();
 }
 
-void Fle_Dock_Host::set_min_size_callback(const std::function<void(Fle_Dock_Host* host, int, int)>& cb)
+void Fle_Dock_Host::set_min_size_callback(Fle_Dock_Host_Min_Size_Callback* cb)
 {
 	m_minSizeCallback = cb;
 }
@@ -1906,7 +1907,7 @@ void Fle_Dock_Host::detached_drag(Fle_Dock_Group* group, int screenX, int screen
 	// we can calculate where to display the preview
 
 	// this very specific combination means clear preview
-	if (screenX == 2121420 && screenY == -1)
+	if ((m_previewW != 0 || m_previewH != 0) && screenX == 2121420 && screenY == -1)
 	{
 		m_previewW = 0;
 		m_previewH = 0;
@@ -1921,7 +1922,7 @@ void Fle_Dock_Host::detached_drag(Fle_Dock_Group* group, int screenX, int screen
 	// First check if the coords are outside this window
 	if (screenX < window()->x() || screenX >= window()->x() + window()->w() || screenY < window()->y() || screenY >= window()->y() + window()->h())
 	{
-		if (m_previewH != 0 && m_previewW != 0)
+		if (m_previewH != 0 || m_previewW != 0)
 		{
 			m_previewW = 0;
 			m_previewH = 0;
@@ -2100,7 +2101,7 @@ int Fle_Dock_Host::try_attach(Fle_Dock_Group* group, int screenX, int screenY, b
 		if (preview)
 		{
 			m_previewX = x() + w() - m_breadthRight - group->get_breadth();
-			m_previewY = m_breadthTop;
+			m_previewY = y() + m_breadthTop;
 			m_previewW = group->get_breadth();
 			m_previewH = h() - m_breadthTop - m_breadthBottom;
 			return 0;
@@ -2367,7 +2368,6 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 					removeFromBefore = sizeBefore - newGroupOffset;
 					removeFromAfter = newGroupSize - (sizeBefore - newGroupOffset);
 				}
-				//std::cout << newGroupOffset << " " << lineLength << " " << newGroupSize << std::endl;
 				if (newGroupOffset > lineLength - newGroupSize)
 				{
 					newGroupOffset = lineLength - newGroupSize;
@@ -2392,13 +2392,13 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 				if (isVertical)
 				{
 					m_previewX = otherGroup->x();
-					m_previewY = newGroupOffset + m_breadthTop;
+					m_previewY = newGroupOffset + m_breadthTop + y();
 					m_previewW = otherGroup->get_breadth();
 					m_previewH = newGroupSize;
 				}
 				else
 				{
-					m_previewX = newGroupOffset;
+					m_previewX = newGroupOffset + x();
 					m_previewY = otherGroup->y();
 					m_previewW = newGroupSize;
 					m_previewH = otherGroup->get_breadth();
@@ -2506,10 +2506,10 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 			addedToDirection = direction;
 			if (isVertical)
 			{
-				group->resize(otherGroup->x(), newGroupOffset + m_breadthTop, otherGroup->get_breadth(), newGroupSize);
+				group->resize(otherGroup->x(), newGroupOffset + m_breadthTop + y(), otherGroup->get_breadth(), newGroupSize);
 			}
 			else
-				group->resize(newGroupOffset, otherGroup->y(), newGroupSize, otherGroup->get_breadth());
+				group->resize(newGroupOffset + x(), otherGroup->y(), newGroupSize, otherGroup->get_breadth());
 			needCalcMinSize = true;
 
 			line_reset_preferred_sizes(line);

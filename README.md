@@ -35,6 +35,8 @@ There are several ways for the user to change those properties:
 
 If a group is detachable, it may be detached by the user and floated in a non-modal window. When the user is moving the detached group, a timer is set. Once it elapses, a check is made to determine if and where the detached group should be attached. If the group is non-detachable, then if re-attaching it normally fails, the group is repositioned inside the host automatically, making it impossible to permanently detach it, only move it around.
 
+Currently, the docking implementation is incompatible with with the server side decorations of the KWin Wayland compositor. To circumvent this problem, the application can use client side decorations drawn by libdecor bundled with FLTK, or draw it's own.
+
 #### Code style
 The preferred style for FLEET development is Allman style indentation, snake_case and no `auto` keyword.
 
