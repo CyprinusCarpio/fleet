@@ -253,10 +253,7 @@ Fle_Dock_Group::Fle_Dock_Group(Fle_Dock_Host* host, int id, const char* label, i
 	m_offsetX = 0;
 	m_offsetY = 0;
 	m_movingGroup = false;
-	m_resizingTop = false;
-	m_resizingRight = false;
-	m_resizingBottom = false;
-	m_resizingLeft = false;
+	m_resizing = 0;
 	m_detaching = false;
 	m_previewTimeoutActive = false;
 
@@ -355,6 +352,67 @@ int Fle_Dock_Group::handle(int e)
 		return 1;
 	}
 
+	// Display resize cursor
+	if (e == FL_MOVE && detached())
+	{
+		static bool resizeCursorSet = false;
+		int directions = 0;
+
+		if (flexible() && m_state & FLE_DOCK_HORIZONTAL && Fl::event_y() <= 4)
+		{
+			directions |= FLE_DOCK_TOP;
+		}
+		if (Fl::event_y() >= h() - 4 && ((m_state & FLE_DOCK_HORIZONTAL && flexible()) || m_state & FLE_DOCK_VERTICAL))
+		{
+			directions |= FLE_DOCK_BOTTOM;
+		}
+		if (flexible() && m_state & FLE_DOCK_VERTICAL && Fl::event_x() < 4)
+		{
+			directions |= FLE_DOCK_LEFT;
+		}
+		if (Fl::event_x() > w() - 4 && ((m_state & FLE_DOCK_VERTICAL && flexible()) || m_state & FLE_DOCK_HORIZONTAL))
+		{
+			directions |= FLE_DOCK_RIGHT;
+		}
+		if (resizeCursorSet && directions == 0)
+		{
+			m_detachedWindow->cursor(FL_CURSOR_DEFAULT);
+		}
+
+		if (directions != 0)
+		{
+			resizeCursorSet = true;
+
+			switch (directions)
+			{
+			case FLE_DOCK_TOP:
+				m_detachedWindow->cursor(FL_CURSOR_N);
+				break;
+			case FLE_DOCK_TOP | FLE_DOCK_RIGHT:
+				m_detachedWindow->cursor(FL_CURSOR_NE);
+				break;
+			case FLE_DOCK_RIGHT:
+				m_detachedWindow->cursor(FL_CURSOR_E);
+				break;
+			case FLE_DOCK_RIGHT | FLE_DOCK_BOTTOM:
+				m_detachedWindow->cursor(FL_CURSOR_SE);
+				break;
+			case FLE_DOCK_BOTTOM:
+				m_detachedWindow->cursor(FL_CURSOR_S);
+				break;
+			case FLE_DOCK_BOTTOM | FLE_DOCK_LEFT:
+				m_detachedWindow->cursor(FL_CURSOR_SW);
+				break;
+			case FLE_DOCK_LEFT:
+				m_detachedWindow->cursor(FL_CURSOR_W);
+				break;
+			case FLE_DOCK_LEFT | FLE_DOCK_TOP:
+				m_detachedWindow->cursor(FL_CURSOR_NW);
+				break;
+			}
+		}
+	}
+
 	if (e == FL_PUSH && Fl::event_button() == FL_LEFT_MOUSE)
 	{
 		m_offsetX = 0;
@@ -378,39 +436,34 @@ int Fle_Dock_Group::handle(int e)
 				m_offsetX = m_detachedWindow->x() - Fl::event_x_root();
 				m_offsetY = m_detachedWindow->y() - Fl::event_y_root();
 			}
+			if (m_movingGroup)
+				return 1;
+
 			// Vertical groups can't be resized grabbing by the top edge,
 			// and horizontal ones by the left edge.
 			else if (flexible() && m_state & FLE_DOCK_HORIZONTAL && Fl::event_y() <= 4)
 			{
-				m_resizingTop = true;
-				m_detachedWindow->cursor(FL_CURSOR_S);
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
+				m_resizing |= FLE_DOCK_TOP;
 			}
-			else if (Fl::event_y() >= h() - 4 && ((m_state & FLE_DOCK_HORIZONTAL && flexible()) || m_state & FLE_DOCK_VERTICAL))
+			if (Fl::event_y() >= h() - 4 && ((m_state & FLE_DOCK_HORIZONTAL && flexible()) || m_state & FLE_DOCK_VERTICAL))
 			{
-				m_resizingBottom = true;
-				m_detachedWindow->cursor(FL_CURSOR_S);
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
+				m_resizing |= FLE_DOCK_BOTTOM;
 			}
-			else if (flexible() && m_state & FLE_DOCK_VERTICAL && Fl::event_x() < 4)
+			if (flexible() && m_state & FLE_DOCK_VERTICAL && Fl::event_x() < 4)
 			{
-				m_resizingLeft = true;
-				m_detachedWindow->cursor(FL_CURSOR_W);
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
+				m_resizing |= FLE_DOCK_LEFT;
 			}
-			else if (Fl::event_x() > w() - 4 && ((m_state & FLE_DOCK_VERTICAL && flexible()) || m_state & FLE_DOCK_HORIZONTAL))
+			if (Fl::event_x() > w() - 4 && ((m_state & FLE_DOCK_VERTICAL && flexible()) || m_state & FLE_DOCK_HORIZONTAL))
 			{
-				m_resizingRight = true;
-				m_detachedWindow->cursor(FL_CURSOR_E);
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
+				m_resizing |= FLE_DOCK_RIGHT;
 			}
 
-			if (m_offsetX != 0 || m_offsetY != 0)
+			if (m_resizing != 0)
+			{
+				m_offsetX = Fl::event_x_root();
+				m_offsetY = Fl::event_y_root();
 				return 1;
+			}
 		}
 		// If attached, store window coords
 		if (!locked())
@@ -459,69 +512,85 @@ int Fle_Dock_Group::handle(int e)
 		{
 			m_offsetX = 0;
 			m_offsetY = 0;
-			m_resizingTop = false;
-			m_resizingRight = false;
-			m_resizingBottom = false;
-			m_resizingLeft = false;
+			m_resizing = 0;
 			m_movingGroup = false;
 			m_detaching = false;
 		}
 		return 1;
 	}
-	// TODO: make resizing detached groups more consistent with WM behaviour - diagonal resizing, etc
+
 	if (e == FL_DRAG)
 	{
 		// If detached, simply move/resize parent window
 		if (detached())
 		{
 			// First, check if we are resizing as opposed to moving
-			bool resized = false;
-			if (m_resizingTop)
+			if (m_resizing != 0)
 			{
-				m_detachedWindow->fle_resize(m_detachedWindow->x(), Fl::event_y_root(), m_detachedWindow->w(), m_detachedWindow->h() - (Fl::event_y_root() - m_offsetY));
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
-				resized = true;
-			}
-			if (m_resizingBottom)
-			{
-				m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w(), m_detachedWindow->h() + (Fl::event_y_root() - m_offsetY));
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
-				resized = true;
-			}
-			else if (m_resizingLeft)
-			{
-				m_detachedWindow->fle_resize(Fl::event_x_root(), m_detachedWindow->y(), m_detachedWindow->w() - (Fl::event_x_root() - m_offsetX), m_detachedWindow->h());
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
-				resized = true;
-			}
-			else if (m_resizingRight)
-			{
-				m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w() + (Fl::event_x_root() - m_offsetX), m_detachedWindow->h());
-				m_offsetX = Fl::event_x_root();
-				m_offsetY = Fl::event_y_root();
-				resized = true;
-			}
+				int X = m_detachedWindow->x();
+				int Y = m_detachedWindow->y();
+				int W = m_detachedWindow->w();
+				int H = m_detachedWindow->h();
 
-			if (resized)
-			{
-				// Make sure that the detached window didn't go below the minimal size
+				if (m_resizing & FLE_DOCK_TOP)
+				{
+					Y = Fl::event_y_root();
+					H -= Fl::event_y_root() - m_offsetY;
+				}
+				if (m_resizing & FLE_DOCK_BOTTOM)
+				{
+					H += Fl::event_y_root() - m_offsetY;
+				}
+				if (m_resizing & FLE_DOCK_LEFT)
+				{
+					X = Fl::event_x_root();
+					W -= Fl::event_x_root() - m_offsetX;
+				}
+				if (m_resizing & FLE_DOCK_RIGHT)
+				{
+					W += Fl::event_x_root() - m_offsetX;
+				}
+				
+				bool saveOffsetX = true;
+				bool saveOffsetY = true;
+
+				// Make sure that the detached window doesn't go below the minimal size
 				if (m_state & FLE_DOCK_VERTICAL)
 				{
-					if (m_detachedWindow->w() < m_minBreadth)
-						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_minBreadth, m_detachedWindow->h());
-					if (m_detachedWindow->h() < m_minSize)
-						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w(), m_minSize);
+					if (W < m_minBreadth) 
+					{
+						W = m_minBreadth;
+						X = m_detachedWindow->x();
+						saveOffsetX = false;
+					}
+					if (H < m_minSize) 
+					{
+						H = m_minSize;
+						saveOffsetY = false;
+					}
 				}
 				else
 				{
-					if (m_detachedWindow->w() < m_minSize)
-						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_minSize, m_detachedWindow->h());
-					if (m_detachedWindow->h() < m_minBreadth)
-						m_detachedWindow->fle_resize(m_detachedWindow->x(), m_detachedWindow->y(), m_detachedWindow->w(), m_minBreadth);
+					if (H < m_minBreadth)
+					{
+						H = m_minBreadth;
+						Y = m_detachedWindow->y();
+						saveOffsetY = false;
+					}
+					if (W < m_minSize)
+					{
+						W = m_minSize;
+						saveOffsetX = false;
+					}
 				}
+
+				if(saveOffsetX)
+					m_offsetX = Fl::event_x_root();
+
+				if(saveOffsetY)
+					m_offsetY = Fl::event_y_root();
+
+				m_detachedWindow->fle_resize(X, Y, W, H);
 				return 1;
 			}
 
@@ -539,8 +608,8 @@ int Fle_Dock_Group::handle(int e)
 					m_host->detached_drag(this, 2121420, -1);
 				Fl::add_timeout(PREVIEW_TIMEOUT, Fle_Dock_Group::preview_timeout_cb, this);
 				m_previewTimeoutActive = true;
+				return 1;
 			}
-			return 1;
 		}
 		else if (m_detaching)
 		{

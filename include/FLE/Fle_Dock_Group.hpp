@@ -91,10 +91,7 @@ protected:
 	int m_offsetX;
 	int m_offsetY;
 	bool m_movingGroup;
-	bool m_resizingTop;
-	bool m_resizingRight;
-	bool m_resizingBottom;
-	bool m_resizingLeft;
+	int m_resizing;
 	bool m_detaching;
 	bool m_previewTimeoutActive;
 

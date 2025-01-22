@@ -23,6 +23,8 @@ Fle_Dock_Host::Fle_Dock_Host(int X, int Y, int W, int H, const char* l, int acti
 	m_oldMinW = 0;
 	m_oldMinH = 0;
 
+	m_nonDetachableDetachSavedLayout = nullptr;
+
 	m_previewX = 0;
 	m_previewY = 0;
 	m_previewW = 0;
@@ -618,8 +620,8 @@ int Fle_Dock_Host::handle(int e)
 			// Hide all detached windows
 			for (Fle_Dock_Group* group : m_detachedGroups)
 			{
-				// TODO: fix hide detached groups when host is hidden
 				group->m_detachedWindow->hide();
+				Fl::delete_widget(group->m_detachedWindow);
 			}
 		}
 	}
@@ -1008,7 +1010,7 @@ void Fle_Dock_Host::draw()
 	Fl_Group::draw();
 
 	// Draw the preview
-	if(m_previewW != 0 && m_previewH != 0)
+	if(m_previewW != 0 || m_previewH != 0)
 	{
 		fl_color(m_previewColor);
 		draw_preview(m_previewX, m_previewY, m_previewW, m_previewH);
@@ -1310,6 +1312,16 @@ bool Fle_Dock_Host::is_direction_flexible(int direction)
 void Fle_Dock_Host::detach(Fle_Dock_Group* group, bool addToDetached)
 {
 	// if addToDetached == false then we're just hiding the group
+
+	// If the group is not detachable, and we're not just hiding it, save the layout
+	if (addToDetached && !group->detachable())
+	{
+		// Sanity check
+		if (m_nonDetachableDetachSavedLayout != nullptr) delete[] m_nonDetachableDetachSavedLayout;
+
+		int s;
+		m_nonDetachableDetachSavedLayout = save_layout(s);
+	}
 
 	std::list<std::list<Fle_Dock_Group*>>* direction;
 
@@ -2123,13 +2135,10 @@ int Fle_Dock_Host::try_attach(Fle_Dock_Group* group, int screenX, int screenY, b
 	}
 
 	// If the group is non-detachable but attaching at those coords failed,
-	// attach it forcefully to some other line in the groups direction.
-	// Non detachable groups don't clear their m_direction on detaching like
-	// detachable ones do.
+	// load the saved layout
 	if (force && addedToDirection == 0)
 	{
-		addedToDirection = group->get_direction();
-		add_dock_group(group, addedToDirection, 0);
+		load_layout(m_nonDetachableDetachSavedLayout);
 	}
 
 	if (addedToDirection != 0)
@@ -2137,10 +2146,15 @@ int Fle_Dock_Host::try_attach(Fle_Dock_Group* group, int screenX, int screenY, b
 		// Remove the group from the detached list
 		m_detachedGroups.remove(group);
 		group->m_direction = addedToDirection;
-		//init_sizes();
 		find_edges();
 		if (needCalcMinSize)
 			calculate_min_size();
+	}
+
+	if (m_nonDetachableDetachSavedLayout != nullptr)
+	{
+		delete[] m_nonDetachableDetachSavedLayout;
+		m_nonDetachableDetachSavedLayout = nullptr;
 	}
 
 	// Clear preview

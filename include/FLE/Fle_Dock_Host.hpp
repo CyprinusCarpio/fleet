@@ -56,7 +56,7 @@ class Fle_Dock_Host : public Fl_Group
 	// - show_group
 	friend class Fle_Dock_Group;
 
-	// TODO: a way for hidden groups and temporarily detached non-detachable groups to remember their attached pos
+	// TODO: a way for hidden groups to remember their attached pos
 	// TODO: clean up redundand includes from both the host and group files
 
 	Fl_Widget* m_workWidget;
@@ -69,6 +69,11 @@ class Fle_Dock_Host : public Fl_Group
 	int m_workWidgetMinH;
 	int m_oldMinW;
 	int m_oldMinH;
+	
+	// Layout is saved when detaching a non-detachable group
+	// If the user fails to attach the non-detachable group,
+	// the saved layout is loaded
+	const int* m_nonDetachableDetachSavedLayout;
 
 	int m_previewX, m_previewY, m_previewW, m_previewH;
 
