@@ -33,6 +33,13 @@ int Fle_Detached_Window::handle(int e)
 		{
 			m_screenScale = Fl::screen_scale(screen_num());
 		}
+		else if (e == FL_PUSH || e == FL_RELEASE)
+		{
+			// Shield widgets that lie below this wnd from getting mouse events
+			// by saying that the detached wnd handled the event
+			Fl_Double_Window::handle(e);
+			return 1;
+		}
 	}
 #endif
 	return Fl_Double_Window::handle(e);
@@ -330,6 +337,41 @@ int Fle_Dock_Group::handle(int e)
 	// First let the band widget and decoration buttons process the event
 	int ret = Fl_Group::handle(e);
 
+#ifdef FLTK_USE_WAYLAND
+	// Detached windows are not brought to top on activation by default
+	// need to do that manually
+	if (fl_wl_display() && detached() && e == FL_PUSH && (*m_host->m_detachedGroups.rbegin()) != this)
+	{
+		// If this group is detached and it's not already on top, it may be eligible
+		// to be moved to the top. Check if the coordinates are not occluded by other
+		// groups
+		int ex = Fl::event_x_root();
+		int ey = Fl::event_y_root();
+		bool occluded = false;
+		for (std::list<Fle_Dock_Group*>::reverse_iterator it = m_host->m_detachedGroups.rbegin(); *it != this; it++)
+		{
+			Fle_Detached_Window* wnd = (*it)->m_detachedWindow;
+
+			if (ex >= wnd->x() && ex < wnd->x() + wnd->w() && ey >= wnd->y() && ey < wnd->y() + wnd->h())
+			{
+				occluded = true;
+				break;
+			}
+		}
+		// If these coords are not occluded, move this group to the top
+		if (!occluded)
+		{
+			m_host->m_detachedGroups.remove(this);
+			m_host->m_detachedGroups.push_back(this);
+			Fl_Window* toplevel = m_detachedWindow->top_window();
+			m_detachedWindow->hide();
+			toplevel->remove(m_detachedWindow);
+			toplevel->add(m_detachedWindow);
+			m_detachedWindow->show();
+		}
+	}
+#endif
+
 	// Popup menu
 	if (e == FL_PUSH && Fl::event_button() == FL_RIGHT_MOUSE)
 	{
@@ -393,6 +435,7 @@ int Fle_Dock_Group::handle(int e)
 		if (resizeCursorSet && directions == 0)
 		{
 			m_detachedWindow->cursor(FL_CURSOR_DEFAULT);
+			resizeCursorSet = false;
 		}
 
 		if (directions != 0)

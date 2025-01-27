@@ -54,6 +54,7 @@ class Fle_Dock_Host : public Fl_Group
 	// - detached_drag
 	// - hide_group
 	// - show_group
+	// - reordering m_detachedGroups on Wayland
 	friend class Fle_Dock_Group;
 
 	// TODO: a way for hidden groups to remember their attached pos
