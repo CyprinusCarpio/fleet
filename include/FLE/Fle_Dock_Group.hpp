@@ -48,10 +48,12 @@ private:
 	friend class Fle_Dock_Group;
 #ifdef FLTK_USE_WAYLAND
 	bool m_resizeAllowed;
+	float m_screenScale;
 #endif
 
 	Fle_Detached_Window(int W, int H, const char* l);
 
+	int handle(int e) override;
 	void resize(int X, int Y, int W, int H) override;
 
 	void fle_resize(int X, int Y, int W, int H);

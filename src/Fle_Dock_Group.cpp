@@ -24,13 +24,29 @@ Fle_Detached_Window::Fle_Detached_Window(int W, int H, const char* l) : Fl_Doubl
 #endif
 }
 
+int Fle_Detached_Window::handle(int e)
+{
+#ifdef FLTK_USE_WAYLAND
+	if (fl_wl_display())
+	{
+		if (e == FL_SHOW)
+		{
+			m_screenScale = Fl::screen_scale(screen_num());
+		}
+	}
+#endif
+	return Fl_Double_Window::handle(e);
+}
+
 void Fle_Detached_Window::resize(int X, int Y, int W, int H)
 {
 #ifdef FLTK_USE_WAYLAND
 	if (fl_wl_display())
 	{
-		if (m_resizeAllowed)
+		float newScale = Fl::screen_scale(screen_num());
+		if (m_resizeAllowed || newScale != m_screenScale)
 		{
+			m_screenScale = newScale;
 			return Fl_Double_Window::resize(X, Y, W, H);
 		}
 		else
