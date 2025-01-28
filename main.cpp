@@ -162,7 +162,7 @@ void showFoldersCb(Fl_Widget* w, void* d)
 
 Fle_Dock_Group* make_toolbar(Fle_Dock_Host* dh)
 {
-    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 7, "Toolbar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 270, 26, true);
+    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 7, "Toolbar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_BOTTOM, 270, 26, true);
     Fl_Group* tbg = new Fl_Group(0, 0, 280, 24);
     Fle_Flat_Button* btn1 = new Fle_Flat_Button(0, 0, 50, 24, "@<- Back");
     Fle_Flat_Button* btn2 = new Fle_Flat_Button(50, 0, 24, 24, "@->");
@@ -210,7 +210,7 @@ void loadLayoutCb(Fl_Widget* w, void* d)
 
 Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 {
-    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 9, "Debug", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 270, 26, true);
+    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 9, "Debug", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP, 270, 26, true);
     Fl_Group* tbg = new Fl_Group(0, 0, 85 * 3 + 2, 24);
     Fle_Flat_Button* btn1 = new Fle_Flat_Button(0, 0, 85, 24, "Save layout");
     btn1->callback(saveLayoutCb);
@@ -252,35 +252,35 @@ int main(int argc, char** argv)
 	win->end();
 	win->resizable(dh);
 
-    vertGroup1 = new Fle_Dock_Group(dh, 1, "Folders", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 120, 180, false);
+    vertGroup1 = new Fle_Dock_Group(dh, 1, "Folders", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 120, 180, false);
     Fl_Tree* tree = make_tree();
 	vertGroup1->add_band_widget(tree);
 
-    Fle_Dock_Group* vertGroup4 = new Fle_Dock_Group(dh, 2, "Inflexible 1", FLE_DOCK_LOCKED | FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT,  FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 75, 180, false);
+    Fle_Dock_Group* vertGroup4 = new Fle_Dock_Group(dh, 2, "Inflexible 1", FLE_DOCK_LOCKED | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT,  FLE_DOCK_RIGHT, 75, 180, false);
     Fl_Box* sthBox = new Fl_Box(0, 0, 0, 0, "Inflexible group 1");
     sthBox->box(FL_DOWN_BOX);
     sthBox->color(FL_BACKGROUND2_COLOR);
     vertGroup4->add_band_widget(sthBox);
 
-    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Sth", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 75, 180, false);
+    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Sth", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 75, 180, false);
     Fl_Box* sthBox1 = new Fl_Box(0, 0, 0, 0, "Something");
     sthBox1->box(FL_DOWN_BOX);
     sthBox1->color(FL_BACKGROUND2_COLOR);
     vertGroup5->add_band_widget(sthBox1);
 
-    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Favourites", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 120, 180, false);
+    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Favourites", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 120, 180, false);
     Fl_Box* favs = new Fl_Box(0, 0, 0, 0, "");
     favs->box(FL_DOWN_BOX);
     favs->color(FL_BACKGROUND2_COLOR);
     vertGroup2->add_band_widget(favs);
 
-    Fle_Dock_Group* vertGroup3 = new Fle_Dock_Group(dh, 5, "Inflexible 2", FLE_DOCK_VERTICAL | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT, FLE_DOCK_LEFT | FLE_DOCK_RIGHT, 220, 180, false);
+    Fle_Dock_Group* vertGroup3 = new Fle_Dock_Group(dh, 5, "Inflexible 2", FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 220, 180, false);
     Fl_Box* large = new Fl_Box(0, 0, 0, 0, "Inflexible group 2");
     large->box(FL_DOWN_BOX);
     large->color(FL_BACKGROUND2_COLOR);
     vertGroup3->add_band_widget(large);
 
-    Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, 6, "Menubar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_HORIZONTAL| FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 240, 26, true);
+    Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, 6, "Menubar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_BOTTOM, 240, 26, true);
     FlatMenuBar* menu = new FlatMenuBar(0, 0, 0, 0, "");
     menu->add("File/Open");
     menu->add("File/Properties");
@@ -295,7 +295,7 @@ int main(int argc, char** argv)
 
     make_toolbar(dh);
 
-    Fle_Dock_Group* horGroup = new Fle_Dock_Group(dh, 8, "Address: ", FLE_DOCK_HORIZONTAL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_TOP | FLE_DOCK_BOTTOM, 180, 26, true);
+    Fle_Dock_Group* horGroup = new Fle_Dock_Group(dh, 8, "Address: ", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_BOTTOM, 180, 26, true);
     Fl_Group* addressGroup = new Fl_Group(0, 0, 100, 30);
     Fl_Input* input = new Fl_Input(0, 0, 50, 30);
     input->append("/etc/network/");
@@ -308,6 +308,8 @@ int main(int argc, char** argv)
 
     int s;
     layout = dh->save_layout(s);
+
+    //setenv("LIBDECOR_FORCE_CSD", "1", 1);
 
 #ifdef WIN32
     win->show(argc, argv);

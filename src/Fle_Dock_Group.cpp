@@ -5,7 +5,6 @@
 #ifdef FLTK_USE_WAYLAND
 #include <FL/platform.H>
 #endif
-#include <iostream>
 #include <FLE/Fle_Dock_Host.hpp>
 
 #define PREVIEW_TIMEOUT 0.25f
@@ -266,7 +265,14 @@ Fle_Dock_Group::Fle_Dock_Group(Fle_Dock_Host* host, int id, const char* label, i
 	m_preferredSize = minSize;
 
 	m_direction = direction;
-	m_allowedDirections = allowedDirections;
+	m_allowedDirections = allowedDirections | direction;
+
+	if (m_direction == FLE_DOCK_TOP || m_direction == FLE_DOCK_BOTTOM)
+	{
+		m_state |= FLE_DOCK_HORIZONTAL;
+	}
+	else
+		m_state |= FLE_DOCK_VERTICAL;
 
 	m_bandOffsetX = 0;
 	m_bandOffsetY = 0;
@@ -698,7 +704,7 @@ void Fle_Dock_Group::draw()
 		if (!locked())
 		{
 			// Draw gripper dots
-			for (int X = x() + 12 + get_label_width(); X <= x() + w() - 44; X += 12)
+			for (int X = x() + 12 + get_label_width(); X <= x() + w() - 46; X += 12)
 			{
 				fl_draw_box(FL_GTK_THIN_UP_BOX, X, y() + 3, 6, 6, FL_BACKGROUND_COLOR);
 				fl_draw_box(FL_GTK_THIN_UP_BOX, X + 5, y() + 11, 6, 6, FL_BACKGROUND_COLOR);

@@ -1,7 +1,6 @@
 #include <FLE/Fle_Dock_Host.hpp>
 
 #include <algorithm>
-#include <iostream>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
@@ -2033,7 +2032,7 @@ void Fle_Dock_Host::line_reset_preferred_sizes(std::list<Fle_Dock_Group*>* line)
 	}
 }
 
-// Returns true if managed to attach
+// Returns direction if managed to attach
 int Fle_Dock_Host::try_attach(Fle_Dock_Group* group, int screenX, int screenY, bool force, bool preview)
 {
 	// force argument is used to attach a non-detachable group even if all else fails

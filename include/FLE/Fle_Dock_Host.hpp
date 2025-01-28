@@ -58,7 +58,6 @@ class Fle_Dock_Host : public Fl_Group
 	friend class Fle_Dock_Group;
 
 	// TODO: a way for hidden groups to remember their attached pos
-	// TODO: clean up redundand includes from both the host and group files
 
 	Fl_Widget* m_workWidget;
 	int m_activeDirections;
