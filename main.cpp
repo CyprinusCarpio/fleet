@@ -11,6 +11,9 @@
 #include "FLE/Fle_Flat_Button.hpp"
 #include "FLE/Fle_Dock_Host.hpp"
 
+#define FLE_BOXTYPES_BEGIN FL_FREE_BOXTYPE
+#include "FLE/Fle_Schemes.hpp"
+
 Fl_Tree* make_tree()
 {
     static char* ikona_xpm[] = {
@@ -132,12 +135,44 @@ public:
 protected:
     void draw() override
     {
-        fl_push_clip(x() + 2, y() + 2, w() - 4, h() - 4);
+        fl_push_clip(x() + 3, y() + 3, w() - 6, h() - 6);
         Fl_Menu_Bar::draw();
         fl_pop_clip();
     }
+};
 
+class SchemeTest : public Fl_Box
+{
+public:
+    SchemeTest(int X, int Y, int W, int H, const char* l) : Fl_Box(X, Y, W, H, l)
+    {
+        box(FL_DOWN_BOX);
+        color(FL_BACKGROUND2_COLOR);
+    }
 
+protected:
+    void draw() override
+    {
+        Fl_Box::draw();
+
+        /*fl_draw_box(FLE_SCHEME1_UP_BOX, x() + 20, y() + 20, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME1_DOWN_BOX, x() + 20, y() + 50, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME1_UP_FRAME, x() + 90, y() + 20, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME1_DOWN_FRAME, x() + 90, y() + 50, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME1_THIN_UP_BOX, x() + 20, y() + 20 + 60, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME1_THIN_DOWN_BOX, x() + 20, y() + 50 + 60, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME1_THIN_UP_FRAME, x() + 90, y() + 20 + 60, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME1_THIN_DOWN_FRAME, x() + 90, y() + 50 + 60, 64, 26, FL_BACKGROUND_COLOR);
+
+        fl_draw_box(FLE_SCHEME2_UP_BOX, x() + 20, 150 +  y() + 20, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME2_DOWN_BOX, x() + 20, 150 + y() + 50, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME2_UP_FRAME, x() + 90, 150 + y() + 20, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME2_DOWN_FRAME, x() + 90, 150 + y() + 50, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME2_THIN_UP_BOX, x() + 20, 150 + y() + 20 + 60, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME2_THIN_DOWN_BOX, x() + 20, 150 + y() + 50 + 60, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME2_THIN_UP_FRAME, x() + 90, 150 + y() + 20 + 60, 64, 26, FL_BACKGROUND_COLOR);
+        fl_draw_box(FLE_SCHEME2_THIN_DOWN_FRAME, x() + 90, 150 + y() + 50 + 60, 64, 26, FL_BACKGROUND_COLOR);*/
+    }
 };
 
 void min_size_cb(Fle_Dock_Host* host, int W, int H)
@@ -229,6 +264,8 @@ Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 
 int main(int argc, char** argv)
 {
+    fle_define_schemes();
+
 #ifndef WIN32
     // make it look "nice" and modernish
     Fl::scheme("oxy");
@@ -243,11 +280,14 @@ int main(int argc, char** argv)
     dh->set_min_size_callback(min_size_cb);
     //dh->set_preview_color(FL_MAGENTA);
 
-    Fl_Box* box = new Fl_Box(0, 0, 0, 0);
-    box->box(FL_DOWN_BOX);
-    box->color(FL_BACKGROUND2_COLOR);
+    //Fl_Box* box = new Fl_Box(0, 0, 0, 0);
+    //box->box(FL_DOWN_BOX);
+    //box->color(FL_BACKGROUND2_COLOR);
 
-	dh->add_work_widget(box);
+	//dh->add_work_widget(box);
+
+    SchemeTest* st = new SchemeTest(0, 0, 0, 0, "");
+    dh->add_work_widget(st);
 
 	win->end();
 	win->resizable(dh);
@@ -316,6 +356,8 @@ int main(int argc, char** argv)
 #else
     win->show();
 #endif
+
+    fle_set_scheme2();
 
     return Fl::run();
 }

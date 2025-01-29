@@ -11,6 +11,7 @@ add_executable(FleetDemo main.cpp
 	src/Fle_Flat_Button.cpp
 	src/Fle_Dock_Group.cpp 
 	src/Fle_Dock_Host.cpp
+    src/Fle_Schemes.cpp
 )
 
 file(GLOB FLE_HEADER_FILES "${CMAKE_SOURCE_DIR}/include/FLE/*.hpp")
