@@ -154,10 +154,10 @@ void fle_scheme2_up_frame_draw(int x, int y, int w, int h, Fl_Color c)
 	Fl::set_box_color(fl_darker(c));
 	fl_xyline(x + 2, y, x + w - 3, y);
 	fl_xyline(x + 2, y + h - 1, x + w - 3, y + h - 1);
-	fl_xyline(x + 1, y + 1, x + 1, y + 1);
-	fl_xyline(x + 1, y + h - 2, x + 1, y + h - 2);
-	fl_xyline(x + w - 2, y + 1, x + w - 2, y + 1);
-	fl_xyline(x + w - 2, y + h - 2, x + w - 2, y + h - 2);
+	fl_point(x + 1, y + 1);
+	fl_point(x + 1, y + h - 2);
+	fl_point(x + w - 2, y + 1);
+	fl_point(x + w - 2, y + h - 2);
 	fl_xyline(x, y + 2, x, y + h - 3);
 	fl_xyline(x + w - 1, y + 2, x + w - 1, y + h - 3);
 
@@ -185,10 +185,10 @@ void fle_scheme2_down_frame_draw(int x, int y, int w, int h, Fl_Color c)
 	Fl::set_box_color(fl_darker(c));
 	fl_xyline(x + 2, y, x + w - 3, y);
 	fl_xyline(x + 2, y + h - 1, x + w - 3, y + h - 1);
-	fl_xyline(x + 1, y + 1, x + 1, y + 1);
-	fl_xyline(x + 1, y + h - 2, x + 1, y + h - 2);
-	fl_xyline(x + w - 2, y + 1, x + w - 2, y + 1);
-	fl_xyline(x + w - 2, y + h - 2, x + w - 2, y + h - 2);
+	fl_point(x + 1, y + 1);
+	fl_point(x + 1, y + h - 2);
+	fl_point(x + w - 2, y + 1);
+	fl_point(x + w - 2, y + h - 2);
 	fl_xyline(x, y + 2, x, y + h - 3);
 	fl_xyline(x + w - 1, y + 2, x + w - 1, y + h - 3);
 
@@ -228,10 +228,10 @@ void fle_scheme2_thin_up_frame_draw(int x, int y, int w, int h, Fl_Color c)
 	Fl::set_box_color(fl_color_average(c, fl_darker(c), 0.45f));
 	fl_xyline(x + 2, y, x + w - 3, y);
 	fl_xyline(x + 2, y + h - 1, x + w - 3, y + h - 1);
-	fl_xyline(x + 1, y + 1, x + 1, y + 1);
-	fl_xyline(x + 1, y + h - 2, x + 1, y + h - 2);
-	fl_xyline(x + w - 2, y + 1, x + w - 2, y + 1);
-	fl_xyline(x + w - 2, y + h - 2, x + w - 2, y + h - 2);
+	fl_point(x + 1, y + 1);
+	fl_point(x + 1, y + h - 2);
+	fl_point(x + w - 2, y + 1);
+	fl_point(x + w - 2, y + h - 2);
 	fl_xyline(x, y + 2, x, y + h - 3);
 	fl_xyline(x + w - 1, y + 2, x + w - 1, y + h - 3);
 
@@ -251,10 +251,10 @@ void fle_scheme2_thin_down_frame_draw(int x, int y, int w, int h, Fl_Color c)
 	Fl::set_box_color(fl_color_average(c, fl_darker(c), 0.45f));
 	fl_xyline(x + 2, y, x + w - 3, y);
 	fl_xyline(x + 2, y + h - 1, x + w - 3, y + h - 1);
-	fl_xyline(x + 1, y + 1, x + 1, y + 1);
-	fl_xyline(x + 1, y + h - 2, x + 1, y + h - 2);
-	fl_xyline(x + w - 2, y + 1, x + w - 2, y + 1);
-	fl_xyline(x + w - 2, y + h - 2, x + w - 2, y + h - 2);
+	fl_point(x + 1, y + 1);
+	fl_point(x + 1, y + h - 2);
+	fl_point(x + w - 2, y + 1);
+	fl_point(x + w - 2, y + h - 2);
 	fl_xyline(x, y + 2, x, y + h - 3);
 	fl_xyline(x + w - 1, y + 2, x + w - 1, y + h - 3);
 
