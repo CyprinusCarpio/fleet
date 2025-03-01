@@ -32,7 +32,11 @@ enum Fle_Dock_State
 	FLE_DOCK_LOCKED = 1 << 5,
 	FLE_DOCK_HIDDEN = 1 << 6,
 	// Don't display the label in a attached horizontal group
-	FLE_DOCK_NO_HOR_LABEL = 1 << 7
+	FLE_DOCK_NO_HOR_LABEL = 1 << 7,
+	// A toolbar group is a group that can be attached both horizontally and vertically
+	// It has the appearance of a horizontal group. It cannot be in the same vertical line
+	// as non-toolbar groups.
+	FLE_DOCK_TOOLBAR = 1 << 8
 };
 
 class Fle_Detached_Window : public Fl_Double_Window
@@ -70,6 +74,7 @@ class Fle_Dock_Group : public Fl_Group
 	// - saving/loading group data from a layout buffer
 	// - detach and delete_detached_wnd when loading layout
 	// - update_decoration_btns when loading layout
+	// - set_vertical when attaching a toolbar group
 	friend class Fle_Dock_Host;
 
 protected:
@@ -121,6 +126,7 @@ protected:
 	void detach(int X, int Y); // Screen coords
 	void update_preferred_size();
 	void update_decoration_btns();
+	void set_vertical(bool vertical);
 	bool set_size(int newsize); // ret false if size is smaller than min size
 	bool set_breadth(int newbreadth);
 
@@ -152,6 +158,7 @@ public:
 	bool detached() const;
 	bool detachable() const;
 	bool locked() const;
+	bool is_toolbar() const;
 	void locked(bool l);
 	void hide_group();
 	void show_group();

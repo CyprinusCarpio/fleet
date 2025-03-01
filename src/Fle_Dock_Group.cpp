@@ -6,6 +6,7 @@
 #include <FL/platform.H>
 #endif
 #include <FLE/Fle_Dock_Host.hpp>
+#include <FLE/Fle_Events.hpp>
 
 #define PREVIEW_TIMEOUT 0.25f
 
@@ -106,7 +107,8 @@ void Fle_Dock_Group::preview_timeout_cb(void* data)
 void Fle_Dock_Group::position_everything()
 {
 	// Decoration buttons are not present on the horizontal group
-	if (m_state & FLE_DOCK_VERTICAL && m_closeButton && m_pinButton)
+	// and on toolbar groups attached vertically
+	if (m_state & FLE_DOCK_VERTICAL && (m_state & FLE_DOCK_TOOLBAR) == false &&  m_closeButton && m_pinButton)
 	{
 		m_closeButton->resize(x() + w() - 17, y() + 2, 16, 16);
 		m_pinButton->resize(x() + w() - 35, y() + 2, 16, 16);
@@ -148,6 +150,26 @@ void Fle_Dock_Group::try_attach_to_host(int X, int Y)
 	if (addedToDirection != 0)
 	{
 		delete_detached_wnd();
+
+		// A toolbar group may be attached to all directions
+		// check if the state needs updating
+		if (is_toolbar())
+		{
+			if (m_state & FLE_DOCK_VERTICAL && (addedToDirection == FLE_DOCK_TOP || addedToDirection == FLE_DOCK_BOTTOM))
+			{
+				m_state &= ~FLE_DOCK_VERTICAL;
+				m_state |= FLE_DOCK_HORIZONTAL;
+
+				position_everything();
+			}
+			if (m_state & FLE_DOCK_HORIZONTAL && (addedToDirection == FLE_DOCK_LEFT || addedToDirection == FLE_DOCK_RIGHT))
+			{
+				m_state &= ~FLE_DOCK_HORIZONTAL;
+				m_state |= FLE_DOCK_VERTICAL;
+
+				position_everything();
+			}
+		}
 	}
 }
 
@@ -160,7 +182,8 @@ void Fle_Dock_Group::create_detached_window()
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
 		m_detachedWindow->size_range(flexible() ? get_min_breadth() : get_breadth(), get_min_size());
-		m_pinButton->deactivate();
+		if(!is_toolbar())
+			m_pinButton->deactivate();
 	}
 	if (m_state & FLE_DOCK_HORIZONTAL)
 	{
@@ -198,7 +221,7 @@ void Fle_Dock_Group::delete_detached_wnd()
 	delete m_detachedWindow;
 	m_detachedWindow = nullptr;
 
-	if (m_state & FLE_DOCK_VERTICAL)
+	if (m_state & FLE_DOCK_VERTICAL && !is_toolbar())
 	{
 		m_pinButton->activate();
 	}
@@ -231,7 +254,7 @@ void Fle_Dock_Group::update_preferred_size()
 
 void Fle_Dock_Group::update_decoration_btns()
 {
-	if (m_state & FLE_DOCK_VERTICAL)
+	if (m_state & FLE_DOCK_VERTICAL && !is_toolbar())
 	{
 		m_pinButton->label(locked() ? "@-28->" : "@-22->");
 		m_pinButton->tooltip(locked() ? m_unpinText.c_str() : m_pinText.c_str());
@@ -242,6 +265,34 @@ void Fle_Dock_Group::update_decoration_btns()
 		}
 		else
 			m_pinButton->activate();
+	}
+}
+
+void Fle_Dock_Group::set_vertical(bool vertical)
+{
+	int oldState = m_state;
+	if (vertical)
+	{
+		m_state |= FLE_DOCK_VERTICAL;
+		m_state &= ~FLE_DOCK_HORIZONTAL;
+	}
+	else
+	{
+		m_state |= FLE_DOCK_HORIZONTAL;
+		m_state &= ~FLE_DOCK_VERTICAL;
+	}
+
+	if (m_state != oldState)
+	{
+		// Swap band widget offsets
+		int o = m_bandOffsetY;
+		m_bandOffsetY = m_bandOffsetX;
+		m_bandOffsetX = o;
+
+		position_everything();
+
+		// Let the band widget know that it may need to reorganize
+		m_bandWidget->handle(FLE_EVENTS_SWITCH_ORIENTATION);
 	}
 }
 
@@ -294,15 +345,23 @@ Fle_Dock_Group::Fle_Dock_Group(Fle_Dock_Host* host, int id, const char* label, i
 
 	if (m_state & FLE_DOCK_VERTICAL)
 	{
-		m_decorationSize = 20;
-		size(breadth, m_minSize);
-		m_closeButton = new Fle_Flat_Button(0, 0, 15, 15, "@-31+");
-		m_closeButton->labelsize(10);
-		m_closeButton->callback((Fl_Callback*)Fle_Dock_Group::decoration_cb, (void*)0);
-		m_closeButton->tooltip(m_closeText.c_str());
-		m_pinButton = new Fle_Flat_Button(0, 0, 15, 15, locked() ? "@-28->" : "@-22->");
-		m_pinButton->callback((Fl_Callback*)Fle_Dock_Group::decoration_cb, (void*)1);
-		m_pinButton->tooltip(locked() ? m_unpinText.c_str() : m_pinText.c_str());
+		if(is_toolbar())
+		{
+			m_decorationSize = 9;
+			size(breadth, m_minSize);
+		}
+		else
+		{
+			m_decorationSize = 20;
+			size(breadth, m_minSize);
+			m_closeButton = new Fle_Flat_Button(0, 0, 15, 15, "@-31+");
+			m_closeButton->labelsize(10);
+			m_closeButton->callback((Fl_Callback*)Fle_Dock_Group::decoration_cb, (void*)0);
+			m_closeButton->tooltip(m_closeText.c_str());
+			m_pinButton = new Fle_Flat_Button(0, 0, 15, 15, locked() ? "@-28->" : "@-22->");
+			m_pinButton->callback((Fl_Callback*)Fle_Dock_Group::decoration_cb, (void*)1);
+			m_pinButton->tooltip(locked() ? m_unpinText.c_str() : m_pinText.c_str());
+		}
 	}
 	else
 	{
@@ -392,14 +451,19 @@ int Fle_Dock_Group::handle(int e)
 			menu[1].deactivate();
 
 		bool shouldShowMenu = false;
-		if (m_state & FLE_DOCK_VERTICAL && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - 38)
+		if (m_state & FLE_DOCK_VERTICAL)
 		{
-			shouldShowMenu = true;
+			if((is_toolbar() && Fl::event_x() <= x() + w() && Fl::event_y() <= y() + m_decorationSize) ||
+			   (!is_toolbar() && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - 38))
+			{
+				shouldShowMenu = true;
+			}
 		}
 		else if (m_state & FLE_DOCK_HORIZONTAL && Fl::event_x() <= x() + m_decorationSize + get_label_width())
 		{
 			shouldShowMenu = true;
 		}
+
 		if (shouldShowMenu)
 		{
 			const Fl_Menu_Item* choice = menu->popup(Fl::event_x(), Fl::event_y(), 0, 0, 0);
@@ -487,12 +551,16 @@ int Fle_Dock_Group::handle(int e)
 		if (detached())
 		{
 			// Dragging by the decoration
-			if (m_state & FLE_DOCK_VERTICAL && Fl::event_y() <= m_decorationSize && Fl::event_x() <= w() - 38)
+			if (m_state & FLE_DOCK_VERTICAL)
 			{
-				m_movingGroup = true;
-				m_detachedWindow->cursor(FL_CURSOR_MOVE);
-				m_offsetX = m_detachedWindow->x() - Fl::event_x_root();
-				m_offsetY = m_detachedWindow->y() - Fl::event_y_root();
+				if ((is_toolbar() && Fl::event_x() <= w() && Fl::event_y() <= m_decorationSize) ||
+					(!is_toolbar() && Fl::event_y() <= + m_decorationSize && Fl::event_x() <= w() - 38))
+				{
+					m_movingGroup = true;
+					m_detachedWindow->cursor(FL_CURSOR_MOVE);
+					m_offsetX = m_detachedWindow->x() - Fl::event_x_root();
+					m_offsetY = m_detachedWindow->y() - Fl::event_y_root();
+				}
 			}
 			else if (m_state & FLE_DOCK_HORIZONTAL && Fl::event_x() <= m_decorationSize)
 			{
@@ -533,7 +601,7 @@ int Fle_Dock_Group::handle(int e)
 		// If attached, store window coords
 		if (!locked())
 		{
-			if ((m_state & FLE_DOCK_VERTICAL && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - 38) ||
+			if ((m_state & FLE_DOCK_VERTICAL && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - (is_toolbar() ? 0 : 38)) ||
 				(m_state & FLE_DOCK_HORIZONTAL && Fl::event_x() <= x() + m_decorationSize))
 			{
 				m_detaching = true;
@@ -697,17 +765,28 @@ void Fle_Dock_Group::draw()
 
 	if (m_state & FLE_DOCK_VERTICAL)
 	{
-		fl_color(labelcolor());
-		fl_font(FL_HELVETICA, 14);
-		fl_draw(label(), x() + 6, y(), get_label_width() + 3, m_decorationSize, FL_ALIGN_LEFT);
-
-		if (!locked())
+		if (is_toolbar())
 		{
-			// Draw gripper dots
-			for (int X = x() + 12 + get_label_width(); X <= x() + w() - 46; X += 12)
+			if (!locked())
 			{
-				fl_draw_box(FL_GTK_THIN_UP_BOX, X, y() + 3, 6, 6, FL_BACKGROUND_COLOR);
-				fl_draw_box(FL_GTK_THIN_UP_BOX, X + 5, y() + 11, 6, 6, FL_BACKGROUND_COLOR);
+				fl_draw_box(FL_GTK_THIN_UP_FRAME, x() + 2, y() + 3, w() - 5, 3, FL_BACKGROUND_COLOR);
+				fl_draw_box(FL_GTK_THIN_UP_FRAME, x() + 2, y() + 6, w() - 5, 3, FL_BACKGROUND_COLOR);
+			}
+		}
+		else
+		{
+			fl_color(labelcolor());
+			fl_font(FL_HELVETICA, 14);
+			fl_draw(label(), x() + 6, y(), get_label_width() + 3, m_decorationSize, FL_ALIGN_LEFT);
+
+			if (!locked())
+			{
+				// Draw gripper dots
+				for (int X = x() + 12 + get_label_width(); X <= x() + w() - 46; X += 12)
+				{
+					fl_draw_box(FL_GTK_THIN_UP_BOX, X, y() + 3, 6, 6, FL_BACKGROUND_COLOR);
+					fl_draw_box(FL_GTK_THIN_UP_BOX, X + 5, y() + 11, 6, 6, FL_BACKGROUND_COLOR);
+				}
 			}
 		}
 	}
@@ -812,6 +891,11 @@ bool Fle_Dock_Group::set_breadth(int newbreadth)
 	}
 
 	return true;
+}
+
+bool Fle_Dock_Group::is_toolbar() const
+{
+	return m_state & FLE_DOCK_TOOLBAR;
 }
 
 int Fle_Dock_Group::get_size() const

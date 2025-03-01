@@ -1093,7 +1093,9 @@ bool Fle_Dock_Host::add_dock_group(Fle_Dock_Group* group, int direction, int new
 			availableSpaceInLine = h() - m_breadthTop - m_breadthBottom;
 		}
 		else
+		{
 			availableSpaceInLine = w();
+		}
 
 		int lineBreadth = 0;
 
@@ -1115,7 +1117,16 @@ bool Fle_Dock_Host::add_dock_group(Fle_Dock_Group* group, int direction, int new
 					line = l;
 					break;
 				}
-				if((l->back()->flexible() && group->flexible() && group->get_min_breadth() <= l->back()->get_breadth()) || (!group->flexible() && !l->back()->flexible() && group->get_breadth() == l->back()->get_breadth()))
+
+				// A vertical toolbar group cannot be in the same line as non-toolbar groups
+				if (direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT)
+				{
+					if (group->is_toolbar() != l->back()->is_toolbar())
+						continue;
+				}
+
+				if((l->back()->flexible() && group->flexible() && group->get_min_breadth() <= l->back()->get_breadth()) ||
+				   (!group->flexible() && !l->back()->flexible() && group->get_breadth() == l->back()->get_breadth()))
 				{
 					int spaceAvailableInThisLine = availableSpaceInLine;
 
@@ -1204,6 +1215,11 @@ bool Fle_Dock_Host::add_dock_group(Fle_Dock_Group* group, int direction, int new
 
 		add(group);
 
+		// If the group is a toolbar, it may have changed between horizontal and vertical
+		if (group->is_toolbar())
+		{
+			group->set_vertical(direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT);
+		}
 		if (direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT)
 		{
 			group->resize(x() + offsetInHost, y() + offsetInLine + m_breadthTop, lineBreadth, availableSpaceInLine);
@@ -1748,6 +1764,8 @@ void Fle_Dock_Host::load_layout(int const * const layout)
 							g = (*it);
 							add(g);
 							m_hiddenGroups.erase(it);
+							if (g->is_toolbar())
+								g->set_vertical(state & FLE_DOCK_VERTICAL);
 							g->m_state = state;
 							g->m_direction = direction;
 							g->m_preferredSize = preferredSize;
@@ -1768,6 +1786,8 @@ void Fle_Dock_Host::load_layout(int const * const layout)
 								add(g);
 								m_detachedGroups.erase(it);
 								g->delete_detached_wnd();
+								if (g->is_toolbar())
+									g->set_vertical(state & FLE_DOCK_VERTICAL);
 								g->m_state = state;
 								g->m_direction = direction;
 								g->m_preferredSize = preferredSize;
@@ -1787,6 +1807,8 @@ void Fle_Dock_Host::load_layout(int const * const layout)
 								if (((Fle_Dock_Group*)child(c))->get_id() == id)
 								{
 									g = (Fle_Dock_Group*)child(c);
+									if (g->is_toolbar())
+										g->set_vertical(state & FLE_DOCK_VERTICAL);
 									g->m_state = state;
 									g->m_direction = direction;
 									g->m_preferredSize = preferredSize;
@@ -1831,11 +1853,13 @@ void Fle_Dock_Host::load_layout(int const * const layout)
 				// Unhide this group
 				g = (*it);
 				m_hiddenGroups.erase(it);
+				if (g->is_toolbar())
+					g->set_vertical(state & FLE_DOCK_VERTICAL);
 				g->m_state = state | FLE_DOCK_HIDDEN;
 				g->m_direction = 0;
 				g->m_preferredSize = preferredSize;
 				g->show_group();
-				//g->size(W, H);
+				g->size(W, H);
 				g->window()->position(screenX, screenY);
 				break;
 			}
@@ -1849,10 +1873,12 @@ void Fle_Dock_Host::load_layout(int const * const layout)
 			if (((Fle_Dock_Group*)child(c))->get_id() == id)
 			{
 				g = (Fle_Dock_Group*)child(c);
+				if (g->is_toolbar())
+					g->set_vertical(state & FLE_DOCK_VERTICAL);
 				g->m_state = state;
 				g->m_direction = 0;
 				g->m_preferredSize = preferredSize;
-				//g->size(W, H);
+				g->size(W, H);
 				g->detach(screenX, screenY);
 				break;
 			}
@@ -2262,6 +2288,10 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 		if ((isVertical && (X > (*it->begin())->x() && X < (*it->begin())->x() + (*it->begin())->get_breadth())) ||
 			(!isVertical && (Y > (*it->begin())->y() && Y < (*it->begin())->y() + (*it->begin())->get_breadth())))
 		{
+			// A vertical toolbar group cannot be in the same line as non-toolbar groups
+			if (isVertical && group->is_toolbar() != (*it->begin())->is_toolbar())
+				continue;
+
 			line = &(*it);
 		}
 	}
@@ -2524,6 +2554,9 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 			else
 				group->resize(newGroupOffset + x(), otherGroup->y(), newGroupSize, otherGroup->get_breadth());
 			needCalcMinSize = true;
+
+			if (group->is_toolbar())
+				group->set_vertical(isVertical);
 
 			line_reset_preferred_sizes(line);
 		}

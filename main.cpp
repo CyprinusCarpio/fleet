@@ -8,8 +8,10 @@
 
 #include <iostream>
 
-#include "FLE/Fle_Flat_Button.hpp"
 #include "FLE/Fle_Dock_Host.hpp"
+#include "FLE/Fle_Events.hpp"
+#include "FLE/Fle_Orientable_Flex.hpp"
+#include "FLE/Fle_Toolbar.hpp"
 
 #define FLE_BOXTYPES_BEGIN FL_FREE_BOXTYPE
 #include "FLE/Fle_Schemes.hpp"
@@ -197,23 +199,26 @@ void showFoldersCb(Fl_Widget* w, void* d)
 
 Fle_Dock_Group* make_toolbar(Fle_Dock_Host* dh)
 {
-    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 7, "Toolbar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_BOTTOM, 270, 26, true);
-    Fl_Group* tbg = new Fl_Group(0, 0, 280, 24);
+    Fle_Dock_Group* tbg = new Fle_Dock_Group(dh, 7, "Toolbar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_BOTTOM, 270, 26, true);
+    Fle_Toolbar* tb = new Fle_Toolbar(0, 0, 0, 0, Fl_Flex::HORIZONTAL);
+
     Fle_Flat_Button* btn1 = new Fle_Flat_Button(0, 0, 50, 24, "@<- Back");
     Fle_Flat_Button* btn2 = new Fle_Flat_Button(50, 0, 24, 24, "@->");
     Fle_Flat_Button* btn3 = new Fle_Flat_Button(24 + 50, 0, 24, 24, "@8->");
-    Fl_Box* s1 = new Fl_Box(48 + 50 + 1, 1, 2, 22);
-    s1->box(FL_THIN_DOWN_BOX);
-    Fle_Flat_Button* btn4 = new Fle_Flat_Button(24 * 2+ 50 + 4, 0, 75, 24, "@search Search");
-    Fle_Flat_Button* btn5 = new Fle_Flat_Button(24 * 2+ 50 + 75 + 4, 0, 75, 24, "@fileopen Folders");
+    Fle_Flat_Button* btn4 = new Fle_Flat_Button(24 * 2 + 50 + 4, 0, 75, 24, "@search Search");
+    Fle_Flat_Button* btn5 = new Fle_Flat_Button(24 * 2 + 50 + 75 + 4, 0, 75, 24, "@fileopen Folders");
     btn5->callback(showFoldersCb);
 
-    Fl_Box* r = new Fl_Box(278, 0, 2, 24);
-    tbg->resizable(r);
+    tb->add_tool(btn1);
+    tb->add_tool(btn2);
+    tb->add_tool(btn3);
+    tb->add_separator();
+    tb->add_tool(btn4);
+    tb->add_tool(btn5);
 
-    tb->add_band_widget(tbg);
+    tbg->add_band_widget(tb);
 
-    return tb;
+    return tbg;
 }
 
 const int* layout = nullptr;
@@ -345,6 +350,30 @@ int main(int argc, char** argv)
     horGroup->add_band_widget(addressGroup, 0, 1, 1, 1);
 
     make_debug_toolbar(dh);
+
+    Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 10, "Orientable Flex", FLE_DOCK_DETACHABLE | FLE_DOCK_TOOLBAR, FLE_DOCK_RIGHT, FLE_DOCK_ALLDIRS, 180, 60, true);
+
+    Fle_Orientable_Flex* fof1 = new Fle_Orientable_Flex(Fl_Flex::HORIZONTAL);
+    Fle_Orientable_Flex* fof2 = new Fle_Orientable_Flex(Fl_Flex::VERTICAL);
+    for (int i = 0; i < 15; i += 2)
+    {
+        std::string* l = new std::string;
+        *l = std::to_string(i);
+        Fle_Flat_Button* nmb = new Fle_Flat_Button(0, 0, 0, 0, l->c_str());
+        fof2->fixed(nmb, 25);
+    }
+    fof2->end();
+    Fle_Orientable_Flex* fof3 = new Fle_Orientable_Flex(Fl_Flex::VERTICAL);
+    for (int i = 1; i < 16; i += 2)
+    {
+        std::string* l = new std::string;
+        *l = std::to_string(i);
+        Fle_Flat_Button* nmb = new Fle_Flat_Button(0, 0, 0, 0, l->c_str());
+        fof3->fixed(nmb, 25);
+    }
+    fof3->end();
+    fof1->end();
+    tb->add_band_widget(fof1);
 
     int s;
     layout = dh->save_layout(s);
