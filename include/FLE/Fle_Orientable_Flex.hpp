@@ -1,7 +1,7 @@
 #ifndef FLE_ORIENTABLE_FLEX_H
 #define FLE_ORIENTABLE_FLEX_H
 
-#include <FL/Fl_Flex.h>
+#include <FL/Fl_Flex.H>
 
 class Fle_Orientable_Flex : public Fl_Flex
 {
