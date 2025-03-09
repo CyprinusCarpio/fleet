@@ -27,7 +27,7 @@ void fle_define_schemes()
 
 void fle_set_scheme1()
 {
-	Fl::scheme("plastic");
+	Fl::scheme("gleam");
 
 	Fl::set_boxtype(FL_UP_BOX, FLE_SCHEME1_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, FLE_SCHEME1_DOWN_BOX);
@@ -41,7 +41,7 @@ void fle_set_scheme1()
 
 void fle_set_scheme2()
 {
-	Fl::scheme("plastic");
+	Fl::scheme("gleam");
 
 	Fl::set_boxtype(FL_UP_BOX, FLE_SCHEME2_UP_BOX);
 	Fl::set_boxtype(FL_DOWN_BOX, FLE_SCHEME2_DOWN_BOX);
