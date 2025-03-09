@@ -1985,6 +1985,9 @@ void Fle_Dock_Host::calculate_min_size()
 	int minW = 0;
 	int minH = 0;
 
+	bool minWSetByBreadths = false;
+	bool minHSetByBreadths = true;
+
 	// First calculate W using sizes and H using breadths
 	for (std::list<std::list<Fle_Dock_Group*>>::iterator it = m_topLines.begin(); it != m_topLines.end(); it++)
 	{
@@ -2019,10 +2022,12 @@ void Fle_Dock_Host::calculate_min_size()
 		}
 		cH += m_breadthTop;
 		cH += m_breadthBottom;
-		if (cH > minH) minH = cH;
+		if (cH > minH) 
+		{
+			minH = cH;
+			minHSetByBreadths = false;
+		}
 	}
-	if (cW > minW) minW = cW;
-	cW = 0;
 	for (std::list<std::list<Fle_Dock_Group*>>::iterator it = m_rightLines.begin(); it != m_rightLines.end(); it++)
 	{
 		int cH = 0;
@@ -2033,15 +2038,25 @@ void Fle_Dock_Host::calculate_min_size()
 		}
 		cH += m_breadthTop;
 		cH += m_breadthBottom;
-		if (cH > minH) minH = cH;
+		if (cH > minH)
+		{
+			minH = cH;
+			minHSetByBreadths = false;
+		}
 	}
-	if (cW > minW) minW = cW;
+	if (cW > minW) 
+	{
+		minW = cW;
+		minWSetByBreadths = true;
+	}
 
-	//if (minW < m_workWidgetMinW) minW = m_workWidgetMinW;
+	if (minW < m_workWidgetMinW) minW = m_workWidgetMinW;
 	if (minH < m_workWidgetMinH) minH = m_workWidgetMinH;
 
-	minW += m_workWidgetMinW;
-	//minH += m_workWidgetMinH;
+	if(minWSetByBreadths)
+		minW += m_workWidgetMinW;
+	if(minHSetByBreadths)
+		minH += m_workWidgetMinH;
 
 	if(m_minSizeCallback != nullptr && (m_oldMinW != minW || m_oldMinW != minH))
 		m_minSizeCallback(this, minW, minH);
