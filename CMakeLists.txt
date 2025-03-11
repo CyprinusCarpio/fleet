@@ -20,6 +20,8 @@ set(FLE_CPP_FILES
 	src/Fle_Schemes.cpp
 	src/Fle_Orientable_Flex.cpp
 	src/Fle_Toolbar.cpp
+	src/Fle_Listview_Item.cpp
+	src/Fle_Listview.cpp
 )
 
 set(FLE_HPP_FILES
@@ -29,6 +31,8 @@ set(FLE_HPP_FILES
 	include/FLE/Fle_Schemes.hpp
 	include/FLE/Fle_Orientable_Flex.hpp
 	include/FLE/Fle_Toolbar.hpp
+	include/FLE/Fle_Listview_Item.hpp
+	include/FLE/Fle_Listview.hpp
 )
 
 add_library(Fleet ${FLE_CPP_FILES})

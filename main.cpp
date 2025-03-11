@@ -12,41 +12,42 @@
 #include "FLE/Fle_Events.hpp"
 #include "FLE/Fle_Orientable_Flex.hpp"
 #include "FLE/Fle_Toolbar.hpp"
+#include "FLE/Fle_Listview.hpp"
+#include "FLE/Fle_Listview_Item.hpp"
 
 #define FLE_BOXTYPES_BEGIN FL_FREE_BOXTYPE
 #include "FLE/Fle_Schemes.hpp"
 
+static char* ikona_xpm[] = {
+"16 16 8 1",
+" 	c None",
+".	c #000000",
+"+	c #99966A",
+"@	c #9C996C",
+"#	c #74714F",
+"$	c #767350",
+"%	c #9D9A6D",
+"&	c #B0AE84",
+"                ",
+" .......        ",
+" .+@@@+.        ",
+" .#$$$#.        ",
+" .............  ",
+" .@@@@@@@@@@@@. ",
+" .@@@@@@@@@@@@. ",
+" .@@@@@@@@@@@@. ",
+" .@@@@@@@@@@@@. ",
+" .%%%%%%%%%%%%. ",
+" .&&&&&&&&&&&&. ",
+" .&&&&&&&&&&&&. ",
+" .%%%%%%%%%%%%. ",
+" .++++++++++++. ",
+"  ............  ",
+"                " };
+Fl_Pixmap* img = nullptr;
+
 Fl_Tree* make_tree()
 {
-    static char* ikona_xpm[] = {
-    "16 16 8 1",
-    " 	c None",
-    ".	c #000000",
-    "+	c #99966A",
-    "@	c #9C996C",
-    "#	c #74714F",
-    "$	c #767350",
-    "%	c #9D9A6D",
-    "&	c #B0AE84",
-    "                ",
-    " .......        ",
-    " .+@@@+.        ",
-    " .#$$$#.        ",
-    " .............  ",
-    " .@@@@@@@@@@@@. ",
-    " .@@@@@@@@@@@@. ",
-    " .@@@@@@@@@@@@. ",
-    " .@@@@@@@@@@@@. ",
-    " .%%%%%%%%%%%%. ",
-    " .&&&&&&&&&&&&. ",
-    " .&&&&&&&&&&&&. ",
-    " .%%%%%%%%%%%%. ",
-    " .++++++++++++. ",
-    "  ............  ",
-    "                " };
-    static Fl_Pixmap* img = nullptr;
-    if (!img)
-        img = new Fl_Pixmap(ikona_xpm);
     Fl_Tree* tree = new Fl_Tree(10, 10, 380, 280);
 
     // The following is Llama-3.3-70b-Instruct's take on a
@@ -248,6 +249,16 @@ void loadLayoutCb(Fl_Widget* w, void* d)
     dh->load_layout(layout);
 }
 
+Fle_Listview* listview;
+
+void listview_cb(Fl_Widget* w, void* d)
+{
+    if (d == (void*)0) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_ICONS);
+    if (d == (void*)1) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_SMALL_ICONS);
+    if (d == (void*)2) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_LIST);
+    if (d == (void*)3) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_DETAILS);
+}
+
 Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 {
     Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 9, "Debug", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP, 270, 26, true);
@@ -269,6 +280,7 @@ Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 
 int main(int argc, char** argv)
 {
+    img = new Fl_Pixmap(ikona_xpm);
     fle_define_schemes();
 
 #ifndef WIN32
@@ -291,8 +303,89 @@ int main(int argc, char** argv)
 
 	//dh->add_work_widget(box);
 
-    SchemeTest* st = new SchemeTest(0, 0, 0, 0, "");
-    dh->add_work_widget(st);
+    //SchemeTest* st = new SchemeTest(0, 0, 0, 0, "");
+    //dh->add_work_widget(st);
+
+    listview = new Fle_Listview(0, 0, 0, 0, "");
+    //listview->single_selection(true);
+
+    {
+        Fle_Listview_Item* item;
+        item = new Fle_Listview_Item("report_data_v1.csv"); listview->add_item(item);
+        item = new Fle_Listview_Item("image_001.png"); listview->add_item(item);
+        item = new Fle_Listview_Item("config.ini"); listview->add_item(item);
+        item = new Fle_Listview_Item("backup_20231225.zip"); listview->add_item(item);
+        item = new Fle_Listview_Item("document_draft.docx"); listview->add_item(item);
+        item = new Fle_Listview_Item("audio_track.mp3"); listview->add_item(item);
+        item = new Fle_Listview_Item("video_clip.mp4"); listview->add_item(item);
+        item = new Fle_Listview_Item("script.py"); listview->add_item(item);
+        item = new Fle_Listview_Item("database_dump.sql"); listview->add_item(item);
+        item = new Fle_Listview_Item("texture_02.jpg"); listview->add_item(item);
+        item = new Fle_Listview_Item("settings.json"); listview->add_item(item);
+        item = new Fle_Listview_Item("readme.md"); listview->add_item(item);
+        item = new Fle_Listview_Item("project_proposal.pdf"); listview->add_item(item);
+        item = new Fle_Listview_Item("source_code.cpp"); listview->add_item(item);
+        item = new Fle_Listview_Item("level_data.dat"); listview->add_item(item);
+        item = new Fle_Listview_Item("user_profile.xml"); listview->add_item(item);
+        item = new Fle_Listview_Item("animation_01.gif"); listview->add_item(item);
+        item = new Fle_Listview_Item("temp_file.tmp"); listview->add_item(item);
+        item = new Fle_Listview_Item("error_log_01.txt"); listview->add_item(item);
+        item = new Fle_Listview_Item("system_report.html"); listview->add_item(item);
+        item = new Fle_Listview_Item("model_weights.bin"); listview->add_item(item);
+        item = new Fle_Listview_Item("game_save.sav"); listview->add_item(item);
+        item = new Fle_Listview_Item("resource_pack.zip"); listview->add_item(item);
+        item = new Fle_Listview_Item("translation_en.txt"); listview->add_item(item);
+        item = new Fle_Listview_Item("carp.obj"); listview->add_item(item);
+        item = new Fle_Listview_Item("shader_code.glsl"); listview->add_item(item);
+        item = new Fle_Listview_Item("test_results.log"); listview->add_item(item);
+        item = new Fle_Listview_Item("input_data.in"); listview->add_item(item);
+        item = new Fle_Listview_Item("output_file.out"); listview->add_item(item);
+        item = new Fle_Listview_Item("archive_001.tar.gz"); listview->add_item(item);
+        item = new Fle_Listview_Item("website_index.php"); listview->add_item(item);
+        item = new Fle_Listview_Item("font_file.ttf"); listview->add_item(item);
+        item = new Fle_Listview_Item("custom_style.css"); listview->add_item(item);
+        item = new Fle_Listview_Item("plugin_01.dll"); listview->add_item(item);
+        item = new Fle_Listview_Item("map_data.json"); listview->add_item(item);
+        item = new Fle_Listview_Item("calibration_data.cal"); listview->add_item(item);
+        item = new Fle_Listview_Item("firmware_update.bin"); listview->add_item(item);
+        item = new Fle_Listview_Item("license_agreement.txt"); listview->add_item(item);
+        item = new Fle_Listview_Item("3d_model.obj"); listview->add_item(item);
+        item = new Fle_Listview_Item("particle_effect.pfx"); listview->add_item(item);
+        item = new Fle_Listview_Item("key_bindings.cfg"); listview->add_item(item);
+        item = new Fle_Listview_Item("material_library.mat"); listview->add_item(item);
+        item = new Fle_Listview_Item("animation_data.anim"); listview->add_item(item);
+        item = new Fle_Listview_Item("character_sheet.chr"); listview->add_item(item);
+        item = new Fle_Listview_Item("patch_file.patch"); listview->add_item(item);
+        item = new Fle_Listview_Item("voice_recording.wav"); listview->add_item(item);
+        item = new Fle_Listview_Item("network_config.net"); listview->add_item(item);
+        item = new Fle_Listview_Item("ui_layout.ui"); listview->add_item(item);
+        item = new Fle_Listview_Item("compressed_data.lz"); listview->add_item(item);
+        item = new Fle_Listview_Item("encrypted_file.enc"); listview->add_item(item);
+        item = new Fle_Listview_Item("metadata.meta"); listview->add_item(item);
+        item = new Fle_Listview_Item("thumbnail.thumb"); listview->add_item(item);
+        item = new Fle_Listview_Item("backup_02_20240101.tar"); listview->add_item(item);
+        item = new Fle_Listview_Item("debug_log_002.txt"); listview->add_item(item);
+        item = new Fle_Listview_Item("data_export.jsonl"); listview->add_item(item);
+        item = new Fle_Listview_Item("render_output.exr"); listview->add_item(item);
+        item = new Fle_Listview_Item("physics_data.phys"); listview->add_item(item);
+        item = new Fle_Listview_Item("collision_mesh.cmesh"); listview->add_item(item);
+        item = new Fle_Listview_Item("dialogue_tree.dtree"); listview->add_item(item);
+        item = new Fle_Listview_Item("environment_map.hdr"); listview->add_item(item);
+        item = new Fle_Listview_Item("light_profile.lprof"); listview->add_item(item);
+        item = new Fle_Listview_Item("ai_model.onnx"); listview->add_item(item);
+        item = new Fle_Listview_Item("timeline_data.tline"); listview->add_item(item);
+        item = new Fle_Listview_Item("voxel_data.vox"); listview->add_item(item);
+        item = new Fle_Listview_Item("heightmap.hmap"); listview->add_item(item);
+        item = new Fle_Listview_Item("spline_data.spl"); listview->add_item(item);
+        item = new Fle_Listview_Item("procedural_texture.ptx"); listview->add_item(item);
+        item = new Fle_Listview_Item("behavior_tree.bt"); listview->add_item(item);
+        item = new Fle_Listview_Item("navigation_mesh.nav"); listview->add_item(item);
+        item = new Fle_Listview_Item("localization_data.loc"); listview->add_item(item);
+        item = new Fle_Listview_Item("custom_filter.flt"); listview->add_item(item);
+    }
+
+
+    dh->add_work_widget(listview);
 
 	win->end();
 	win->resizable(dh);
@@ -333,9 +426,10 @@ int main(int argc, char** argv)
     menu->add("Edit/Copy");
     menu->add("Edit/Paste");
     menu->add("Edit/Cut");
-    menu->add("View/Big icons");
-    menu->add("View/Small icons");
-    menu->add("View/List");
+    menu->add("View/Big icons", 0, listview_cb, (void*)0);
+    menu->add("View/Small icons", 0, listview_cb, (void*)1);
+    menu->add("View/List", 0, listview_cb, (void*)2);
+    menu->add("View/Details", 0, listview_cb, (void*)3);
     toolbar->add_band_widget(menu, 1, 2, 2, 2);
 
     make_toolbar(dh);
@@ -386,7 +480,7 @@ int main(int argc, char** argv)
     win->show();
 #endif
 
-    fle_set_scheme2();
+    //fle_set_scheme2();
 
     return Fl::run();
 }
