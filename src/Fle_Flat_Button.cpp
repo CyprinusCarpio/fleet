@@ -6,6 +6,7 @@ void Fle_Flat_Button::draw()
 {
 	fl_draw_box(value() ? FL_THIN_DOWN_BOX : m_mouseOver ? FL_THIN_UP_BOX : FL_FLAT_BOX, x(), y(), w(), h(), color());
 	draw_label();
+	if (Fl::focus() == this) draw_focus();
 }
 
 Fle_Flat_Button::Fle_Flat_Button(int X, int Y, int W, int H, const char* L) : Fl_Button(X, Y, W, H, L)
