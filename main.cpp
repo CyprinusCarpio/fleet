@@ -5,6 +5,7 @@
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Scheme_Choice.H>
+#include <FL/fl_draw.H>
 
 #include <iostream>
 
@@ -257,6 +258,7 @@ void listview_cb(Fl_Widget* w, void* d)
     if (d == (void*)1) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_SMALL_ICONS);
     if (d == (void*)2) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_LIST);
     if (d == (void*)3) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_DETAILS);
+    if (d == (void*)4) listview->set_details_helper_lines(!listview->get_details_helper_lines());
 }
 
 Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
@@ -277,6 +279,61 @@ Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 
     return tb;
 }
+
+class Test_Listview_Item : public Fle_Listview_Item
+{
+    int m_sizeKB;
+    std::string m_owner;
+
+protected:
+    bool is_greater(Fle_Listview_Item* other, int property) override
+    {
+        Test_Listview_Item* o = (Test_Listview_Item*)other;
+        if (property == 0) return m_sizeKB > o->m_sizeKB;
+        if (property == 1) return m_owner > o->m_owner;
+
+        return Fle_Listview_Item::is_greater(other, property);
+    }
+
+    void draw_properties() override
+    {
+        Fle_Listview* lv = get_listview();
+
+        const std::vector<int>& props = lv->get_property_order();
+
+        int prevWidth = 0;
+        
+        for (int i : props)
+        {
+            int width = lv->get_property_header_width(i);
+
+            fl_color(FL_INACTIVE_COLOR);
+            fl_line(x() + w() - width - prevWidth, y(), x() + w() - width - prevWidth, y() + h() - 1);
+
+            fl_color(labelcolor());
+            std::string s;
+            if(i == 0)
+            {
+                s = std::to_string(m_sizeKB);
+            }
+            else if (i == 1)
+            {
+                s = m_owner;
+            }
+            fl_draw(s.c_str(), x() + w() - prevWidth - width + 4, y(), width, h(), FL_ALIGN_LEFT);
+
+            prevWidth += width;
+        }
+    }
+
+public:
+
+    Test_Listview_Item(const char* l, int kb, std::string o) : Fle_Listview_Item(l)
+    {
+        m_sizeKB = kb;
+        m_owner = std::move(o);
+    }
+};
 
 int main(int argc, char** argv)
 {
@@ -307,83 +364,90 @@ int main(int argc, char** argv)
     //dh->add_work_widget(st);
 
     listview = new Fle_Listview(0, 0, 0, 0, "");
+
+    listview->set_property_widths({ 82, 82 });
+    listview->set_property_order({ 1, 0 });
+    listview->add_property_name("Size (KB)");
+    listview->add_property_name("Owner");
     //listview->single_selection(true);
 
     {
-        Fle_Listview_Item* item;
-        item = new Fle_Listview_Item("report_data_v1.csv"); listview->add_item(item);
-        item = new Fle_Listview_Item("image_001.png"); listview->add_item(item);
-        item = new Fle_Listview_Item("config.ini"); listview->add_item(item);
-        item = new Fle_Listview_Item("backup_20231225.zip"); listview->add_item(item);
-        item = new Fle_Listview_Item("document_draft.docx"); listview->add_item(item);
-        item = new Fle_Listview_Item("audio_track.mp3"); listview->add_item(item);
-        item = new Fle_Listview_Item("video_clip.mp4"); listview->add_item(item);
-        item = new Fle_Listview_Item("script.py"); listview->add_item(item);
-        item = new Fle_Listview_Item("database_dump.sql"); listview->add_item(item);
-        item = new Fle_Listview_Item("texture_02.jpg"); listview->add_item(item);
-        item = new Fle_Listview_Item("settings.json"); listview->add_item(item);
-        item = new Fle_Listview_Item("readme.md"); listview->add_item(item);
-        item = new Fle_Listview_Item("project_proposal.pdf"); listview->add_item(item);
-        item = new Fle_Listview_Item("source_code.cpp"); listview->add_item(item);
-        item = new Fle_Listview_Item("level_data.dat"); listview->add_item(item);
-        item = new Fle_Listview_Item("user_profile.xml"); listview->add_item(item);
-        item = new Fle_Listview_Item("animation_01.gif"); listview->add_item(item);
-        item = new Fle_Listview_Item("temp_file.tmp"); listview->add_item(item);
-        item = new Fle_Listview_Item("error_log_01.txt"); listview->add_item(item);
-        item = new Fle_Listview_Item("system_report.html"); listview->add_item(item);
-        item = new Fle_Listview_Item("model_weights.bin"); listview->add_item(item);
-        item = new Fle_Listview_Item("game_save.sav"); listview->add_item(item);
-        item = new Fle_Listview_Item("resource_pack.zip"); listview->add_item(item);
-        item = new Fle_Listview_Item("translation_en.txt"); listview->add_item(item);
-        item = new Fle_Listview_Item("carp.obj"); listview->add_item(item);
-        item = new Fle_Listview_Item("shader_code.glsl"); listview->add_item(item);
-        item = new Fle_Listview_Item("test_results.log"); listview->add_item(item);
-        item = new Fle_Listview_Item("input_data.in"); listview->add_item(item);
-        item = new Fle_Listview_Item("output_file.out"); listview->add_item(item);
-        item = new Fle_Listview_Item("archive_001.tar.gz"); listview->add_item(item);
-        item = new Fle_Listview_Item("website_index.php"); listview->add_item(item);
-        item = new Fle_Listview_Item("font_file.ttf"); listview->add_item(item);
-        item = new Fle_Listview_Item("custom_style.css"); listview->add_item(item);
-        item = new Fle_Listview_Item("plugin_01.dll"); listview->add_item(item);
-        item = new Fle_Listview_Item("map_data.json"); listview->add_item(item);
-        item = new Fle_Listview_Item("calibration_data.cal"); listview->add_item(item);
-        item = new Fle_Listview_Item("firmware_update.bin"); listview->add_item(item);
-        item = new Fle_Listview_Item("license_agreement.txt"); listview->add_item(item);
-        item = new Fle_Listview_Item("3d_model.obj"); listview->add_item(item);
-        item = new Fle_Listview_Item("particle_effect.pfx"); listview->add_item(item);
-        item = new Fle_Listview_Item("key_bindings.cfg"); listview->add_item(item);
-        item = new Fle_Listview_Item("material_library.mat"); listview->add_item(item);
-        item = new Fle_Listview_Item("animation_data.anim"); listview->add_item(item);
-        item = new Fle_Listview_Item("character_sheet.chr"); listview->add_item(item);
-        item = new Fle_Listview_Item("patch_file.patch"); listview->add_item(item);
-        item = new Fle_Listview_Item("voice_recording.wav"); listview->add_item(item);
-        item = new Fle_Listview_Item("network_config.net"); listview->add_item(item);
-        item = new Fle_Listview_Item("ui_layout.ui"); listview->add_item(item);
-        item = new Fle_Listview_Item("compressed_data.lz"); listview->add_item(item);
-        item = new Fle_Listview_Item("encrypted_file.enc"); listview->add_item(item);
-        item = new Fle_Listview_Item("metadata.meta"); listview->add_item(item);
-        item = new Fle_Listview_Item("thumbnail.thumb"); listview->add_item(item);
-        item = new Fle_Listview_Item("backup_02_20240101.tar"); listview->add_item(item);
-        item = new Fle_Listview_Item("debug_log_002.txt"); listview->add_item(item);
-        item = new Fle_Listview_Item("data_export.jsonl"); listview->add_item(item);
-        item = new Fle_Listview_Item("render_output.exr"); listview->add_item(item);
-        item = new Fle_Listview_Item("physics_data.phys"); listview->add_item(item);
-        item = new Fle_Listview_Item("collision_mesh.cmesh"); listview->add_item(item);
-        item = new Fle_Listview_Item("dialogue_tree.dtree"); listview->add_item(item);
-        item = new Fle_Listview_Item("environment_map.hdr"); listview->add_item(item);
-        item = new Fle_Listview_Item("light_profile.lprof"); listview->add_item(item);
-        item = new Fle_Listview_Item("ai_model.onnx"); listview->add_item(item);
-        item = new Fle_Listview_Item("timeline_data.tline"); listview->add_item(item);
-        item = new Fle_Listview_Item("voxel_data.vox"); listview->add_item(item);
-        item = new Fle_Listview_Item("heightmap.hmap"); listview->add_item(item);
-        item = new Fle_Listview_Item("spline_data.spl"); listview->add_item(item);
-        item = new Fle_Listview_Item("procedural_texture.ptx"); listview->add_item(item);
-        item = new Fle_Listview_Item("behavior_tree.bt"); listview->add_item(item);
-        item = new Fle_Listview_Item("navigation_mesh.nav"); listview->add_item(item);
-        item = new Fle_Listview_Item("localization_data.loc"); listview->add_item(item);
-        item = new Fle_Listview_Item("custom_filter.flt"); listview->add_item(item);
-    }
+        Test_Listview_Item* item;
+        // LLama to the rescue again
+        item = new Test_Listview_Item("model_2023.obj", 43, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("texture.png", 18, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("scene_2_14_2022.blend", 1024, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("script_01.py", 5, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("image_20210101.jpg", 512, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("doc_20230420.docx", 236, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("sound_effect.wav", 120, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("video_clip.mp4", 2048, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("report_q4_2022.pdf", 876, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("portrait.jpg", 300, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("level_design.txt", 12, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("icon_16x16.png", 3, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("project_plan_2023.xlsx", 458, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("backup_20221231.zip", 10240, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("certificate.p12", 6, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("manual_v3.2.pdf", 1500, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("source_code.tar.gz", 4096, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("avatar.jpg", 82, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("presentation_2023.pptx", 982, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("database.dump", 8192, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("invoice_20220101.pdf", 201, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("diagram.svg", 41, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("3d_model.stl", 1200, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("thesis_draft.docx", 1792, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("photo_album.zip", 3072, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("meeting_minutes_2023.docx", 56, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("icon_set.zip", 29, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("annual_report_2022.pdf", 2400, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("game_save.dat", 14, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("profile_picture.jpg", 91, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("chart.xlsx", 83, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("trailer.mp4", 4096, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("leaflet_v2.pdf", 192, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("source.tar", 6144, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("banner.png", 221, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("memo_20230210.docx", 17, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("font_pack.zip", 105, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("itinerary.pdf", 67, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("dataset.csv", 3008, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("screensaver.exe", 49, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("brochure_2023.pdf", 291, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("patch_note.txt", 7, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("project_timeline.gantt", 420, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("ebook.epub", 1024, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("image_gallery.zip", 2048, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("contract_20220101.pdf", 375, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("theme.css", 25, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("newsletter_jan2023.pdf", 138, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("backup_20221231.7z", 5120, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("portrait_2022.jpg", 119, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("spreadsheet_template.xlsx", 46, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("whitepaper_v2.pdf", 842, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("video_tutorial.mp4", 3072, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("game_trailer_2023.mp4", 4096, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("data_analysis.csv", 1892, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("press_release.docx", 63, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("icon_32x32.png", 4, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("brochure_design.ai", 921, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("database_schema.sql", 85, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("profile_picture_2023.jpg", 108, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("meeting_schedule.ics", 11, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("style_guide.pdf", 275, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("project_plan_v2.xlsx", 521, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("dataset_v2.csv", 3584, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("banner_ad.jpg", 251, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("minutes_of_meeting.docx", 39, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("update_patch.exe", 56, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("chart_template.pptx", 182, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("image_set.zip", 2048, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("thesis_final.docx", 1921, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("event_ticket.jpg", 93, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("soundtrack.mp3", 921, "2121"); listview->add_item(item);
 
+    }
 
     dh->add_work_widget(listview);
 
@@ -426,10 +490,11 @@ int main(int argc, char** argv)
     menu->add("Edit/Copy");
     menu->add("Edit/Paste");
     menu->add("Edit/Cut");
-    menu->add("View/Big icons", 0, listview_cb, (void*)0);
-    menu->add("View/Small icons", 0, listview_cb, (void*)1);
-    menu->add("View/List", 0, listview_cb, (void*)2);
-    menu->add("View/Details", 0, listview_cb, (void*)3);
+    menu->add("View/Big icons", 0, listview_cb, (void*)0, FL_MENU_RADIO);
+    menu->add("View/Small icons", 0, listview_cb, (void*)1, FL_MENU_RADIO);
+    menu->add("View/List", 0, listview_cb, (void*)2, FL_MENU_RADIO | FL_MENU_VALUE);
+    menu->add("View/Details", 0, listview_cb, (void*)3, FL_MENU_RADIO | FL_MENU_DIVIDER);
+    menu->add("View/Display lines", 0, listview_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_VALUE);
     toolbar->add_band_widget(menu, 1, 2, 2, 2);
 
     make_toolbar(dh);

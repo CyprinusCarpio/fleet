@@ -1,7 +1,7 @@
 ## FLEET
 **FLEET** is a *fleet* of extra additions for the FLTK library.
 
-It's designed to build on the capabilities of FLTK 1.4 to add new, universal and useful widgets.
+It's designed to build on the capabilities of FLTK to add new, universal and useful widgets.
 
 #### Disclaimer
 This is pre-Alpha software. It has a few bugs and many things are not yet implemented. Breaking changes are guaranteed in future. Documentation is sparse. Use for any reason other than testing is not recommended.
@@ -13,6 +13,8 @@ A button with hot tracking, that draws a frame only when the user is interating 
 A complex group that allows the program user to change it's appearance by moving/detaching/attaching various groups at different places.
 - `Fle_Dock_Group`  
 A container for any FLTK widget that allows it to be attached/detached to a `Fle_Dock_Host`. There are vertical and horizontal dock groups.
+- `Fle_Listview`  
+A traditional list view widget supporting 4 display modes by default: icons, small icons, list, details. Populated by `Fle_Listview_Item` or it's subclasses.
 
 #### Docking in-depth
 FLEET brings the widget docking ability known from other toolkits to FLTK. At the core of this design is the `Fle_Dock_Host`, which governs the positioning, scale and behaviour of the attached groups, and contains the **work widget** in the middle. The dock host can allow attaching of groups in 4 **directions**: top, right, bottom, left. The directions are divided into **lines** of dock groups. A dock group has a few key properties:
@@ -37,10 +39,15 @@ If a group is detachable, it may be detached by the user and floated in a non-mo
 
 Currently, the docking implementation is incompatible with with the server side decorations of the KWin Wayland compositor. To circumvent this problem, the application can use client side decorations drawn by libdecor bundled with FLTK, or draw it's own.
 
+#### Listview
+![image](./listview.png)
+
+The listview has 4 display modes: icons, small icons, list and details. More can be added in a subclass. The items can be sorted in ascending/descending order or be left unsorted.
+
 #### Code style
 The preferred style for FLEET development is Allman style indentation, snake_case and no `auto` keyword.
 
 #### Usage
 Currently FLEET is heavily WIP, and exists as a simple demo program to test and develop it's features. 
 
-The only dependency is FLTK 1.4.
+The only dependency is FLTK 1.4 or above.

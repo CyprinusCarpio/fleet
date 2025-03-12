@@ -152,6 +152,8 @@ bool Fle_Listview_Item::is_greater(Fle_Listview_Item* other, int property)
 	{
 		return m_name > other->get_name();
 	}
+
+	return false;
 }
 
 bool Fle_Listview_Item::is_selected() const
@@ -253,9 +255,15 @@ void Fle_Listview_Item::draw()
 {
 	Fl_Box::draw();
 
-	if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS && get_listview()->get_details_helper_lines())
+	if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS)
 	{
-		fl_rect(x(), y(), w(), h(), FL_INACTIVE_COLOR);
+		if(get_listview()->get_details_helper_lines())
+		{
+			fl_color(FL_INACTIVE_COLOR);
+			fl_line(x() + 2, y() + 19, x() + w() - 4, y() + 19);
+		}
+
+		draw_properties();
 	}
 
 	if (!m_focused) return;
@@ -266,8 +274,13 @@ void Fle_Listview_Item::draw()
 	}
 	else if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS && get_listview()->get_details_helper_lines())
 	{
-		draw_focus(box(), x() + 2, y() + 2, w() - 4, h() - 4, color());
+		draw_focus(box(), x() + 2, y() + 1, w() - 4, h() - 3, color());
 	}
 	else
 		draw_focus();
+}
+
+void Fle_Listview_Item::draw_properties()
+{
+
 }

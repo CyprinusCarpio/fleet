@@ -15,7 +15,8 @@ enum Fle_Listview_Flags
 	FLE_LISTVIEW_SORTED_ASCENDING = 1 << 2,
 	FLE_LISTVIEW_SORTED_DESCENDING = 1 << 3,
 	FLE_LISTVIEW_DETAILS_LINES = 1 << 4,
-	FLE_LISTVIEW_REDRAW = 1 << 5
+	FLE_LISTVIEW_REDRAW = 1 << 5,
+	FLE_LISTVIEW_NEEDS_ARRANGING = 1 << 6
 };
 
 class Fle_Listview : public Fl_Group
@@ -27,10 +28,19 @@ class Fle_Listview : public Fl_Group
 	int  m_headersHeight;
 	int  m_focusedItem;
 	int  m_lastSelectedItem;
+	int  m_sortedByProperty;
+
+	int m_itemsBBoxX;
+	int m_itemsBBoxY;
 
 	std::vector<int> m_selected;
+
 	std::vector<std::string> m_propertyDisplayNames;
 	std::vector<int> m_propertyOrder;
+	std::vector<int> m_propertyHeaderWidths;
+	std::vector<int> m_propertyHeaderMinWidths;
+
+	std::string m_nameDisplayText;
 
 protected:
 
@@ -46,8 +56,6 @@ protected:
 public:
 	Fle_Listview(int X, int Y, int W, int H, const char* l);
 	~Fle_Listview();
-
-	static std::string m_nameDisplayText;
 
 	void add_item(Fle_Listview_Item* item);
 	void remove_item(Fle_Listview_Item* item);
@@ -71,9 +79,15 @@ public:
 
 	void add_property_name(std::string name);
 	void set_property_order(std::vector<int> order);
-	int  get_property_offset(int property) const;
+	const std::vector<int>& get_property_order() const;
+	void set_property_widths(std::vector<int> widths);
+	int  get_property_header_width(int property) const;
+
+	void set_name_text(std::string t);
 
 	void sort_items(bool ascending, int property);
+	int get_sort_direction() const;
+	int get_sorted_by_property() const;
 
 	void set_redraw(bool redraw);
 

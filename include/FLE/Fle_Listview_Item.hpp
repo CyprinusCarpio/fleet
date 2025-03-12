@@ -39,6 +39,7 @@ protected:
 	virtual bool is_greater(Fle_Listview_Item* other, int property);
 
 	void draw() override;
+	virtual void draw_properties();
 
 public:
 	Fle_Listview_Item(const char* name);
