@@ -29,6 +29,7 @@ class Fle_Listview : public Fl_Group
 	int  m_focusedItem;
 	int  m_lastSelectedItem;
 	int  m_sortedByProperty;
+	int  m_nameHeaderMinWidth;
 
 	int m_itemsBBoxX;
 	int m_itemsBBoxY;
@@ -42,13 +43,15 @@ class Fle_Listview : public Fl_Group
 
 	std::string m_nameDisplayText;
 
+	void quicksort(int low, int high, bool ascending, int property);
+	int  quicksort_partition(int low , int high, bool ascending, int property);
+
 protected:
 
 	virtual void arrange_items();
 	virtual void keyboard_select(int key);
 	void set_focused(int item);
 	void ensure_item_visible(int item);
-	virtual void update_headers();
 	void drag_select(int x1, int y1, int x2, int y2);
 
 	void draw() override;
@@ -81,6 +84,7 @@ public:
 	void set_property_order(std::vector<int> order);
 	const std::vector<int>& get_property_order() const;
 	void set_property_widths(std::vector<int> widths);
+	void set_name_min_width(int width);
 	int  get_property_header_width(int property) const;
 
 	void set_name_text(std::string t);

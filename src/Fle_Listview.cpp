@@ -34,6 +34,7 @@ Fle_Listview::Fle_Listview(int X, int Y, int W, int H, const char* l) : Fl_Group
 	m_itemsBBoxX = 0;
 	m_itemsBBoxY = 0;
 	m_nameDisplayText = "Name";
+	m_nameHeaderMinWidth = 100;
 	m_sortedByProperty = -2;
 	set_property_order({});
 	set_property_widths({});
@@ -87,7 +88,7 @@ void Fle_Listview::arrange_items()
 		case FLE_LISTVIEW_DISPLAY_ICONS:
 			W = 70;
 			H = 70;
-			if (X + W > x() + w() - Fl::box_dx(box()) - Fl::box_dw(box()))
+			if (X + W > x() + w() - Fl::box_dw(box()) - Fl::scrollbar_size())
 			{
 				X = x() + Fl::box_dx(box());
 				Y += 70;
@@ -96,7 +97,7 @@ void Fle_Listview::arrange_items()
 		case FLE_LISTVIEW_DISPLAY_SMALL_ICONS:
 			H = 20;
 			W = widest;
-			if (X + W > x() + w() - Fl::box_dx(box()) - Fl::box_dw(box()))
+			if (X + W > x() + w() - Fl::box_dw(box()) - Fl::scrollbar_size())
 			{
 				X = x() + Fl::box_dx(box());
 				Y += 20;
@@ -113,7 +114,7 @@ void Fle_Listview::arrange_items()
 		case FLE_LISTVIEW_DISPLAY_LIST:
 			W = widest;
 			H = 20;
-			if (Y + H > y() + h() - Fl::scrollbar_size())
+			if (Y + H > y() + h() - Fl::scrollbar_size() - Fl::box_dh(box()))
 			{
 				X += widest;
 				Y -= columnSum;
@@ -186,11 +187,6 @@ void Fle_Listview::keyboard_select(int key)
 	if (itemToFocus > m_scroll->children() - 3) return;
 
 	set_focused(itemToFocus);
-}
-
-void Fle_Listview::update_headers()
-{
-
 }
 
 void Fle_Listview::drag_select(int x1, int y1, int x2, int y2)
@@ -319,7 +315,7 @@ void Fle_Listview::set_property_order(std::vector<int> order)
 {
 	m_propertyOrder = std::move(order);
 
-	update_headers();
+	redraw();
 }
 
 const std::vector<int>& Fle_Listview::get_property_order() const
@@ -331,6 +327,11 @@ void Fle_Listview::set_property_widths(std::vector<int> widths)
 {
 	m_propertyHeaderMinWidths = widths;
 	m_propertyHeaderWidths = std::move(widths);
+}
+
+void Fle_Listview::set_name_min_width(int width)
+{
+	m_nameHeaderMinWidth = width;
 }
 
 int Fle_Listview::get_property_header_width(int property) const
@@ -348,6 +349,32 @@ bool Fle_Listview::single_selection() const
 	return m_state & FLE_LISTVIEW_SINGLE_SELECTION;
 }
 
+void Fle_Listview::quicksort(int low, int high, bool ascending, int property)
+{
+	if (low < high)
+	{
+		int pivot_index = quicksort_partition(low, high, ascending, property);
+		quicksort(low, pivot_index - 1, ascending, property);
+		quicksort(pivot_index + 1, high, ascending, property);
+	}
+}
+int Fle_Listview::quicksort_partition(int low, int high, bool ascending, int property)
+{
+	Fle_Listview_Item* pivot = get_item(high);
+	int i = low - 1;
+	for (int j = low; j < high; j++)
+	{
+		Fle_Listview_Item* item = get_item(j);
+		if ((!ascending && item->is_greater(pivot, property)) || (ascending && pivot->is_greater(item, property)))
+		{
+			i++;
+			m_scroll->insert(*item, i);
+		}
+	}
+	m_scroll->insert(*pivot, i + 1);
+	return i + 1;
+}
+
 void Fle_Listview::sort_items(bool ascending, int property)
 {
 	int n = m_scroll->children() - 2;
@@ -359,19 +386,7 @@ void Fle_Listview::sort_items(bool ascending, int property)
 
 	clear_selection();
 
-	// Bubble sort swapping children
-	for (int i = 0; i < n - 1; i++) 
-	{
-		for (int j = 0; j < n - i - 1; j++) 
-		{
-			Fle_Listview_Item* itemj = get_item(j);
-			Fle_Listview_Item* itemjp = get_item(j + 1);
-			if ((ascending && itemj->is_greater(itemjp, property)) || (!ascending && !itemj->is_greater(itemjp, property)))
-			{
-				m_scroll->insert(*itemjp, j);
-			}
-		}
-	}
+	quicksort(0, n - 1, ascending, property);
 
 	arrange_items();
 
@@ -538,8 +553,7 @@ void Fle_Listview::ensure_item_visible(int item)
 
 void Fle_Listview::ensure_item_visible(Fle_Listview_Item* item)
 {
-	// First check if the item is visible now
-	
+
 }
 
 void Fle_Listview::set_redraw(bool redraw)
@@ -641,6 +655,8 @@ int Fle_Listview::handle(int e)
 		}
 		else if(resizingHeaderProperty != -2)
 		{
+			// TODO: disallow resizing name header below min size
+
 			// Resize property header
 			int diff = dragX - ex;
 

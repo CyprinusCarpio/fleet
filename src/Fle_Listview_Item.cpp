@@ -263,7 +263,27 @@ void Fle_Listview_Item::draw()
 			fl_line(x() + 2, y() + 19, x() + w() - 4, y() + 19);
 		}
 
-		draw_properties();
+		Fle_Listview* lv = get_listview();
+
+		const std::vector<int>& props = lv->get_property_order();
+
+		bool lines = lv->get_details_helper_lines();
+		int prevWidth = 0;
+
+		for (int i : props)
+		{
+			int width = lv->get_property_header_width(i);
+
+			if (lines)
+			{
+				fl_color(FL_INACTIVE_COLOR);
+				fl_line(x() + w() - width - prevWidth, y(), x() + w() - width - prevWidth, y() + h() - 1);
+			}
+
+			draw_property(i, x() + w() - prevWidth - width + 4, y(), width, h());
+
+			prevWidth += width;
+		}
 	}
 
 	if (!m_focused) return;
@@ -280,7 +300,6 @@ void Fle_Listview_Item::draw()
 		draw_focus();
 }
 
-void Fle_Listview_Item::draw_properties()
+void Fle_Listview_Item::draw_property(int property, int X, int Y, int W, int H)
 {
-
 }

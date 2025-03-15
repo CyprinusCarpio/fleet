@@ -295,35 +295,19 @@ protected:
         return Fle_Listview_Item::is_greater(other, property);
     }
 
-    void draw_properties() override
+    void draw_property(int i, int X, int Y, int W, int H) override
     {
-        Fle_Listview* lv = get_listview();
-
-        const std::vector<int>& props = lv->get_property_order();
-
-        int prevWidth = 0;
-        
-        for (int i : props)
+        fl_color(labelcolor());
+        std::string s;
+        if(i == 0)
         {
-            int width = lv->get_property_header_width(i);
-
-            fl_color(FL_INACTIVE_COLOR);
-            fl_line(x() + w() - width - prevWidth, y(), x() + w() - width - prevWidth, y() + h() - 1);
-
-            fl_color(labelcolor());
-            std::string s;
-            if(i == 0)
-            {
-                s = std::to_string(m_sizeKB);
-            }
-            else if (i == 1)
-            {
-                s = m_owner;
-            }
-            fl_draw(s.c_str(), x() + w() - prevWidth - width + 4, y(), width, h(), FL_ALIGN_LEFT);
-
-            prevWidth += width;
+            s = std::to_string(m_sizeKB);
         }
+        else if (i == 1)
+        {
+            s = m_owner;
+        }
+        fl_draw(s.c_str(), X, Y, W, H, FL_ALIGN_LEFT);
     }
 
 public:
@@ -446,7 +430,14 @@ int main(int argc, char** argv)
         item = new Test_Listview_Item("thesis_final.docx", 1921, "Wald"); listview->add_item(item);
         item = new Test_Listview_Item("event_ticket.jpg", 93, "Fishy"); listview->add_item(item);
         item = new Test_Listview_Item("soundtrack.mp3", 921, "2121"); listview->add_item(item);
-
+        item = new Test_Listview_Item("presentation_template.pptx", 182, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("database_backup.7z", 5120, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("product_catalog.xlsx", 46, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("video_tutorial_2023.mp4", 4096, "Fishy"); listview->add_item(item);
+        item = new Test_Listview_Item("data_analysis_2023.csv", 1892, "CC"); listview->add_item(item);
+        item = new Test_Listview_Item("press_release_2023.docx", 63, "2121"); listview->add_item(item);
+        item = new Test_Listview_Item("icon_64x64.png", 8, "root"); listview->add_item(item);
+        item = new Test_Listview_Item("brochure_design_2023.ai", 921, "Wald"); listview->add_item(item);
     }
 
     dh->add_work_widget(listview);

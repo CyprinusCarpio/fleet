@@ -34,12 +34,14 @@ class Fle_Listview_Item : public Fl_Box
 
 protected:
 	virtual void set_display_mode(Fle_Listview_Display_Mode mode);
+	virtual bool is_greater(Fle_Listview_Item* other, int property);
+	virtual void draw_property(int property, int X, int Y, int W, int H);
+
 	void set_selected(bool selected);
 	void set_focus(bool focus);
-	virtual bool is_greater(Fle_Listview_Item* other, int property);
 
 	void draw() override;
-	virtual void draw_properties();
+
 
 public:
 	Fle_Listview_Item(const char* name);
