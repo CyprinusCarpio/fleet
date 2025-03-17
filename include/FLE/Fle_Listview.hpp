@@ -22,7 +22,7 @@ enum Fle_Listview_Flags
 class Fle_Listview : public Fl_Group
 {
 	Fle_Listview_Display_Mode m_displayMode;
-	Fl_Scroll* m_scroll;
+	Fl_Scroll m_scroll;
 
 	int  m_state;
 	int  m_headersHeight;
@@ -33,6 +33,8 @@ class Fle_Listview : public Fl_Group
 
 	int m_itemsBBoxX;
 	int m_itemsBBoxY;
+
+	Fle_Listview_Item* m_callbackItem;
 
 	std::vector<int> m_selected;
 
@@ -45,6 +47,8 @@ class Fle_Listview : public Fl_Group
 
 	void quicksort(int low, int high, bool ascending, int property);
 	int  quicksort_partition(int low , int high, bool ascending, int property);
+
+	void do_callback_for_item(Fle_Listview_Item* item, Fl_Callback_Reason reason);
 
 protected:
 
@@ -63,17 +67,18 @@ public:
 	void add_item(Fle_Listview_Item* item);
 	void remove_item(Fle_Listview_Item* item);
 	void clear_items();
-	void clear_selection();
+	void clear_selection(int otherThan = -1);
 
 	Fle_Listview_Display_Mode get_display_mode() const;
 	Fle_Listview_Item* get_item(int index) const;
+	Fle_Listview_Item* get_callback_item() const;
 
 	const std::vector<int>& get_selected() const;
 
 	void set_display_mode(Fle_Listview_Display_Mode mode);
 	void ensure_item_visible(Fle_Listview_Item* item);
 	void set_focused(Fle_Listview_Item* item, bool focused);
-	void set_selected(Fle_Listview_Item* item, bool selected);
+	void set_selected(Fle_Listview_Item* item, bool selected, bool scrollTo = true);
 	void set_details_helper_lines(bool lines);
 	bool get_details_helper_lines() const;
 

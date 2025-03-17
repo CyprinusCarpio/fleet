@@ -319,6 +319,28 @@ public:
     }
 };
 
+void ListviewCb(Fl_Widget* w, void* d)
+{
+    Fle_Listview* lv = (Fle_Listview*)w;
+
+    /*std::string callbackReason;
+
+    switch (Fl::callback_reason())
+    {
+    case FL_REASON_SELECTED:
+		callbackReason = "selected";
+		break;
+	case FL_REASON_DESELECTED:
+		callbackReason = "deselected";
+		break;
+	case FL_REASON_RESELECTED:
+		callbackReason = "reselected";
+		break;
+    }
+
+    std::cout << "Item " << lv->get_callback_item()->label() << " " << callbackReason << std::endl;*/
+}
+
 int main(int argc, char** argv)
 {
     img = new Fl_Pixmap(ikona_xpm);
@@ -348,6 +370,8 @@ int main(int argc, char** argv)
     //dh->add_work_widget(st);
 
     listview = new Fle_Listview(0, 0, 0, 0, "");
+
+    listview->callback(ListviewCb);
 
     listview->set_property_widths({ 82, 82 });
     listview->set_property_order({ 1, 0 });
