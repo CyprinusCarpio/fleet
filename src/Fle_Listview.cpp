@@ -3,6 +3,7 @@
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
 
+#include <algorithm>
 #include <iostream>
 
 bool intersect(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
@@ -21,11 +22,32 @@ bool intersect(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, in
 	return true;
 }
 
-Fle_Listview::Fle_Listview(int X, int Y, int W, int H, const char* l) : Fl_Group(X, Y, W, H, l), m_scroll(X, Y, W, H)
+void Fle_Listview::scr_callback(Fl_Widget* w, void* data)
+{
+	Fle_Listview* lv = (Fle_Listview*)w->parent();
+	bool horizontal = data == (void*)1;
+	
+	// Update only if currently scrolled past max
+	if (horizontal)
+	{
+		if (lv->m_hscrollbar.value() > lv->m_itemsBBoxX - lv->w())
+			lv->update_scrollbars();
+	}
+	else
+	{
+		if(lv->m_vscrollbar.value() > lv->m_itemsBBoxY - lv->h())
+			lv->update_scrollbars();
+	}
+
+
+	lv->listview_redraw();
+}
+
+Fle_Listview::Fle_Listview(int X, int Y, int W, int H, const char* l) : Fl_Group(X, Y, W, H, l),
+m_hscrollbar(0, 0, 0, 0, 0), m_vscrollbar(0, 0, 0, 0, 0)
 {
 	m_displayMode = FLE_LISTVIEW_DISPLAY_LIST;
-	m_scroll.box(FL_NO_BOX);
-	m_scroll.color(FL_BACKGROUND2_COLOR);
+
 	m_state = FLE_LISTVIEW_DETAILS_LINES | FLE_LISTVIEW_REDRAW;
 	m_headersHeight = 20;
 	m_focusedItem = -1;
@@ -35,6 +57,13 @@ Fle_Listview::Fle_Listview(int X, int Y, int W, int H, const char* l) : Fl_Group
 	m_nameDisplayText = "Name";
 	m_nameHeaderMinWidth = 100;
 	m_sortedByProperty = -2;
+	m_margin = 5;
+	m_headersColor = FL_BACKGROUND_COLOR;
+	m_hscrollbar.type(FL_HORIZONTAL);
+	m_hscrollbar.when(FL_WHEN_CHANGED);
+	m_vscrollbar.when(FL_WHEN_CHANGED);
+	m_hscrollbar.callback(scr_callback, (void*)1);
+	m_vscrollbar.callback(scr_callback, (void*)0);
 	set_property_order({});
 	set_property_widths({});
 
@@ -42,6 +71,7 @@ Fle_Listview::Fle_Listview(int X, int Y, int W, int H, const char* l) : Fl_Group
 	when(FL_WHEN_CHANGED);
 
 	box(FL_DOWN_BOX);
+	color(FL_BACKGROUND2_COLOR);
 }
 
 Fle_Listview::~Fle_Listview()
@@ -54,8 +84,8 @@ void Fle_Listview::arrange_items()
 
 	Fle_Listview_Display_Mode mode = get_display_mode();
 
-	int X = x() + Fl::box_dx(box());
-	int Y = y() + Fl::box_dy(box()) + (mode == FLE_LISTVIEW_DISPLAY_DETAILS ? m_headersHeight : 0);
+	int X = 0;
+	int Y = (mode == FLE_LISTVIEW_DISPLAY_DETAILS ? m_headersHeight : 0);
 	int W = 0;
 	int H = 0;
 
@@ -67,9 +97,9 @@ void Fle_Listview::arrange_items()
 
 	if(mode == FLE_LISTVIEW_DISPLAY_SMALL_ICONS || mode == FLE_LISTVIEW_DISPLAY_LIST)
 	{
-		for (int i = 0; i < m_scroll.children(); i++)
+		for (int i = 0; i < m_items.size(); i++)
 		{
-			Fle_Listview_Item* item = (Fle_Listview_Item*)m_scroll.child(i);
+			Fle_Listview_Item* item = m_items[i];
 
 			W = item->get_label_width();
 
@@ -79,42 +109,42 @@ void Fle_Listview::arrange_items()
 		if (widest > 200) widest = 200;
 	}
 
-	for (int i = 0; i < m_scroll.children() - 2; i++)
+	for (int i = 0; i < m_items.size(); i++)
 	{
-		Fle_Listview_Item* item = (Fle_Listview_Item*)m_scroll.child(i);
+		Fle_Listview_Item* item = m_items[i];
 
 		switch (mode)
 		{
 		case FLE_LISTVIEW_DISPLAY_ICONS:
 			W = 70;
 			H = 70;
-			if (X + W > x() + w() - Fl::box_dw(box()) - Fl::scrollbar_size())
+			if (X + W > w() - Fl::scrollbar_size() - (2 * m_margin))
 			{
-				X = x() + Fl::box_dx(box());
+				X = 0;
 				Y += 70;
 			}
 			break;
 		case FLE_LISTVIEW_DISPLAY_SMALL_ICONS:
 			H = 20;
 			W = widest;
-			if (X + W > x() + w() - Fl::box_dw(box()) - Fl::scrollbar_size())
+			if (X + W > w() - Fl::scrollbar_size() - (2 * m_margin))
 			{
-				X = x() + Fl::box_dx(box());
+				X = 0;
 				Y += 20;
 			}
 			break;
 		case FLE_LISTVIEW_DISPLAY_DETAILS:
 			H = 20;
-			W = w() - Fl::box_dx(box()) - Fl::box_dw(box());
+			W = w() - (2 * m_margin);
 
 			// At this point in time the scrollbar may or may not be visible
 			// need to check if it WILL be visible
-			if ((m_scroll.children() - 2) * 20 >= y() + h()) W -= Fl::scrollbar_size();
+			if (m_items.size() * 20 >= h()) W -= Fl::scrollbar_size();
 			break;
 		case FLE_LISTVIEW_DISPLAY_LIST:
 			W = widest;
 			H = 20;
-			if (Y + H > y() + h() - Fl::scrollbar_size() - Fl::box_dh(box()))
+			if (Y + H > h() - Fl::scrollbar_size() - (2 * m_margin))
 			{
 				X += widest;
 				Y -= columnSum;
@@ -146,8 +176,9 @@ void Fle_Listview::arrange_items()
 
 	m_state &= ~FLE_LISTVIEW_NEEDS_ARRANGING;
 
-	if(m_state & FLE_LISTVIEW_REDRAW)
-		redraw();
+	update_scrollbars();
+
+	listview_redraw();
 }
 
 void Fle_Listview::keyboard_select(int key)
@@ -155,15 +186,15 @@ void Fle_Listview::keyboard_select(int key)
 	if (m_focusedItem == -1) m_focusedItem = 0;
 
 	int itemToFocus = -1;
-	int itemWidth = m_scroll.child(m_focusedItem)->w();
+	int itemWidth = m_items[m_focusedItem]->w();
 
 	switch (get_display_mode())
 	{
 	case FLE_LISTVIEW_DISPLAY_LIST:
 		if (key == FL_Right)
-			itemToFocus = m_focusedItem + (int)((h() - Fl::scrollbar_size() - Fl::box_dy(box())) / 20);
+			itemToFocus = m_focusedItem + (int)((h() - (2 * m_margin) - Fl::scrollbar_size()) / 20);
 		if (key == FL_Left)
-			itemToFocus = m_focusedItem - (int)((h() - Fl::scrollbar_size() - Fl::box_dy(box())) / 20);
+			itemToFocus = m_focusedItem - (int)((h() - (2 * m_margin) - Fl::scrollbar_size()) / 20);
 	case FLE_LISTVIEW_DISPLAY_DETAILS:
 		if (key == FL_Down)
 			itemToFocus = m_focusedItem + 1;
@@ -177,41 +208,73 @@ void Fle_Listview::keyboard_select(int key)
 		if (key == FL_Left)
 			itemToFocus = m_focusedItem - 1;
 		if (key == FL_Down)
-			itemToFocus = m_focusedItem + (int)((w() - Fl::box_dx(box()) - Fl::box_dw(box())) / itemWidth);
+			itemToFocus = m_focusedItem + (int)((w() - (2 * m_margin)) / itemWidth);
 		if (key == FL_Up)
-			itemToFocus = m_focusedItem - (int)((w() - Fl::box_dx(box()) - Fl::box_dw(box())) / itemWidth);
+			itemToFocus = m_focusedItem - (int)((w() - (2 * m_margin)) / itemWidth);
 		break;
 	}
 
 	if (itemToFocus < 0) return;
-	if (itemToFocus > m_scroll.children() - 3) return;
+	if (itemToFocus > m_items.size() - 1) return;
 
 	set_focused(itemToFocus);
 }
 
+void Fle_Listview::get_grid_xy_at(int X, int Y, int& gridX, int& gridY)
+{
+	gridX = 0;
+	gridY = 0;
+	
+	int scrX = m_hscrollbar.value();
+	int scrY = m_vscrollbar.value();
+
+	Fle_Listview_Display_Mode mode = get_display_mode();
+
+	if (mode == FLE_LISTVIEW_DISPLAY_DETAILS)
+	{
+		gridY = (Y - y() - m_margin + scrY) / 20;
+	}
+	else if (mode == FLE_LISTVIEW_DISPLAY_ICONS)
+	{
+		gridX = (X - x() - m_margin + scrX) / 70;
+		gridY = (Y - y() - m_margin + scrY) / 70;
+	}
+	else
+	{
+		gridX = (X - x() - m_margin + scrX) / get_item(0)->w();
+		gridY = (Y - y() - m_margin + scrY) / 20;
+	}
+}
+
 void Fle_Listview::drag_select(int x1, int y1, int x2, int y2)
 {
-	m_selected.clear();
+	if(!Fl::event_ctrl())
+		m_selected.clear();
 
-	for (int i = 0; i < m_scroll.children() - 2; i++)
+	for (int i = 0; i < m_items.size(); i++)
 	{
 		Fle_Listview_Item* item = get_item(i);
 
 		if(intersect(x1, y1, x2, y2, item->x(), item->y(), item->x() + item->w(), item->y() + item->h()))
 		{
-			if (!item->is_selected())
+			if (item->is_selected())
 			{
 				// reselect callback
 				if (when() & FL_WHEN_CHANGED)
 					do_callback_for_item(item, FL_REASON_RESELECTED);
-			}
-			item->set_selected(true);
-			m_selected.push_back(i);
 
-			if (when() & FL_WHEN_CHANGED)
-				do_callback_for_item(item, FL_REASON_SELECTED);
+				m_selected.push_back(i);
+			}
+			else
+			{
+				item->set_selected(true);
+				m_selected.push_back(i);
+
+				if (when() & FL_WHEN_CHANGED)
+					do_callback_for_item(item, FL_REASON_SELECTED);
+			}
 		}
-		else if (item->is_selected())
+		else if (item->is_selected() && !Fl::event_ctrl())
 		{
 			item->set_selected(false);
 			if (when() & FL_WHEN_CHANGED)
@@ -220,9 +283,49 @@ void Fle_Listview::drag_select(int x1, int y1, int x2, int y2)
 	}
 }
 
+void Fle_Listview::update_scrollbars()
+{
+	if (get_display_mode() == FLE_LISTVIEW_DISPLAY_LIST)
+	{
+		m_vscrollbar.hide();
+		if (m_itemsBBoxX + m_hscrollbar.value() > w() || m_hscrollbar.value() != 0)
+		{
+			m_hscrollbar.show();
+			m_hscrollbar.resize(x() + Fl::box_dx(box()), y() + h() - Fl::scrollbar_size() - Fl::box_dy(box()), w() - Fl::box_dw(box()), Fl::scrollbar_size());
+			m_hscrollbar.value(m_hscrollbar.value(), w(), 0, m_itemsBBoxX + (2 * m_margin));
+		}
+		else
+			m_hscrollbar.hide();
+	}
+	else if(get_display_mode() == FLE_LISTVIEW_DISPLAY_DETAILS)
+	{
+		m_hscrollbar.hide();
+		if (m_itemsBBoxY > h() - m_headersHeight + m_vscrollbar.value() || m_vscrollbar.value() != 0)
+		{
+			m_vscrollbar.show();
+			m_vscrollbar.resize(x() + w() - Fl::scrollbar_size() - Fl::box_dx(box()), y() + Fl::box_dy(box()) + m_headersHeight, Fl::scrollbar_size(), h() - Fl::box_dh(box()) - m_headersHeight);
+			m_vscrollbar.value(m_vscrollbar.value(), h() - m_headersHeight, 0, m_itemsBBoxY - m_headersHeight + (2 * m_margin));
+		}
+		else
+			m_vscrollbar.hide();
+	}
+	else
+	{
+		m_hscrollbar.hide();
+		if (m_itemsBBoxY > h() + m_vscrollbar.value() || m_vscrollbar.value() != 0)
+		{
+			m_vscrollbar.show();
+			m_vscrollbar.resize(x() + w() - Fl::scrollbar_size() - Fl::box_dx(box()), y() + Fl::box_dy(box()), Fl::scrollbar_size(), h() - Fl::box_dh(box()));
+			m_vscrollbar.value(m_vscrollbar.value(), h(), 0, m_itemsBBoxY + (2 * m_margin));
+		}
+		else
+			m_vscrollbar.hide();
+	}
+}
+
 void Fle_Listview::set_focused(Fle_Listview_Item* item, bool focused)
 {
-	set_focused(m_scroll.find(item));
+	set_focused(std::distance(m_items.begin(), std::find(m_items.begin(), m_items.end(), item)));
 }
 
 void Fle_Listview::set_focused(int item)
@@ -230,17 +333,18 @@ void Fle_Listview::set_focused(int item)
 	if (item == m_focusedItem) return;
 
 	// Unfocus current
-	if (m_focusedItem != -1) ((Fle_Listview_Item*)(m_scroll.child(m_focusedItem)))->set_focus(false);
+	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
 
 	// item == -1 means clear focus
 	if (item == -1) 
 	{
 		m_focusedItem = -1;
+		listview_redraw();
 		return;
 	}
 
 	// Focus selected
-	Fle_Listview_Item* i = (Fle_Listview_Item*)(m_scroll.child(item));
+	Fle_Listview_Item* i = m_items[item];
 	m_focusedItem = item;
 	i->set_focus(true);
 
@@ -251,7 +355,7 @@ void Fle_Listview::set_selected(Fle_Listview_Item* item, bool selected, bool scr
 {
 	bool ctrl = Fl::event_ctrl();
 	bool shift = Fl::event_shift();
-	int index = m_scroll.find(item);
+	int index = std::distance(m_items.begin(), std::find(m_items.begin(), m_items.end(), item));
 
 	if (single_selection() || (!ctrl && !shift))
 	{
@@ -273,7 +377,11 @@ void Fle_Listview::set_selected(Fle_Listview_Item* item, bool selected, bool scr
 			do_callback_for_item(item, selected ? FL_REASON_SELECTED : FL_REASON_DESELECTED);
 	}
 
-	if(!selected || (shift && m_lastSelectedItem == -1)) return;
+	if (!selected || (shift && m_lastSelectedItem == -1))
+	{
+		listview_redraw();
+		return;
+	}
 
 	if (shift && !single_selection())
 	{
@@ -321,6 +429,8 @@ void Fle_Listview::set_selected(Fle_Listview_Item* item, bool selected, bool scr
 		set_focused(index);
 	
 	m_selected.push_back(index);
+
+	listview_redraw();
 }
 
 void Fle_Listview::set_details_helper_lines(bool lines)
@@ -333,12 +443,17 @@ void Fle_Listview::set_details_helper_lines(bool lines)
 	else
 		m_state &= ~FLE_LISTVIEW_DETAILS_LINES;
 
-	if (oldState != m_state) redraw();
+	if (oldState != m_state) listview_redraw();
 }
 
 bool Fle_Listview::get_details_helper_lines() const
 {
 	return m_state & FLE_LISTVIEW_DETAILS_LINES;
+}
+
+void Fle_Listview::set_headers_color(Fl_Color c)
+{
+	m_headersColor = c;
 }
 
 void Fle_Listview::single_selection(bool s)
@@ -360,7 +475,7 @@ void Fle_Listview::set_property_order(std::vector<int> order)
 {
 	m_propertyOrder = std::move(order);
 
-	redraw();
+	listview_redraw();
 }
 
 const std::vector<int>& Fle_Listview::get_property_order() const
@@ -384,6 +499,19 @@ int Fle_Listview::get_property_header_width(int property) const
 	return m_propertyHeaderWidths[property];
 }
 
+void Fle_Listview::set_margin(int m)
+{
+	m_margin = m;
+
+	update_scrollbars();
+	listview_redraw();
+}
+
+int Fle_Listview::get_margin() const
+{
+	return m_margin;
+}
+
 void Fle_Listview::set_name_text(std::string t)
 {
 	m_nameDisplayText = std::move(t);
@@ -394,42 +522,19 @@ bool Fle_Listview::single_selection() const
 	return m_state & FLE_LISTVIEW_SINGLE_SELECTION;
 }
 
-void Fle_Listview::quicksort(int low, int high, bool ascending, int property)
-{
-	if (low < high)
-	{
-		int pivot_index = quicksort_partition(low, high, ascending, property);
-		quicksort(low, pivot_index - 1, ascending, property);
-		quicksort(pivot_index + 1, high, ascending, property);
-	}
-}
-int Fle_Listview::quicksort_partition(int low, int high, bool ascending, int property)
-{
-	Fle_Listview_Item* pivot = get_item(high);
-	int i = low - 1;
-	for (int j = low; j < high; j++)
-	{
-		Fle_Listview_Item* item = get_item(j);
-		if ((!ascending && item->is_greater(pivot, property)) || (ascending && pivot->is_greater(item, property)))
-		{
-			i++;
-			m_scroll.insert(*item, i);
-		}
-	}
-	m_scroll.insert(*pivot, i + 1);
-	return i + 1;
-}
-
 void Fle_Listview::do_callback_for_item(Fle_Listview_Item* item, Fl_Callback_Reason reason)
 {
 	m_callbackItem = item;
 	do_callback(reason);
 }
 
+void Fle_Listview::listview_redraw()
+{
+	if(m_state & FLE_LISTVIEW_REDRAW) redraw();
+}
+
 void Fle_Listview::sort_items(bool ascending, int property)
 {
-	int n = m_scroll.children() - 2;
-
 	// Remove focus and selections
 	set_focused(-1);
 
@@ -437,7 +542,7 @@ void Fle_Listview::sort_items(bool ascending, int property)
 
 	clear_selection();
 
-	quicksort(0, n - 1, ascending, property);
+	std::sort(m_items.begin(), m_items.end(), [property, ascending](Fle_Listview_Item* a, Fle_Listview_Item* b) { return ascending ? b->is_greater(a, property) : a->is_greater(b, property); });
 
 	arrange_items();
 
@@ -470,8 +575,6 @@ void Fle_Listview::draw()
 
 	if (mode == FLE_LISTVIEW_DISPLAY_DETAILS)
 	{
-		fl_draw_box(box(), x(), y() + m_headersHeight, w(), h() - m_headersHeight, color());
-
 		// Draw header
 		int prevWidth = 0;
 		int bdw = Fl::box_dw(box());
@@ -479,7 +582,7 @@ void Fle_Listview::draw()
 		int scrollbar = 0;
 		// At this point in time the scrollbar may or may not be visible
 		// need to check if it WILL be visible
-		if ((m_scroll.children() - 2) * 20 >= y() + h()) scrollbar = Fl::scrollbar_size();
+		if (m_items.size() * 20 >= y() + h()) scrollbar = Fl::scrollbar_size();
 
 		fl_font(labelfont(), labelsize());
 
@@ -488,7 +591,7 @@ void Fle_Listview::draw()
 			int prop = m_propertyOrder[i];
 			int propWidth = m_propertyHeaderWidths[prop];
 
-			fl_draw_box(FL_UP_BOX, x() + w() - prevWidth - propWidth - scrollbar - bdw, y(), propWidth + (i == 0 ? bdw + scrollbar: 0), m_headersHeight, color());
+			fl_draw_box(FL_UP_BOX, x() + w() - prevWidth - propWidth - scrollbar - bdw, y(), propWidth + (i == 0 ? bdw + scrollbar: 0), m_headersHeight, m_headersColor);
 			fl_color(labelcolor());
 			fl_draw(m_propertyDisplayNames[prop].c_str(), x() + w() - prevWidth - propWidth - scrollbar - bdw + 4, y(), propWidth, m_headersHeight, FL_ALIGN_LEFT);
 
@@ -503,7 +606,7 @@ void Fle_Listview::draw()
 			prevWidth += propWidth;
 		}
 
-		fl_draw_box(FL_UP_BOX, x(), y(), w() - prevWidth - scrollbar - bdw, m_headersHeight, color());
+		fl_draw_box(FL_UP_BOX, x(), y(), w() - prevWidth - scrollbar - bdw, m_headersHeight, m_headersColor);
 		fl_color(labelcolor());
 		fl_draw(m_nameDisplayText.c_str(), x() + 4, y(), w() - prevWidth, m_headersHeight, FL_ALIGN_LEFT);
 
@@ -511,41 +614,109 @@ void Fle_Listview::draw()
 		{
 			fl_draw(get_sort_direction() == 1 ? "@-38UpArrow" : "@-32DnArrow", x() + w() - prevWidth - scrollbar - bdw - 18, y(), w() - prevWidth, m_headersHeight, FL_ALIGN_LEFT, nullptr, 1);
 		}
+
+		fl_push_clip(x(), y() + m_headersHeight, w(), h() - m_headersHeight);
 	}
 	else
-		fl_draw_box(box(), x(), y(), w(), h(), color());
-
-	draw_child(m_scroll);
-
-	// TODO: support scollbars on the left and/or top
-	if (m_scroll.scrollbar.visible() && m_scroll.hscrollbar.visible())
 	{
-		fl_draw_box(FL_FLAT_BOX, x() + w() - Fl::scrollbar_size() - Fl::box_dx(box()),
-			        y() + h() - Fl::scrollbar_size() - Fl::box_dy(box()), Fl::scrollbar_size(), Fl::scrollbar_size(), FL_BACKGROUND_COLOR);
+		fl_push_clip(x(), y(), w(), h());
 	}
+
+	
+	// Draw all items
+	for (int i = 0; i < m_items.size(); i++)
+		m_items[i]->draw_item(i == m_items.size() - 1);
+
+
+	// Draw frame
+	if (mode == FLE_LISTVIEW_DISPLAY_DETAILS)
+	{
+		fl_draw_box(fl_frame(box()), x(), y() + m_headersHeight, w(), h() - m_headersHeight, color());
+	}
+	else
+	{
+		fl_draw_box(fl_frame(box()), x(), y(), w(), h(), color());
+	}
+
+	// Draw focus rectangle
+	if (m_focusedItem != -1)
+	{
+		Fle_Listview_Item *item = m_items[m_focusedItem];
+		Fl_Color c = item->is_selected() ? FL_SELECTION_COLOR : color();
+		if (mode == FLE_LISTVIEW_DISPLAY_ICONS)
+		{
+			draw_focus(FL_FLAT_BOX, item->x(), item->y() + 32, item->w(), item->h() - 32, c);
+		}
+		else if (mode == FLE_LISTVIEW_DISPLAY_DETAILS && get_details_helper_lines())
+		{
+			draw_focus(FL_FLAT_BOX, item->x() + 2, item->y() + 1, item->w() - 4, item->h() - 3, c);
+		}
+		else
+			draw_focus(FL_FLAT_BOX, item->x(), item->y(), item->w(), item->h(), c);
+	}
+
+	fl_pop_clip();
+
+	// Draw scrollbars
+	draw_children();
 }
 
 void Fle_Listview::add_item(Fle_Listview_Item* item)
 {
-	m_scroll.add(item);
+	m_items.push_back(item);
+	item->m_listview = this;
 
 	m_state &= ~FLE_LISTVIEW_SORTED_ASCENDING;
 	m_state &= ~FLE_LISTVIEW_SORTED_DESCENDING;
 	m_sortedByProperty = -2;
 
-	m_state | FLE_LISTVIEW_NEEDS_ARRANGING;
+	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
 }
 
 void Fle_Listview::remove_item(Fle_Listview_Item* item)
 {
-	m_scroll.remove(item);
+	std::vector<Fle_Listview_Item*>::iterator it = std::find(m_items.begin(), m_items.end(), item);
+	if (it == std::prev(m_items.end()) && m_focusedItem == m_items.size() - 1)
+	{
+		set_focused(-1);
+	}
+	m_items.erase(it);
 
-	m_state | FLE_LISTVIEW_NEEDS_ARRANGING;
+	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
+}
+
+void Fle_Listview::remove_item(int index)
+{
+	if(index > m_items.size() - 1) return;
+
+	Fle_Listview_Item* item = get_item(index);
+	remove_item(item);
+
+	delete item;
+}
+
+void Fle_Listview::remove_selected()
+{
+	set_redraw(false);
+	std::vector<int> selected = get_selected();
+	clear_selection();
+	std::sort(selected.begin(), selected.end(), [](int a, int b) { return a > b; });
+	set_focused(-1);
+	for (int i = 0; i < selected.size(); i++)
+	{
+		remove_item(get_item(selected[i]));
+	}
+	set_redraw(true);
+	listview_redraw();
 }
 
 void Fle_Listview::clear_items()
 {
-	m_scroll.clear();
+	for(Fle_Listview_Item* item : m_items)
+	{
+		delete item;
+	}
+	m_items.clear();
 }
 
 void Fle_Listview::clear_selection(int otherThan)
@@ -562,6 +733,8 @@ void Fle_Listview::clear_selection(int otherThan)
 		}
 	}
 	m_selected.clear();
+
+	listview_redraw();
 }
 
 Fle_Listview_Display_Mode Fle_Listview::get_display_mode() const
@@ -571,7 +744,23 @@ Fle_Listview_Display_Mode Fle_Listview::get_display_mode() const
 
 Fle_Listview_Item* Fle_Listview::get_item(int index) const
 {
-	return (Fle_Listview_Item*)m_scroll.child(index);
+	return m_items[index];
+}
+
+Fle_Listview_Item* Fle_Listview::get_item_at(int X, int Y) const
+{
+	if (get_display_mode() == FLE_LISTVIEW_DISPLAY_DETAILS && Y < y() + m_headersHeight)
+		return nullptr;
+
+	for (Fle_Listview_Item* item : m_items)
+	{
+		if(X >= item->x() && X < item->x() + item->w() && Y >= item->y() && Y < item->y() + item->h())
+		{
+			return item;
+		}
+	}
+
+	return nullptr;
 }
 
 Fle_Listview_Item* Fle_Listview::get_callback_item() const
@@ -588,22 +777,14 @@ void Fle_Listview::set_display_mode(Fle_Listview_Display_Mode mode)
 {
 	if (mode == m_displayMode) return;
 
-	if (mode == FLE_LISTVIEW_DISPLAY_DETAILS && m_displayMode != FLE_LISTVIEW_DISPLAY_DETAILS)
-	{
-		m_scroll.resize(x() + Fl::box_dx(box()), y() + m_headersHeight + Fl::box_dy(box()), w() - Fl::box_dw(box()), h() - m_headersHeight - Fl::box_dh(box()));
-	}
-	else if(mode != FLE_LISTVIEW_DISPLAY_DETAILS && m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS)
-	{
-		m_scroll.resize(x() + Fl::box_dx(box()), y() + Fl::box_dy(box()), w() - Fl::box_dw(box()), h() - Fl::box_dh(box()));
-	}
-
 	m_displayMode = mode;
 
-	for (int i = 0; i < m_scroll.children(); i++)
-	{
-		Fle_Listview_Item* item = (Fle_Listview_Item*)m_scroll.child(i);
+	m_vscrollbar.value(0);
+	m_hscrollbar.value(0);
 
-		item->set_display_mode(mode);
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		m_items[i]->set_display_mode(mode);
 	}
 
 	arrange_items();
@@ -616,34 +797,35 @@ void Fle_Listview::ensure_item_visible(int item)
 
 void Fle_Listview::ensure_item_visible(Fle_Listview_Item* item)
 {
-	int scrollX = m_scroll.xposition();
-	int scrollY = m_scroll.yposition();
+	int scrollX = m_hscrollbar.value();
+	int scrollY = m_vscrollbar.value();
 
-	int itemX = item->x() - m_scroll.x();
-	int itemY = item->y() - m_scroll.y();
+	Fle_Listview_Display_Mode mode = get_display_mode();
 
-	if (get_display_mode() == FLE_LISTVIEW_DISPLAY_LIST)
+	if (mode == FLE_LISTVIEW_DISPLAY_LIST)
 	{
-		if (itemX < 0)
+		if (item->x() < x() || item->w() > w())
 		{
-			m_scroll.scroll_to(scrollX + itemX, scrollY);
+			m_hscrollbar.value(scrollX - (x() - item->x() + m_margin));
 		}
-		else if (itemX + item->w() > m_scroll.w() && itemX != 0)
+		else if(item->x() + item->w() > x() + w())
 		{
-			m_scroll.scroll_to(std::min(m_itemsBBoxX - (x() + w()), scrollX + item->w()), scrollY);
+			m_hscrollbar.value(scrollX - (x() + w() - item->x() - item->w() + m_margin));
 		}
 	}
 	else
 	{
-		if(itemY < 0)
+		if (item->y() < y() + (mode == FLE_LISTVIEW_DISPLAY_DETAILS ? m_headersHeight : 0) || item->h() > h())
 		{
-			m_scroll.scroll_to(scrollX, scrollY + itemY);
+			m_vscrollbar.value(scrollY - (y() + (mode == FLE_LISTVIEW_DISPLAY_DETAILS ? m_headersHeight : 0) - item->y()));
 		}
-		else if (itemY + item->h() > m_scroll.h() && itemY != 0)
+		else if (item->y() + item->h() > y() + h())
 		{
-			m_scroll.scroll_to(scrollX, std::min(m_itemsBBoxY - (y() + h()), scrollY + item->h()));
+			m_vscrollbar.value(scrollY - (y() + h() - item->y() - item->h()));
 		}
 	}
+
+	listview_redraw();
 }
 
 void Fle_Listview::set_redraw(bool redraw)
@@ -665,23 +847,30 @@ int Fle_Listview::handle(int e)
 
 	static int dragX, dragY;
 	static int resizingHeaderProperty = -2;
+	static int lastGridX, lastGridY;
 
 	int ex = Fl::event_x();
 	int ey = Fl::event_y();
+	int gridX, gridY;
+	Fle_Listview_Item* atItem = get_item_at(ex, ey);
 
 	if (e == FL_PUSH)
 	{
 		if(Fl::focus() != this)
 		{
 			Fl::focus(this);
-			if (m_scroll.children() > 2)
+			if (m_items.size() > 0)
 			{
 				set_focused(0);
 			}
 		}
-		// Clear selection
-		if (Fl::belowmouse() == &m_scroll)
+		if (atItem)
 		{
+			set_selected(atItem, true, true);
+		}
+		else if (ret != 1)
+		{
+			// Clear selection
 			clear_selection();
 		}
 
@@ -694,7 +883,7 @@ int Fle_Listview::handle(int e)
 
 			int scrollbar = 0;
 
-			if (m_scroll.scrollbar.visible()) scrollbar = Fl::scrollbar_size();
+			if (m_vscrollbar.visible()) scrollbar = Fl::scrollbar_size();
 
 			for (int i = 0; i < m_propertyOrder.size(); i++)
 			{
@@ -716,51 +905,58 @@ int Fle_Listview::handle(int e)
 		dragX = ex;
 		dragY = ey;
 
+		get_grid_xy_at(ex, ey, gridX, gridY);
+
 		return 1;
 	}
 	else if (e == FL_MOUSEWHEEL)
 	{
-		if (get_display_mode() == FLE_LISTVIEW_DISPLAY_LIST)
+		if (get_display_mode() == FLE_LISTVIEW_DISPLAY_LIST && m_hscrollbar.visible())
 		{
-			int scrollTo = m_scroll.xposition() + Fl::event_dy() * 10;
+			int scrollTo = m_hscrollbar.value() + Fl::event_dy() * 10;
 			if(scrollTo < 0) scrollTo = 0;
-			if(scrollTo > m_itemsBBoxX - (x() + w())) scrollTo = m_itemsBBoxX - (x() + w());
+			if(scrollTo > m_itemsBBoxX - w()) scrollTo = m_itemsBBoxX - w();
 
-			m_scroll.scroll_to(scrollTo, m_scroll.yposition());
+			m_hscrollbar.value(scrollTo);
 		}
-		else
+		else if(m_vscrollbar.visible())
 		{
-			int scrollTo = m_scroll.yposition() + Fl::event_dy() * 5;
+			int scrollTo = m_vscrollbar.value() + Fl::event_dy() * 5;
 			if(scrollTo < 0) scrollTo = 0;
-			if(scrollTo > m_itemsBBoxY - (y() + h())) scrollTo = m_itemsBBoxY - (y() + h());
+			if(scrollTo > m_itemsBBoxY - h()) scrollTo = m_itemsBBoxY - h();
 
-			m_scroll.scroll_to(m_scroll.xposition(), scrollTo);
+			m_vscrollbar.value(scrollTo);
 		}
-
+		listview_redraw();
 		return 1;
 	}
 	else if (e == FL_DRAG)
 	{
 		int scrollTo = 0;
+		get_grid_xy_at(ex, ey, gridX, gridY);
 
 		if(get_display_mode() != FLE_LISTVIEW_DISPLAY_DETAILS)
 		{
 			if (ex > x() + w())
 			{
-				scrollTo = m_scroll.xposition() + 3;
-				if (scrollTo <= m_itemsBBoxX - (x() + w()))
+				scrollTo = m_hscrollbar.value() + 3;
+				if (scrollTo <= m_itemsBBoxX - w())
 				{
-					m_scroll.scroll_to(scrollTo, m_scroll.yposition());
+					m_hscrollbar.value(scrollTo);
 					dragX -= 3;
+					update_scrollbars();
+					listview_redraw();
 				}
 			}
 			if (ex < x())
 			{
-				scrollTo = m_scroll.xposition() - 3;
+				scrollTo = m_hscrollbar.value() - 3;
 				if (scrollTo >= 0)
 				{
-					m_scroll.scroll_to(scrollTo, m_scroll.yposition());
+					m_hscrollbar.value(scrollTo);
 					dragX += 3;
+					update_scrollbars();
+					listview_redraw();
 				}
 			}
 		}
@@ -780,34 +976,43 @@ int Fle_Listview::handle(int e)
 				dragX = ex;
 				dragY = ey;
 
-				redraw();
+				listview_redraw();
 
 				return 1;
 			}
 		}
 		if (ey > y() + h())
 		{
-			scrollTo = m_scroll.yposition() + 3;
-			if (scrollTo <= m_itemsBBoxY - (y() + h()))
+			scrollTo = m_vscrollbar.value() + 3;
+			if (scrollTo <= m_itemsBBoxY -h())
 			{
-				m_scroll.scroll_to(m_scroll.xposition(), scrollTo);
+				m_vscrollbar.value(scrollTo);
 				dragY -= 3;
+				update_scrollbars();
+				listview_redraw();
 			}
 		}
 		if (ey < y())
 		{
-			scrollTo = m_scroll.yposition() - 3;
+			scrollTo = m_vscrollbar.value() - 3;
 			if (scrollTo >= 0)
 			{
-				m_scroll.scroll_to(m_scroll.xposition(), scrollTo);
+				m_vscrollbar.value(scrollTo);
 				dragY += 3;
+				update_scrollbars();
+				listview_redraw();
 			}
 		}
-		if (resizingHeaderProperty == -2 && !single_selection() && (std::abs(dragX - ex) >= 6 || std::abs(dragY - ey) >= 6))
+		//std::cout <<  "------\n" << gridX << " " << gridY << std::endl;
+		//std::cout << lastGridX << " " << lastGridY << std::endl;
+		if (resizingHeaderProperty == -2 && (gridX != lastGridX || gridY != lastGridY) && !single_selection() && (std::abs(dragX - ex) >= 6 || std::abs(dragY - ey) >= 6))
 		{
 			drag_select(dragX, dragY, ex, ey);
 			window()->make_current();
+			listview_redraw();
 			fl_overlay_rect(dragX, dragY, ex - dragX, ey - dragY);
+			lastGridX = gridX;
+			lastGridY = gridY;
 
 			return 1;
 		}
@@ -827,7 +1032,7 @@ int Fle_Listview::handle(int e)
 
 				int scrollbar = 0;
 
-				if (m_scroll.scrollbar.visible()) scrollbar = Fl::scrollbar_size();
+				if (m_vscrollbar.visible()) scrollbar = Fl::scrollbar_size();
 
 				for (int i = 0; i < m_propertyOrder.size(); i++)
 				{
@@ -868,7 +1073,7 @@ int Fle_Listview::handle(int e)
 	}
 	else if (e == FL_FOCUS)
 	{
-		if(m_scroll.children() > 2)
+		if(m_items.size() > 0)
 		{
 			set_focused(0);
 		}
@@ -891,12 +1096,13 @@ int Fle_Listview::handle(int e)
 			return 1;
 			break;
 		case ' ':
-			set_selected(get_item(m_focusedItem), true);
+			if(m_focusedItem != -1)
+				set_selected(get_item(m_focusedItem), true);
 			break;
 		case 'a':
 			if (Fl::event_ctrl() && !single_selection())
 			{
-				for (int i = 0; i < m_scroll.children() - 2; i++)
+				for (int i = 0; i < m_items.size(); i++)
 				{
 					set_selected(get_item(i), true, false);
 				}
@@ -918,29 +1124,5 @@ void Fle_Listview::resize(int X, int Y, int W, int H)
 	int y = Y;
 	int h = H;
 
-	if (get_display_mode() == FLE_LISTVIEW_DISPLAY_DETAILS)
-	{
-		y += m_headersHeight;
-		h -= m_headersHeight;
-
-		for (int i = 0; i < m_scroll.children(); i++)
-		{
-			Fle_Listview_Item* item = (Fle_Listview_Item*)m_scroll.child(i);
-
-			int W = w() - Fl::box_dx(box()) - Fl::box_dw(box());
-			if (m_scroll.scrollbar.visible()) W -= Fl::scrollbar_size();
-
-			item->size(W, 20);
-		}
-	}
-
-	m_scroll.resize(X + Fl::box_dx(box()), y + Fl::box_dy(box()), W - Fl::box_dw(box()), h - Fl::box_dh(box()));
-
-	if ((oldW == 0 || oldH == 0) || 
-		(oldH != H && get_display_mode() == FLE_LISTVIEW_DISPLAY_LIST) ||
-		(oldW != W && get_display_mode() == FLE_LISTVIEW_DISPLAY_SMALL_ICONS) ||
-		(oldW != W && get_display_mode() == FLE_LISTVIEW_DISPLAY_ICONS))
-	{
-		arrange_items();
-	}
+	arrange_items();
 }

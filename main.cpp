@@ -252,7 +252,7 @@ void loadLayoutCb(Fl_Widget* w, void* d)
 
 Fle_Listview* listview;
 
-void listview_cb(Fl_Widget* w, void* d)
+void view_cb(Fl_Widget* w, void* d)
 {
     if (d == (void*)0) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_ICONS);
     if (d == (void*)1) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_SMALL_ICONS);
@@ -297,7 +297,7 @@ protected:
 
     void draw_property(int i, int X, int Y, int W, int H) override
     {
-        fl_color(labelcolor());
+        fl_color(textcolor());
         std::string s;
         if(i == 0)
         {
@@ -319,11 +319,11 @@ public:
     }
 };
 
-void ListviewCb(Fl_Widget* w, void* d)
+void listview_cb(Fl_Widget* w, void* d)
 {
     Fle_Listview* lv = (Fle_Listview*)w;
 
-    /*std::string callbackReason;
+    std::string callbackReason;
 
     switch (Fl::callback_reason())
     {
@@ -338,7 +338,7 @@ void ListviewCb(Fl_Widget* w, void* d)
 		break;
     }
 
-    std::cout << "Item " << lv->get_callback_item()->label() << " " << callbackReason << std::endl;*/
+    std::cout << "Item " << lv->get_callback_item()->get_name() << " " << callbackReason << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -371,7 +371,7 @@ int main(int argc, char** argv)
 
     listview = new Fle_Listview(0, 0, 0, 0, "");
 
-    listview->callback(ListviewCb);
+    listview->callback(listview_cb);
 
     listview->set_property_widths({ 82, 82 });
     listview->set_property_order({ 1, 0 });
@@ -505,11 +505,11 @@ int main(int argc, char** argv)
     menu->add("Edit/Copy");
     menu->add("Edit/Paste");
     menu->add("Edit/Cut");
-    menu->add("View/Big icons", 0, listview_cb, (void*)0, FL_MENU_RADIO);
-    menu->add("View/Small icons", 0, listview_cb, (void*)1, FL_MENU_RADIO);
-    menu->add("View/List", 0, listview_cb, (void*)2, FL_MENU_RADIO | FL_MENU_VALUE);
-    menu->add("View/Details", 0, listview_cb, (void*)3, FL_MENU_RADIO | FL_MENU_DIVIDER);
-    menu->add("View/Display lines", 0, listview_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_VALUE);
+    menu->add("View/Big icons", 0, view_cb, (void*)0, FL_MENU_RADIO);
+    menu->add("View/Small icons", 0, view_cb, (void*)1, FL_MENU_RADIO);
+    menu->add("View/List", 0, view_cb, (void*)2, FL_MENU_RADIO | FL_MENU_VALUE);
+    menu->add("View/Details", 0, view_cb, (void*)3, FL_MENU_RADIO | FL_MENU_DIVIDER);
+    menu->add("View/Display lines", 0, view_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_VALUE);
     toolbar->add_band_widget(menu, 1, 2, 2, 2);
 
     make_toolbar(dh);

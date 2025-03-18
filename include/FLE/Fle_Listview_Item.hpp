@@ -16,19 +16,25 @@ enum Fle_Listview_Display_Mode
 
 class Fle_Listview;
 
-class Fle_Listview_Item : public Fl_Box
+class Fle_Listview_Item
 {
 	friend class Fle_Listview;
 
 	Fle_Listview_Display_Mode m_displayMode;
 
 	std::string m_name;
+	std::string m_displayName;
 	bool m_selected;
 	bool m_focused;
 	Fl_Color m_textcolor;
 	Fl_Color m_bgcolor;
 	Fl_Pixmap* m_smallIcon;
 	Fl_Pixmap* m_bigIcon;
+	Fle_Listview* m_listview;
+	int m_x;
+	int m_y;
+	int m_w;
+	int m_h;
 
 	void set_display_name();
 
@@ -40,7 +46,7 @@ protected:
 	void set_selected(bool selected);
 	void set_focus(bool focus);
 
-	void draw() override;
+	void draw_item(bool last);
 
 
 public:
@@ -51,14 +57,20 @@ public:
 	bool is_selected() const;
 	
 	void textcolor(Fl_Color color);
+	Fl_Color textcolor() const;
 	void bgcolor(Fl_Color color);
+	Fl_Color bgcolor() const;
 	void set_icon(Fl_Pixmap* small, Fl_Pixmap* big);
 	void set_name(std::string newname);
 	const std::string& get_name() const;
+	void resize(int X, int Y, int W, int H);
 
 	int get_label_width() const;
 
-	int handle(int e) override;
+	int x() const;
+	int y() const;
+	int w() const { return m_w; }
+	int h() const { return m_h; }
 };
 
 #endif

@@ -70,7 +70,7 @@ static char* default_icon_big[] = {
 Fl_Pixmap* defaultImgSmall = nullptr;
 Fl_Pixmap* defaultImgBig = nullptr;
 
-Fle_Listview_Item::Fle_Listview_Item(const char* name) : Fl_Box(0, 0, 32, 32, "")
+Fle_Listview_Item::Fle_Listview_Item(const char* name)
 {
 	m_selected = false;
 	m_focused = false;
@@ -85,27 +85,24 @@ Fle_Listview_Item::Fle_Listview_Item(const char* name) : Fl_Box(0, 0, 32, 32, ""
 	m_smallIcon = defaultImgSmall;
 	m_bigIcon = defaultImgBig;
 
-	box(FL_NO_BOX);
-	image(defaultImgSmall);
-
 	set_display_name();
 }
 
 void Fle_Listview_Item::set_display_name()
 {
-	std::string name = m_name;
+	m_displayName = m_name;
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
 	{
-		if(name.length() > 9)
-			name.insert(name.begin() + 9, ' ');
+		if(m_displayName.length() > 9)
+			m_displayName.insert(m_displayName.begin() + 9, ' ');
 	}
 
-	copy_label(name.c_str());
+	
 }
 
 Fle_Listview* Fle_Listview_Item::get_listview() const
 {
-	return (Fle_Listview*)parent()->parent();
+	return m_listview;
 }
 
 void Fle_Listview_Item::set_selected(bool selected)
@@ -113,29 +110,6 @@ void Fle_Listview_Item::set_selected(bool selected)
 	if (selected == m_selected) return;
 
 	m_selected = selected;
-
-	if (m_selected)
-	{
-		box(FL_FLAT_BOX);
-		labelcolor(fl_contrast(labelcolor(), FL_SELECTION_COLOR));
-		color(FL_SELECTION_COLOR);
-	}
-	else
-	{
-		labelcolor(m_textcolor);
-		if (m_bgcolor == 0xFFFFFFFF)
-		{
-			color(parent()->color());
-			box(FL_FLAT_BOX);
-		}
-		else
-		{
-			color(m_bgcolor);
-			box(FL_FLAT_BOX);
-		}
-	}
-
-	redraw();
 }
 
 void Fle_Listview_Item::set_focus(bool focus)
@@ -143,7 +117,6 @@ void Fle_Listview_Item::set_focus(bool focus)
 	if (focus == m_focused) return;
 
 	m_focused = focus;
-	redraw();
 }
 
 bool Fle_Listview_Item::is_greater(Fle_Listview_Item* other, int property)
@@ -164,25 +137,25 @@ bool Fle_Listview_Item::is_selected() const
 void Fle_Listview_Item::textcolor(Fl_Color color)
 {
 	m_textcolor = color;
+}
 
-	if (!m_selected)
+Fl_Color Fle_Listview_Item::textcolor() const
+{
+	if (m_selected)
 	{
-		labelcolor(m_textcolor);
-		redraw();
+		return fl_contrast(m_textcolor, FL_SELECTION_COLOR);
 	}
+	return m_textcolor;
 }
 
 void Fle_Listview_Item::bgcolor(Fl_Color bgcolor)
 {
-	box(FL_FLAT_BOX);
-
 	m_bgcolor = bgcolor;
+}
 
-	if (!m_selected)
-	{
-		color(m_bgcolor);
-		redraw();
-	}
+Fl_Color Fle_Listview_Item::bgcolor() const
+{
+	return m_bgcolor;
 }
 
 void Fle_Listview_Item::set_icon(Fl_Pixmap* small, Fl_Pixmap* big)
@@ -192,14 +165,6 @@ void Fle_Listview_Item::set_icon(Fl_Pixmap* small, Fl_Pixmap* big)
 
 	m_smallIcon = small;
 	m_bigIcon = big;
-
-	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
-	{
-		image(m_bigIcon);
-		return;
-	}
-
-	image(m_smallIcon);
 }
 
 void Fle_Listview_Item::set_name(std::string newname)
@@ -212,52 +177,56 @@ const std::string& Fle_Listview_Item::get_name() const
 	return m_name;
 }
 
+void Fle_Listview_Item::resize(int X, int Y, int W, int H)
+{
+	m_x = X;
+	m_y = Y;
+	m_w = W;
+	m_h = H;
+}
+
 int Fle_Listview_Item::get_label_width() const
 {
+	fl_font(get_listview()->labelfont(), get_listview()->labelsize());
 	int lx = 0, ly;
-	measure_label(lx, ly);
+	fl_measure(m_displayName.c_str(), lx, ly);
 
 	return lx + 5;
 }
-
-int Fle_Listview_Item::handle(int e)
-{
-	if (e == FL_PUSH)
-	{
-		get_listview()->set_selected(this, true);
-	}
-	return Fl_Box::handle(e);
-;}
-
 
 void Fle_Listview_Item::set_display_mode(Fle_Listview_Display_Mode mode)
 {
 	m_displayMode = mode;
 
-	switch (m_displayMode)
-	{
-	case FLE_LISTVIEW_DISPLAY_ICONS:
-		align(FL_ALIGN_TOP | FL_ALIGN_IMAGE_OVER_TEXT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP | FL_ALIGN_CLIP);
-		image(m_bigIcon);
-		break;
-	case FLE_LISTVIEW_DISPLAY_SMALL_ICONS:
-	case FLE_LISTVIEW_DISPLAY_DETAILS:
-	case FLE_LISTVIEW_DISPLAY_LIST:
-		align(FL_ALIGN_LEFT | FL_ALIGN_IMAGE_NEXT_TO_TEXT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-		image(m_smallIcon);
-		break;
-	}
-
 	set_display_name();
 }
 
-void Fle_Listview_Item::draw()
+void Fle_Listview_Item::draw_item(bool last)
 {
-	Fl_Box::draw();
+	if (m_selected) 
+	{
+		fl_color(FL_SELECTION_COLOR);
+		fl_rectf(x(), y(), w(), h());
+	}
+	else if (m_bgcolor != 0xFFFFFFFF)
+	{
+		fl_color(m_bgcolor);
+		fl_rectf(x(), y(), w(), h());
+	}
+	Fl_Align align;
+	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
+	{
+		align = FL_ALIGN_TOP | FL_ALIGN_IMAGE_OVER_TEXT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP | FL_ALIGN_CLIP;
+	}
+	else
+		align = FL_ALIGN_LEFT | FL_ALIGN_IMAGE_NEXT_TO_TEXT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP;
+
+	fl_color(textcolor());
+	fl_draw(m_displayName.c_str(), x(), y(), w(), h(), align, m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS ? m_bigIcon : m_smallIcon);
 
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS)
 	{
-		if(get_listview()->get_details_helper_lines())
+		if(get_listview()->get_details_helper_lines() && !last)
 		{
 			fl_color(FL_INACTIVE_COLOR);
 			fl_line(x() + 2, y() + 19, x() + w() - 4, y() + 19);
@@ -285,21 +254,18 @@ void Fle_Listview_Item::draw()
 			prevWidth += width;
 		}
 	}
-
-	if (!m_focused) return;
-
-	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
-	{
-		draw_focus(box(), x(), y() + 32, w(), h() - 32, color());
-	}
-	else if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS && get_listview()->get_details_helper_lines())
-	{
-		draw_focus(box(), x() + 2, y() + 1, w() - 4, h() - 3, color());
-	}
-	else
-		draw_focus();
 }
 
 void Fle_Listview_Item::draw_property(int property, int X, int Y, int W, int H)
 {
+}
+
+int Fle_Listview_Item::x() const
+{
+	return m_x + m_listview->x() + m_listview->get_margin() - m_listview->m_hscrollbar.value();
+}
+
+int Fle_Listview_Item::y() const
+{
+	return m_y + m_listview->y() + m_listview->get_margin() - m_listview->m_vscrollbar.value();
 }
