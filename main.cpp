@@ -258,7 +258,9 @@ void view_cb(Fl_Widget* w, void* d)
     if (d == (void*)1) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_SMALL_ICONS);
     if (d == (void*)2) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_LIST);
     if (d == (void*)3) listview->set_display_mode(FLE_LISTVIEW_DISPLAY_DETAILS);
-    if (d == (void*)4) listview->set_details_helper_lines(!listview->get_details_helper_lines());
+    if (d == (void*)4) listview->set_details_mode(FLE_LISTVIEW_DETAILS_NONE);
+    if (d == (void*)5) listview->set_details_mode(FLE_LISTVIEW_DETAILS_LINES);
+    if (d == (void*)6) listview->set_details_mode(FLE_LISTVIEW_DETAILS_HIGHLIGHT);
 }
 
 Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
@@ -325,16 +327,34 @@ void listview_cb(Fl_Widget* w, void* d)
 
     std::string callbackReason;
 
-    switch (Fl::callback_reason())
+    Fle_Listview_Reason reason = (Fle_Listview_Reason)Fl::callback_reason();
+
+    switch (reason)
     {
-    case FL_REASON_SELECTED:
+    case FLE_LISTVIEW_REASON_SELECTED:
 		callbackReason = "selected";
 		break;
-	case FL_REASON_DESELECTED:
+	case FLE_LISTVIEW_REASON_DESELECTED:
 		callbackReason = "deselected";
 		break;
-	case FL_REASON_RESELECTED:
+	case FLE_LISTVIEW_REASON_RESELECTED:
 		callbackReason = "reselected";
+		break;
+    case FLE_LISTVIEW_REASON_ADDED:
+		callbackReason = "added";
+		break;
+	case FLE_LISTVIEW_REASON_REMOVED:
+		callbackReason = "removed";
+		break;
+    case FLE_LISTVIEW_REASON_DND_START:
+        std::cout << "dnd start\n";
+        Fl::copy("test", 4);
+        return;
+		break;
+    case FLE_LISTVIEW_REASON_DND_END:
+		std::cout << "dnd end\n";
+        lv->add_item(new Test_Listview_Item(Fl::event_text(), 4, "Drag"));
+		return;
 		break;
     }
 
@@ -507,9 +527,11 @@ int main(int argc, char** argv)
     menu->add("Edit/Cut");
     menu->add("View/Big icons", 0, view_cb, (void*)0, FL_MENU_RADIO);
     menu->add("View/Small icons", 0, view_cb, (void*)1, FL_MENU_RADIO);
-    menu->add("View/List", 0, view_cb, (void*)2, FL_MENU_RADIO | FL_MENU_VALUE);
-    menu->add("View/Details", 0, view_cb, (void*)3, FL_MENU_RADIO | FL_MENU_DIVIDER);
-    menu->add("View/Display lines", 0, view_cb, (void*)4, FL_MENU_TOGGLE | FL_MENU_VALUE);
+    menu->add("View/List", 0, view_cb, (void*)2, FL_MENU_RADIO);
+    menu->add("View/Details", 0, view_cb, (void*)3, FL_MENU_RADIO | FL_MENU_DIVIDER | FL_MENU_VALUE);
+    menu->add("View/None", 0, view_cb, (void*)4, FL_MENU_RADIO);
+    menu->add("View/Display lines", 0, view_cb, (void*)5, FL_MENU_RADIO);
+    menu->add("View/Display highlights", 0, view_cb, (void*)6, FL_MENU_RADIO | FL_MENU_VALUE);
     toolbar->add_band_widget(menu, 1, 2, 2, 2);
 
     make_toolbar(dh);

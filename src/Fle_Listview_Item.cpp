@@ -201,8 +201,9 @@ void Fle_Listview_Item::set_display_mode(Fle_Listview_Display_Mode mode)
 	set_display_name();
 }
 
-void Fle_Listview_Item::draw_item(bool last)
+void Fle_Listview_Item::draw_item(int index)
 {
+	int detailsMode = m_listview->get_details_mode();
 	if (m_selected) 
 	{
 		fl_color(FL_SELECTION_COLOR);
@@ -213,6 +214,12 @@ void Fle_Listview_Item::draw_item(bool last)
 		fl_color(m_bgcolor);
 		fl_rectf(x(), y(), w(), h());
 	}
+	else if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS && detailsMode == 2 && index % 2 == 1)
+	{
+		fl_color(fl_color_average(m_listview->color(), FL_BACKGROUND_COLOR, 0.50f));
+		fl_rectf(x(), y(), w(), h());
+	}
+
 	Fl_Align align;
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
 	{
@@ -226,24 +233,22 @@ void Fle_Listview_Item::draw_item(bool last)
 
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS)
 	{
-		if(get_listview()->get_details_helper_lines() && !last)
+		if(detailsMode == 1 && index != m_listview->get_item_count() - 1)
 		{
 			fl_color(FL_INACTIVE_COLOR);
 			fl_line(x() + 2, y() + 19, x() + w() - 4, y() + 19);
 		}
 
-		Fle_Listview* lv = get_listview();
 
-		const std::vector<int>& props = lv->get_property_order();
+		const std::vector<int>& props = m_listview->get_property_order();
 
-		bool lines = lv->get_details_helper_lines();
 		int prevWidth = 0;
 
 		for (int i : props)
 		{
-			int width = lv->get_property_header_width(i);
+			int width = m_listview->get_property_header_width(i);
 
-			if (lines)
+			if (detailsMode == 1)
 			{
 				fl_color(FL_INACTIVE_COLOR);
 				fl_line(x() + w() - width - prevWidth, y(), x() + w() - width - prevWidth, y() + h() - 1);
@@ -254,6 +259,16 @@ void Fle_Listview_Item::draw_item(bool last)
 			prevWidth += width;
 		}
 	}
+}
+
+bool Fle_Listview_Item::is_inside_drag_area(int X, int Y)
+{
+	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
+	{
+		return X >= x() + 15 && X <= x() + w() - 15 && Y >= y() + 15 && Y <= y() + h() - 15;
+	}
+
+	return X >= x() && X <= x() + get_label_width() + 16 && Y >= y() && Y <= y() + h();
 }
 
 void Fle_Listview_Item::draw_property(int property, int X, int Y, int W, int H)

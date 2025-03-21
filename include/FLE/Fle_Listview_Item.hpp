@@ -42,11 +42,12 @@ protected:
 	virtual void set_display_mode(Fle_Listview_Display_Mode mode);
 	virtual bool is_greater(Fle_Listview_Item* other, int property);
 	virtual void draw_property(int property, int X, int Y, int W, int H);
+	virtual bool is_inside_drag_area(int X, int Y);
 
 	void set_selected(bool selected);
 	void set_focus(bool focus);
 
-	void draw_item(bool last);
+	virtual void draw_item(int index);
 
 
 public:

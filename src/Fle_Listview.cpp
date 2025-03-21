@@ -46,9 +46,7 @@ void Fle_Listview::scr_callback(Fl_Widget* w, void* data)
 Fle_Listview::Fle_Listview(int X, int Y, int W, int H, const char* l) : Fl_Group(X, Y, W, H, l),
 m_hscrollbar(0, 0, 0, 0, 0), m_vscrollbar(0, 0, 0, 0, 0)
 {
-	m_displayMode = FLE_LISTVIEW_DISPLAY_LIST;
-
-	m_state = FLE_LISTVIEW_DETAILS_LINES | FLE_LISTVIEW_REDRAW;
+	m_state = FLE_LISTVIEW_DETAILS_HIGHLIGHT | FLE_LISTVIEW_REDRAW | FLE_LISTVIEW_DND;
 	m_headersHeight = 20;
 	m_focusedItem = -1;
 	m_lastSelectedItem = -1;
@@ -66,6 +64,7 @@ m_hscrollbar(0, 0, 0, 0, 0), m_vscrollbar(0, 0, 0, 0, 0)
 	m_vscrollbar.callback(scr_callback, (void*)0);
 	set_property_order({});
 	set_property_widths({});
+	set_display_mode(FLE_LISTVIEW_DISPLAY_DETAILS);
 
 	end();
 	when(FL_WHEN_CHANGED);
@@ -261,7 +260,7 @@ void Fle_Listview::drag_select(int x1, int y1, int x2, int y2)
 			{
 				// reselect callback
 				if (when() & FL_WHEN_CHANGED)
-					do_callback_for_item(item, FL_REASON_RESELECTED);
+					do_callback_for_item(item, FLE_LISTVIEW_REASON_RESELECTED);
 
 				m_selected.push_back(i);
 			}
@@ -271,14 +270,14 @@ void Fle_Listview::drag_select(int x1, int y1, int x2, int y2)
 				m_selected.push_back(i);
 
 				if (when() & FL_WHEN_CHANGED)
-					do_callback_for_item(item, FL_REASON_SELECTED);
+					do_callback_for_item(item, FLE_LISTVIEW_REASON_SELECTED);
 			}
 		}
 		else if (item->is_selected() && !Fl::event_ctrl())
 		{
 			item->set_selected(false);
 			if (when() & FL_WHEN_CHANGED)
-				do_callback_for_item(item, FL_REASON_DESELECTED);
+				do_callback_for_item(item, FLE_LISTVIEW_REASON_DESELECTED);
 		}
 	}
 }
@@ -351,37 +350,18 @@ void Fle_Listview::set_focused(int item)
 	ensure_item_visible(i);
 }
 
-void Fle_Listview::set_selected(Fle_Listview_Item* item, bool selected, bool scrollTo)
+void Fle_Listview::handle_user_selection(Fle_Listview_Item* item, bool selected, bool scrollTo, bool keepSelected)
 {
 	bool ctrl = Fl::event_ctrl();
 	bool shift = Fl::event_shift();
 	int index = std::distance(m_items.begin(), std::find(m_items.begin(), m_items.end(), item));
 
-	if (single_selection() || (!ctrl && !shift))
+	if (!keepSelected && (single_selection() || (!ctrl && !shift)))
 	{
-		clear_selection(selected ? index : -1);
+		deselect_all(selected ? index : -1);
 	}
 
 	if(shift && m_lastSelectedItem == -1) m_lastSelectedItem = 0;
-
-	bool wasSelected = item->is_selected();
-	item->set_selected(selected);
-
-	if(when() & FL_WHEN_CHANGED)
-	{
-		if (wasSelected)
-		{
-			do_callback_for_item(item, FL_REASON_RESELECTED);
-		}
-		else
-			do_callback_for_item(item, selected ? FL_REASON_SELECTED : FL_REASON_DESELECTED);
-	}
-
-	if (!selected || (shift && m_lastSelectedItem == -1))
-	{
-		listview_redraw();
-		return;
-	}
 
 	if (shift && !single_selection())
 	{
@@ -389,12 +369,7 @@ void Fle_Listview::set_selected(Fle_Listview_Item* item, bool selected, bool scr
 		{
 			if (*it >= std::min(m_lastSelectedItem, index + 1) && *it <= std::max(m_lastSelectedItem, index))
 			{
-				if(when() & FL_WHEN_CHANGED)
-				{
-					Fle_Listview_Item* item = get_item(*it);
-					do_callback_for_item(item, FL_REASON_RESELECTED);
-				}
-
+				// Keep this selected
 				it++;
 				continue;
 			}
@@ -403,52 +378,45 @@ void Fle_Listview::set_selected(Fle_Listview_Item* item, bool selected, bool scr
 			item->set_selected(false);
 
 			if (when() & FL_WHEN_CHANGED)
-				do_callback_for_item(item, FL_REASON_DESELECTED);
+				do_callback_for_item(item, FLE_LISTVIEW_REASON_DESELECTED);
 
 			it = m_selected.erase(it);
 			if(it == m_selected.end()) break;
 		}
 		// "Bridge" from the last selected to currently selected
-		for (int i = std::min(m_lastSelectedItem + 1, index + 1); i < std::max(m_lastSelectedItem, index); i++)
+		for (int i = std::min(m_lastSelectedItem, index); i <= std::max(m_lastSelectedItem, index); i++)
 		{
-			Fle_Listview_Item* item = get_item(i);
-			bool wasSelected = item->is_selected();
-			item->set_selected(true);
-			m_selected.push_back(i);
-
-			if (when() & FL_WHEN_CHANGED)
-				do_callback_for_item(item, wasSelected ? FL_REASON_RESELECTED : FL_REASON_SELECTED);
+			select_item(i, true);
 		}
 	}
 	else
 	{
+		select_item(index, selected);
 		m_lastSelectedItem = index;
 	}
 
 	if(scrollTo)
 		set_focused(index);
 	
-	m_selected.push_back(index);
-
 	listview_redraw();
 }
 
-void Fle_Listview::set_details_helper_lines(bool lines)
+void Fle_Listview::set_details_mode(int mode)
 {
 	int oldState = m_state;
-	if (lines)
-	{
-		m_state |= FLE_LISTVIEW_DETAILS_LINES;
-	}
-	else
-		m_state &= ~FLE_LISTVIEW_DETAILS_LINES;
+	
+	m_state &= ~FLE_LISTVIEW_DETAILS_NONE;
+	m_state &= ~FLE_LISTVIEW_DETAILS_LINES;
+	m_state &= ~FLE_LISTVIEW_DETAILS_HIGHLIGHT;
+
+	m_state |= mode;
 
 	if (oldState != m_state) listview_redraw();
 }
 
-bool Fle_Listview::get_details_helper_lines() const
+int Fle_Listview::get_details_mode() const
 {
-	return m_state & FLE_LISTVIEW_DETAILS_LINES;
+	return m_state & FLE_LISTVIEW_DETAILS_NONE ? 0 : m_state & FLE_LISTVIEW_DETAILS_LINES ? 1 : 2;
 }
 
 void Fle_Listview::set_headers_color(Fl_Color c)
@@ -522,10 +490,20 @@ bool Fle_Listview::single_selection() const
 	return m_state & FLE_LISTVIEW_SINGLE_SELECTION;
 }
 
-void Fle_Listview::do_callback_for_item(Fle_Listview_Item* item, Fl_Callback_Reason reason)
+void Fle_Listview::dnd(bool dnd)
+{
+	if(dnd)
+	{
+		m_state |= FLE_LISTVIEW_DND;
+	}
+	else
+		m_state &= ~FLE_LISTVIEW_DND;
+}
+
+void Fle_Listview::do_callback_for_item(Fle_Listview_Item* item, Fle_Listview_Reason reason)
 {
 	m_callbackItem = item;
-	do_callback(reason);
+	do_callback((Fl_Callback_Reason)reason);
 }
 
 void Fle_Listview::listview_redraw()
@@ -540,7 +518,7 @@ void Fle_Listview::sort_items(bool ascending, int property)
 
 	m_lastSelectedItem = -1;
 
-	clear_selection();
+	deselect_all();
 
 	std::sort(m_items.begin(), m_items.end(), [property, ascending](Fle_Listview_Item* a, Fle_Listview_Item* b) { return ascending ? b->is_greater(a, property) : a->is_greater(b, property); });
 
@@ -624,8 +602,10 @@ void Fle_Listview::draw()
 
 	
 	// Draw all items
+	fl_font(labelfont(), labelsize());
 	for (int i = 0; i < m_items.size(); i++)
-		m_items[i]->draw_item(i == m_items.size() - 1);
+		if(intersect(x(), y(), x() + w(), y() + h(), m_items[i]->x(), m_items[i]->y(), m_items[i]->x() + m_items[i]->w(), m_items[i]->y() + m_items[i]->h()))
+			m_items[i]->draw_item(i);
 
 
 	// Draw frame
@@ -647,7 +627,7 @@ void Fle_Listview::draw()
 		{
 			draw_focus(FL_FLAT_BOX, item->x(), item->y() + 32, item->w(), item->h() - 32, c);
 		}
-		else if (mode == FLE_LISTVIEW_DISPLAY_DETAILS && get_details_helper_lines())
+		else if (mode == FLE_LISTVIEW_DISPLAY_DETAILS && get_details_mode() == 1)
 		{
 			draw_focus(FL_FLAT_BOX, item->x() + 2, item->y() + 1, item->w() - 4, item->h() - 3, c);
 		}
@@ -665,12 +645,30 @@ void Fle_Listview::add_item(Fle_Listview_Item* item)
 {
 	m_items.push_back(item);
 	item->m_listview = this;
+	item->m_displayMode = get_display_mode();
 
 	m_state &= ~FLE_LISTVIEW_SORTED_ASCENDING;
 	m_state &= ~FLE_LISTVIEW_SORTED_DESCENDING;
 	m_sortedByProperty = -2;
 
 	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
+
+	if(when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_ADDED);
+}
+
+void Fle_Listview::insert_item(Fle_Listview_Item* item, int index)
+{
+	m_items.insert(m_items.begin() + index, item);
+	item->m_listview = this;
+	item->m_displayMode = get_display_mode();
+
+	m_state &= ~FLE_LISTVIEW_SORTED_ASCENDING;
+	m_state &= ~FLE_LISTVIEW_SORTED_DESCENDING;
+	m_sortedByProperty = -2;
+
+	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
+
+	if (when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_ADDED);
 }
 
 void Fle_Listview::remove_item(Fle_Listview_Item* item)
@@ -683,6 +681,8 @@ void Fle_Listview::remove_item(Fle_Listview_Item* item)
 	m_items.erase(it);
 
 	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
+
+	if (when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_REMOVED);
 }
 
 void Fle_Listview::remove_item(int index)
@@ -699,7 +699,7 @@ void Fle_Listview::remove_selected()
 {
 	set_redraw(false);
 	std::vector<int> selected = get_selected();
-	clear_selection();
+	deselect_all();
 	std::sort(selected.begin(), selected.end(), [](int a, int b) { return a > b; });
 	set_focused(-1);
 	for (int i = 0; i < selected.size(); i++)
@@ -719,22 +719,79 @@ void Fle_Listview::clear_items()
 	m_items.clear();
 }
 
-void Fle_Listview::clear_selection(int otherThan)
+void Fle_Listview::deselect_all(int otherThan)
 {
+	set_redraw(false);
 	for (int i : m_selected)
 	{
 		if(i == otherThan) continue;
 
 		Fle_Listview_Item* item = get_item(i);
 		item->set_selected(false);
-		if(when() & FL_WHEN_CHANGED)
+		if (when() & FL_WHEN_CHANGED)
 		{
-			do_callback_for_item(item, FL_REASON_DESELECTED);
+			do_callback_for_item(item, FLE_LISTVIEW_REASON_DESELECTED);
 		}
 	}
 	m_selected.clear();
+	if (otherThan != -1) m_selected.push_back(otherThan);
+	set_redraw(true);
 
 	listview_redraw();
+}
+
+void Fle_Listview::select_item(int index, bool selected)
+{
+	if(index > m_items.size() - 1) return;
+	Fle_Listview_Item* item = get_item(index);
+
+	if (!selected && item->is_selected())
+	{
+		m_selected.erase(std::find(m_selected.begin(), m_selected.end(), index));
+		item->set_selected(false);
+		if(when() & FL_WHEN_CHANGED)
+		{
+			do_callback_for_item(item, FLE_LISTVIEW_REASON_DESELECTED);
+		}
+		listview_redraw();
+		return;
+	}
+
+	bool wasSelected = item->is_selected();
+	item->set_selected(true);
+
+	if (!wasSelected)
+	{
+		m_selected.push_back(index);
+	}
+
+	if(when() & FL_WHEN_CHANGED)
+	{
+		if (wasSelected)
+		{
+			do_callback_for_item(item, FLE_LISTVIEW_REASON_RESELECTED);
+		}
+		else
+		{
+			do_callback_for_item(item, FLE_LISTVIEW_REASON_SELECTED);
+		}
+	}
+	listview_redraw();
+}
+
+void Fle_Listview::select_item(Fle_Listview_Item* item, bool selected)
+{
+	select_item(std::distance(m_items.begin(), std::find(m_items.begin(), m_items.end(), item)), selected);
+}
+
+int Fle_Listview::get_item_count() const
+{
+	return m_items.size();
+}
+
+int Fle_Listview::get_selected_count() const
+{
+	return m_selected.size();
 }
 
 Fle_Listview_Display_Mode Fle_Listview::get_display_mode() const
@@ -848,12 +905,27 @@ int Fle_Listview::handle(int e)
 	static int dragX, dragY;
 	static int resizingHeaderProperty = -2;
 	static int lastGridX, lastGridY;
+	static bool itemDrag = false;
 
 	int ex = Fl::event_x();
 	int ey = Fl::event_y();
 	int gridX, gridY;
 	Fle_Listview_Item* atItem = get_item_at(ex, ey);
+	
+	if (dnd())
+	{
+		if (e == FL_DND_ENTER || e == FL_DND_DRAG || e == FL_DND_RELEASE)
+			return 1;
 
+		if(e == FL_PASTE)
+		{
+			if (when() & FL_WHEN_CHANGED)
+			{
+				do_callback((Fl_Callback_Reason)FLE_LISTVIEW_REASON_DND_END);
+			}
+			return 1;
+		}
+	}
 	if (e == FL_PUSH)
 	{
 		if(Fl::focus() != this)
@@ -866,12 +938,18 @@ int Fle_Listview::handle(int e)
 		}
 		if (atItem)
 		{
-			set_selected(atItem, true, true);
+			if (dnd() && atItem->is_inside_drag_area(ex, ey) && atItem->is_selected() && !Fl::event_ctrl())
+			{
+				itemDrag = true;
+			}
+			bool selected = true;
+			if (atItem->is_selected() && Fl::event_ctrl()) selected = false;
+			handle_user_selection(atItem, selected, true, itemDrag);
 		}
 		else if (ret != 1)
 		{
 			// Clear selection
-			clear_selection();
+			deselect_all();
 		}
 
 		// Resize header bars by dragging
@@ -1003,16 +1081,27 @@ int Fle_Listview::handle(int e)
 				listview_redraw();
 			}
 		}
-		//std::cout <<  "------\n" << gridX << " " << gridY << std::endl;
-		//std::cout << lastGridX << " " << lastGridY << std::endl;
+
 		if (resizingHeaderProperty == -2 && (gridX != lastGridX || gridY != lastGridY) && !single_selection() && (std::abs(dragX - ex) >= 6 || std::abs(dragY - ey) >= 6))
 		{
-			drag_select(dragX, dragY, ex, ey);
-			window()->make_current();
-			listview_redraw();
-			fl_overlay_rect(dragX, dragY, ex - dragX, ey - dragY);
-			lastGridX = gridX;
-			lastGridY = gridY;
+			if (itemDrag)
+			{
+				// Start drag of selected items
+				if (when() & FL_WHEN_CHANGED)
+				{
+					do_callback((Fl_Callback_Reason)FLE_LISTVIEW_REASON_DND_START);
+					Fl::dnd();
+				}
+			}
+			else
+			{
+				drag_select(dragX, dragY, ex, ey);
+				window()->make_current();
+				listview_redraw();
+				fl_overlay_rect(dragX, dragY, ex - dragX, ey - dragY);
+				lastGridX = gridX;
+				lastGridY = gridY;
+			}
 
 			return 1;
 		}
@@ -1021,6 +1110,12 @@ int Fle_Listview::handle(int e)
 	{
 		window()->make_current();
 		fl_overlay_clear();
+
+		if (itemDrag)
+		{
+			deselect_all(m_lastSelectedItem);
+		}
+		itemDrag = false;
 
 		// Check for clicks on headers
 		if (resizingHeaderProperty == -2 && get_display_mode() == FLE_LISTVIEW_DISPLAY_DETAILS)
@@ -1097,14 +1192,14 @@ int Fle_Listview::handle(int e)
 			break;
 		case ' ':
 			if(m_focusedItem != -1)
-				set_selected(get_item(m_focusedItem), true);
+				handle_user_selection(m_items[m_focusedItem], true, true, false);
 			break;
 		case 'a':
 			if (Fl::event_ctrl() && !single_selection())
 			{
 				for (int i = 0; i < m_items.size(); i++)
 				{
-					set_selected(get_item(i), true, false);
+					select_item(i, true);
 				}
 			}
 			break;
