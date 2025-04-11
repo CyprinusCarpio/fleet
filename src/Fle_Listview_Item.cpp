@@ -91,13 +91,69 @@ Fle_Listview_Item::Fle_Listview_Item(const char* name)
 void Fle_Listview_Item::set_display_name()
 {
 	m_displayName = m_name;
+	if(m_displayName == "") m_displayName = " ";
+
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
 	{
-		if(m_displayName.length() > 9)
-			m_displayName.insert(m_displayName.begin() + 9, ' ');
-	}
+		Fl_Align align;
+		align = FL_ALIGN_CENTER | FL_ALIGN_INSIDE;
+		int mw, mh;
+		int lineLength = 0;
+		int prevBytes = 0;
+		std::string toDraw = m_displayName;
+		bool secondLine = false;
+		for (int i = 0; i < m_displayName.length(); i++)
+		{
+			mw = 0;
+			const char byte = m_displayName[i];
+			char codePoint[4] = {byte, 0, 0, 0};
+			int bytes = 0;
 
-	
+			if ((byte & 0xE0) == 0xC0)
+			{
+				codePoint[1] = m_displayName[i + 1];
+				i++;
+				bytes = 1;
+			}
+			else if((byte & 0xE0) == 0xE0)
+			{
+				codePoint[1] = m_displayName[i + 1];
+				codePoint[2] = m_displayName[i + 2];
+				i += 2;
+				bytes = 2;
+			}
+			else if((byte & 0xE0) == 0xF0)
+			{
+				codePoint[1] = m_displayName[i + 1];
+				codePoint[2] = m_displayName[i + 2];
+				codePoint[3] = m_displayName[i + 3];
+				i += 3;
+				bytes = 3;
+			}
+
+			prevBytes = bytes;
+
+			fl_measure(codePoint, mw, mh, align);
+			lineLength += mw;
+			if (lineLength >= 70)
+			{
+				lineLength = 0;
+				if (secondLine)
+				{
+					m_displayName.erase(m_displayName.begin() + i - bytes - prevBytes - 1, m_displayName.end());
+					m_displayName.append("...");
+					break;
+				}
+				else
+				{
+					m_displayName.insert(i - bytes, "\n");
+					i++;
+				}
+
+				secondLine = true;
+			}
+		}
+	}
 }
 
 Fle_Listview* Fle_Listview_Item::get_listview() const
@@ -191,7 +247,7 @@ int Fle_Listview_Item::get_label_width() const
 	int lx = 0, ly;
 	fl_measure(m_displayName.c_str(), lx, ly);
 
-	return lx + 5;
+	return lx;
 }
 
 void Fle_Listview_Item::set_display_mode(Fle_Listview_Display_Mode mode)
@@ -204,32 +260,58 @@ void Fle_Listview_Item::set_display_mode(Fle_Listview_Display_Mode mode)
 void Fle_Listview_Item::draw_item(int index)
 {
 	int detailsMode = m_listview->get_details_mode();
-	if (m_selected) 
-	{
-		fl_color(FL_SELECTION_COLOR);
-		fl_rectf(x(), y(), w(), h());
-	}
-	else if (m_bgcolor != 0xFFFFFFFF)
-	{
-		fl_color(m_bgcolor);
-		fl_rectf(x(), y(), w(), h());
-	}
-	else if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS && detailsMode == 2 && index % 2 == 1)
+	int textX, textY, textW, textH;
+
+	get_text_xywh(textX, textY, textW, textH);
+
+	if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS && detailsMode == 2 && index % 2 == 1)
 	{
 		fl_color(fl_color_average(m_listview->color(), FL_BACKGROUND_COLOR, 0.50f));
 		fl_rectf(x(), y(), w(), h());
 	}
+	if (m_selected) 
+	{
+		fl_color(FL_SELECTION_COLOR);
+		fl_rectf(textX,	textY, textW, textH);
+	}
+	else if (m_bgcolor != 0xFFFFFFFF)
+	{
+		fl_color(m_bgcolor);
+		fl_rectf(textX, textY, textW, textH);
+	}
 
-	Fl_Align align;
+	// Draw icon
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
 	{
-		align = FL_ALIGN_TOP | FL_ALIGN_IMAGE_OVER_TEXT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP | FL_ALIGN_CLIP;
+		m_bigIcon->draw(x() + 19, y());
 	}
 	else
-		align = FL_ALIGN_LEFT | FL_ALIGN_IMAGE_NEXT_TO_TEXT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP;
+	{
+		m_smallIcon->draw(x(), y() + 2);
+	}
 
+	// Draw text
 	fl_color(textcolor());
-	fl_draw(m_displayName.c_str(), x(), y(), w(), h(), align, m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS ? m_bigIcon : m_smallIcon);
+	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
+	{
+		Fl_Align align;
+		align = FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_WRAP;
+
+		fl_draw(m_displayName.c_str(), textX, textY, textW, textH, align);
+	}
+	else
+	{
+		Fl_Align align;
+		align = FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP;
+
+		if (m_listview->get_item_column_width() != 0 && get_label_width() + 16 > m_listview->get_item_column_width())
+		{
+			textW = m_listview->get_item_column_width() - 32;
+			fl_draw("...", textX + textW, textY, 16, textH, align);
+		}
+
+		fl_draw(m_displayName.c_str(), textX, textY, textW, textH, align);
+	}
 
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS)
 	{
@@ -238,7 +320,6 @@ void Fle_Listview_Item::draw_item(int index)
 			fl_color(FL_INACTIVE_COLOR);
 			fl_line(x() + 2, y() + 19, x() + w() - 4, y() + 19);
 		}
-
 
 		const std::vector<int>& props = m_listview->get_property_order();
 
@@ -269,6 +350,37 @@ bool Fle_Listview_Item::is_inside_drag_area(int X, int Y)
 	}
 
 	return X >= x() && X <= x() + get_label_width() + 16 && Y >= y() && Y <= y() + h();
+}
+void Fle_Listview_Item::get_text_xywh(int& X, int& Y, int& W, int& H)
+{
+	X =	x();
+	Y = y();
+	W = w();
+	H = h();
+
+	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
+	{
+		Y += 32;
+		H = 14;
+
+		Fl_Align align;
+		align = FL_ALIGN_TOP | FL_ALIGN_INSIDE;
+		int mw, mh;
+		fl_measure(m_name.c_str(), mw, mh, align);
+
+		if (mw > 70) H = 28;
+	}
+	else
+	{
+		X += 16;
+		W -= 16;
+
+		if (m_displayMode == FLE_LISTVIEW_DISPLAY_DETAILS && m_listview->get_details_mode() == 1)
+		{
+			Y += 1;
+			H -= 3;
+		}
+	}
 }
 
 void Fle_Listview_Item::draw_property(int property, int X, int Y, int W, int H)

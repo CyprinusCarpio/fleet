@@ -43,6 +43,7 @@ protected:
 	virtual bool is_greater(Fle_Listview_Item* other, int property);
 	virtual void draw_property(int property, int X, int Y, int W, int H);
 	virtual bool is_inside_drag_area(int X, int Y);
+	virtual void get_text_xywh(int& X, int& Y, int& W, int& H);
 
 	void set_selected(bool selected);
 	void set_focus(bool focus);

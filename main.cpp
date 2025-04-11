@@ -353,7 +353,12 @@ void listview_cb(Fl_Widget* w, void* d)
 		break;
     case FLE_LISTVIEW_REASON_DND_END:
 		std::cout << "dnd end\n";
-        lv->add_item(new Test_Listview_Item(Fl::event_text(), 4, "Drag"));
+        if(lv->get_item_drag_at(Fl::event_x(), Fl::event_y()) != nullptr)
+            std::cout << "dragged on item\n";
+
+        Fle_Listview_Item * item = new Test_Listview_Item(Fl::event_text(), 4, "Drag");
+        item->bgcolor(FL_RED);
+        lv->add_item(item);
 		return;
 		break;
     }
@@ -482,6 +487,7 @@ int main(int argc, char** argv)
         item = new Test_Listview_Item("press_release_2023.docx", 63, "2121"); listview->add_item(item);
         item = new Test_Listview_Item("icon_64x64.png", 8, "root"); listview->add_item(item);
         item = new Test_Listview_Item("brochure_design_2023.ai", 921, "Wald"); listview->add_item(item);
+        item = new Test_Listview_Item("extremely_long_named_item_2021.txt", 921, "Wald"); listview->add_item(item);
     }
 
     dh->add_work_widget(listview);

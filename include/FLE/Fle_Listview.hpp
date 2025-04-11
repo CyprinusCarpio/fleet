@@ -47,6 +47,7 @@ class Fle_Listview : public Fl_Group
 	int m_margin;
 	int m_itemsBBoxX;
 	int m_itemsBBoxY;
+	int m_columnWidth;
 
 	Fle_Listview_Item* m_callbackItem;
 
@@ -76,7 +77,9 @@ protected:
 	void ensure_item_visible(int item);
 	void drag_select(int x1, int y1, int x2, int y2);
 	void update_scrollbars();
+	virtual void recalc_item_column_width();
 
+	virtual void draw_background();
 	void draw() override;
 
 public:
@@ -99,6 +102,7 @@ public:
 	Fle_Listview_Display_Mode get_display_mode() const;
 	Fle_Listview_Item* get_item(int index) const;
 	Fle_Listview_Item* get_item_at(int x, int y) const;
+	Fle_Listview_Item* get_item_drag_at(int x, int y) const;
 	Fle_Listview_Item* get_callback_item() const;
 
 	const std::vector<int>& get_selected() const;
@@ -126,6 +130,7 @@ public:
 	int  get_property_header_width(int property) const;
 	void set_margin(int m);
 	int  get_margin() const;
+	int  get_item_column_width() const;
 
 	void set_name_text(std::string t);
 

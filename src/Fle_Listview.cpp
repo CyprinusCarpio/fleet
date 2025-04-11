@@ -88,25 +88,12 @@ void Fle_Listview::arrange_items()
 	int W = 0;
 	int H = 0;
 
-	int widest = 0;
+	recalc_item_column_width();
+	int widest = m_columnWidth;
 	int columnSum = 0;
 
 	m_itemsBBoxX = 0;
 	m_itemsBBoxY = 0;
-
-	if(mode == FLE_LISTVIEW_DISPLAY_SMALL_ICONS || mode == FLE_LISTVIEW_DISPLAY_LIST)
-	{
-		for (int i = 0; i < m_items.size(); i++)
-		{
-			Fle_Listview_Item* item = m_items[i];
-
-			W = item->get_label_width();
-
-			if (W > widest) widest = W;
-		}
-
-		if (widest > 200) widest = 200;
-	}
 
 	for (int i = 0; i < m_items.size(); i++)
 	{
@@ -296,7 +283,7 @@ void Fle_Listview::update_scrollbars()
 		else
 			m_hscrollbar.hide();
 	}
-	else if(get_display_mode() == FLE_LISTVIEW_DISPLAY_DETAILS)
+	else if (get_display_mode() == FLE_LISTVIEW_DISPLAY_DETAILS)
 	{
 		m_hscrollbar.hide();
 		if (m_itemsBBoxY > h() - m_headersHeight + m_vscrollbar.value() || m_vscrollbar.value() != 0)
@@ -319,6 +306,38 @@ void Fle_Listview::update_scrollbars()
 		}
 		else
 			m_vscrollbar.hide();
+	}
+}
+
+void Fle_Listview::recalc_item_column_width()
+{
+	int W;
+	switch (get_display_mode())
+	{
+	default:
+		m_columnWidth = 0;
+		break;
+	case FLE_LISTVIEW_DISPLAY_DETAILS:
+		m_columnWidth = w() - Fl::scrollbar_size() - (2 * m_margin);
+		for (int i = 0; i < m_propertyOrder.size(); i++)
+		{
+			m_columnWidth -= get_property_header_width(m_propertyOrder[i]);
+		}
+
+		break;
+	case FLE_LISTVIEW_DISPLAY_SMALL_ICONS:
+	case FLE_LISTVIEW_DISPLAY_LIST:
+		for (int i = 0; i < m_items.size(); i++)
+		{
+			Fle_Listview_Item* item = m_items[i];
+
+			W = item->get_label_width() + 16;
+
+			if (W > m_columnWidth) m_columnWidth = W;
+		}
+
+		if (m_columnWidth > 200) m_columnWidth = 200;
+		break;
 	}
 }
 
@@ -480,6 +499,11 @@ int Fle_Listview::get_margin() const
 	return m_margin;
 }
 
+int Fle_Listview::get_item_column_width() const
+{
+	return m_columnWidth;
+}
+
 void Fle_Listview::set_name_text(std::string t)
 {
 	m_nameDisplayText = std::move(t);
@@ -542,11 +566,16 @@ int Fle_Listview::get_sorted_by_property() const
 	return m_sortedByProperty;
 }
 
+void Fle_Listview::draw_background()
+{
+	fl_draw_box(FL_DOWN_BOX, x(), y(), w(), h(), color());
+}
+
 void Fle_Listview::draw()
 {
 	Fle_Listview_Display_Mode mode = get_display_mode();
 
-	fl_draw_box(FL_FLAT_BOX, x(), y(), w(), h(), color());
+	draw_background();
 
 	if (m_state & FLE_LISTVIEW_NEEDS_ARRANGING)
 		arrange_items();
@@ -623,16 +652,10 @@ void Fle_Listview::draw()
 	{
 		Fle_Listview_Item *item = m_items[m_focusedItem];
 		Fl_Color c = item->is_selected() ? FL_SELECTION_COLOR : color();
-		if (mode == FLE_LISTVIEW_DISPLAY_ICONS)
-		{
-			draw_focus(FL_FLAT_BOX, item->x(), item->y() + 32, item->w(), item->h() - 32, c);
-		}
-		else if (mode == FLE_LISTVIEW_DISPLAY_DETAILS && get_details_mode() == 1)
-		{
-			draw_focus(FL_FLAT_BOX, item->x() + 2, item->y() + 1, item->w() - 4, item->h() - 3, c);
-		}
-		else
-			draw_focus(FL_FLAT_BOX, item->x(), item->y(), item->w(), item->h(), c);
+		int textX, textY, textW, textH;
+		item->get_text_xywh(textX, textY, textW, textH);
+
+		draw_focus(FL_FLAT_BOX, textX, textY, textW, textH, c);
 	}
 
 	fl_pop_clip();
@@ -645,7 +668,7 @@ void Fle_Listview::add_item(Fle_Listview_Item* item)
 {
 	m_items.push_back(item);
 	item->m_listview = this;
-	item->m_displayMode = get_display_mode();
+	item->set_display_mode(get_display_mode());
 
 	m_state &= ~FLE_LISTVIEW_SORTED_ASCENDING;
 	m_state &= ~FLE_LISTVIEW_SORTED_DESCENDING;
@@ -654,13 +677,15 @@ void Fle_Listview::add_item(Fle_Listview_Item* item)
 	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
 
 	if(when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_ADDED);
+
+	listview_redraw();
 }
 
 void Fle_Listview::insert_item(Fle_Listview_Item* item, int index)
 {
 	m_items.insert(m_items.begin() + index, item);
 	item->m_listview = this;
-	item->m_displayMode = get_display_mode();
+	item->set_display_mode(get_display_mode());
 
 	m_state &= ~FLE_LISTVIEW_SORTED_ASCENDING;
 	m_state &= ~FLE_LISTVIEW_SORTED_DESCENDING;
@@ -669,6 +694,8 @@ void Fle_Listview::insert_item(Fle_Listview_Item* item, int index)
 	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
 
 	if (when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_ADDED);
+
+	listview_redraw();
 }
 
 void Fle_Listview::remove_item(Fle_Listview_Item* item)
@@ -683,6 +710,8 @@ void Fle_Listview::remove_item(Fle_Listview_Item* item)
 	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
 
 	if (when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_REMOVED);
+
+	listview_redraw();
 }
 
 void Fle_Listview::remove_item(int index)
@@ -816,6 +845,16 @@ Fle_Listview_Item* Fle_Listview::get_item_at(int X, int Y) const
 			return item;
 		}
 	}
+
+	return nullptr;
+}
+
+Fle_Listview_Item* Fle_Listview::get_item_drag_at(int x, int y) const
+{
+	Fle_Listview_Item* item = get_item_at(x, y);
+	
+	if (item && item->is_inside_drag_area(x, y))
+		return item;
 
 	return nullptr;
 }
@@ -993,7 +1032,7 @@ int Fle_Listview::handle(int e)
 		{
 			int scrollTo = m_hscrollbar.value() + Fl::event_dy() * 10;
 			if(scrollTo < 0) scrollTo = 0;
-			if(scrollTo > m_itemsBBoxX - w()) scrollTo = m_itemsBBoxX - w();
+			if(scrollTo > m_itemsBBoxX - w() + (2 * m_margin)) scrollTo = m_itemsBBoxX - w() + (2 * m_margin);
 
 			m_hscrollbar.value(scrollTo);
 		}
@@ -1001,7 +1040,7 @@ int Fle_Listview::handle(int e)
 		{
 			int scrollTo = m_vscrollbar.value() + Fl::event_dy() * 5;
 			if(scrollTo < 0) scrollTo = 0;
-			if(scrollTo > m_itemsBBoxY - h()) scrollTo = m_itemsBBoxY - h();
+			if(scrollTo > m_itemsBBoxY - h() + (2 * m_margin)) scrollTo = m_itemsBBoxY - h() + (2 * m_margin);
 
 			m_vscrollbar.value(scrollTo);
 		}
@@ -1040,20 +1079,30 @@ int Fle_Listview::handle(int e)
 		}
 		else if(resizingHeaderProperty != -2)
 		{
-			// TODO: disallow resizing name header below min size
-
 			// Resize property header
 			int diff = dragX - ex;
 
 			int newval = m_propertyHeaderWidths[resizingHeaderProperty] + diff;
 
-			if(newval > m_propertyHeaderMinWidths[resizingHeaderProperty])
+			int nameHeaderWidth = w();
+			nameHeaderWidth -= newval;
+
+			for (int i = 0; i < m_propertyOrder.size(); i++)
+			{
+				if (m_propertyOrder[i] != resizingHeaderProperty)
+				{
+					nameHeaderWidth -= m_propertyHeaderWidths[m_propertyOrder[i]];
+				}
+			}
+
+			if(nameHeaderWidth >= m_nameHeaderMinWidth && newval > m_propertyHeaderMinWidths[resizingHeaderProperty])
 			{
 				m_propertyHeaderWidths[resizingHeaderProperty] += diff;
 
 				dragX = ex;
 				dragY = ey;
 
+				recalc_item_column_width();
 				listview_redraw();
 
 				return 1;
