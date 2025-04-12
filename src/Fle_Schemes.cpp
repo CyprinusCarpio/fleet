@@ -3,6 +3,7 @@
 #include <FL/fl_draw.H>
 
 #include <vector>
+#include <algorithm>
 
 bool g_fleSchemesDefined = false;
 int  g_currentScheme = 0;
@@ -10,7 +11,7 @@ std::vector <Fle_Scheme_Choice*> g_schemeChoices;
 
 void fle_scheme_choice_cb(Fl_Widget* w, void* data)
 {
-	switch ((int)data)
+	switch ((std::size_t)data)
 	{
 	case 0:
 		fle_set_scheme("base");

@@ -16,7 +16,7 @@ std::vector <Fle_Colors_Choice*> g_colorChoices;
 
 void fle_colors_choice_cb(Fl_Widget* w, void* data)
 {
-    switch ((int)data)
+    switch ((std::size_t)data)
     {
     case 0:
         fle_set_colors("default");
