@@ -22,6 +22,7 @@ set(FLE_CPP_FILES
 	src/Fle_Toolbar.cpp
 	src/Fle_Listview_Item.cpp
 	src/Fle_Listview.cpp
+	src/Fle_Colors.cpp
 )
 
 set(FLE_HPP_FILES
@@ -33,6 +34,7 @@ set(FLE_HPP_FILES
 	include/FLE/Fle_Toolbar.hpp
 	include/FLE/Fle_Listview_Item.hpp
 	include/FLE/Fle_Listview.hpp
+	include/FLE/Fle_Colors.hpp
 )
 
 add_library(Fleet ${FLE_CPP_FILES})

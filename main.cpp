@@ -19,6 +19,8 @@
 #define FLE_BOXTYPES_BEGIN FL_FREE_BOXTYPE
 #include "FLE/Fle_Schemes.hpp"
 
+#include "FLE/Fle_Colors.hpp"
+
 static char* ikona_xpm[] = {
 "16 16 8 1",
 " 	c None",
@@ -266,15 +268,16 @@ void view_cb(Fl_Widget* w, void* d)
 Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 {
     Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 9, "Debug", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP, 270, 26, true);
-    Fl_Group* tbg = new Fl_Group(0, 0, 85 * 3 + 2, 24);
+    Fl_Group* tbg = new Fl_Group(0, 0, 85 * 4 + 2, 24);
     Fle_Flat_Button* btn1 = new Fle_Flat_Button(0, 0, 85, 24, "Save layout");
     btn1->callback(saveLayoutCb);
     Fle_Flat_Button* btn2 = new Fle_Flat_Button(85, 0, 85, 24, "Load layout");
     btn2->callback(loadLayoutCb);
 
-    Fl_Scheme_Choice* schemeChoice = new Fl_Scheme_Choice(85 * 2, 0, 85, 24, "");
+    Fle_Scheme_Choice* schemeChoice = new Fle_Scheme_Choice(85 * 2, 0, 85, 24, "");
+    Fle_Colors_Choice* colorsChoice = new Fle_Colors_Choice(85 * 3, 0, 85, 24, "");
 
-    Fl_Box* r = new Fl_Box(85 * 3, 0, 2, 24);
+    Fl_Box* r = new Fl_Box(85 * 4, 0, 2, 24);
     tbg->resizable(r);
 
     tb->add_band_widget(tbg);
@@ -369,16 +372,7 @@ void listview_cb(Fl_Widget* w, void* d)
 int main(int argc, char** argv)
 {
     img = new Fl_Pixmap(ikona_xpm);
-    fle_define_schemes();
 
-#ifndef WIN32
-    // make it look "nice" and modernish
-    Fl::scheme("oxy");
-    Fl::background(235, 235, 235);
-    Fl::background2(255, 255, 255);
-    Fl::foreground(55, 55, 55);
-    Fl::set_color(FL_SELECTION_COLOR, 0, 120, 180);
-#endif
 	Fl_Double_Window* win = new Fl_Double_Window(600, 600, "Fake File Manager Demo");
 
 	Fle_Dock_Host* dh = new Fle_Dock_Host(0, 0, 600, 600, "Dock Host", FLE_DOCK_ALLDIRS);
@@ -582,13 +576,7 @@ int main(int argc, char** argv)
 
     //setenv("LIBDECOR_FORCE_CSD", "1", 1);
 
-#ifdef WIN32
     win->show(argc, argv);
-#else
-    win->show();
-#endif
-
-    //fle_set_scheme2();
 
     return Fl::run();
 }

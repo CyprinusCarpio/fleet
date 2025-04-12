@@ -2,6 +2,60 @@
 
 #include <FL/fl_draw.H>
 
+#include <vector>
+
+bool g_fleSchemesDefined = false;
+int  g_currentScheme = 0;
+std::vector <Fle_Scheme_Choice*> g_schemeChoices;
+
+void fle_scheme_choice_cb(Fl_Widget* w, void* data)
+{
+	switch ((int)data)
+	{
+	case 0:
+		fle_set_scheme("base");
+		break;
+	case 1:
+		fle_set_scheme("plastic");
+		break;
+	case 2:
+		fle_set_scheme("gtk+");
+		break;
+	case 3:
+		fle_set_scheme("gleam");
+		break;
+	case 4:
+		fle_set_scheme("oxy");
+		break;
+	case 5:
+		fle_set_scheme("fle_scheme1");
+		break;
+	case 6:
+		fle_set_scheme("fle_scheme2");
+		break;
+	}
+}
+
+Fle_Scheme_Choice::Fle_Scheme_Choice(int X, int Y, int W, int H, const char* l) : Fl_Choice(X, Y, W, H, l)
+{
+	add("base", "", fle_scheme_choice_cb, (void*)0);
+	add("plastic", "", fle_scheme_choice_cb, (void*)1);
+	add("gtk+", "", fle_scheme_choice_cb, (void*)2);
+	add("gleam", "", fle_scheme_choice_cb, (void*)3);
+	add("oxy", "", fle_scheme_choice_cb, (void*)4);
+	add("fle_scheme1", "", fle_scheme_choice_cb, (void*)5);
+	add("fle_scheme2", "", fle_scheme_choice_cb, (void*)6);
+
+	value(g_currentScheme);
+
+	g_schemeChoices.push_back(this);
+}
+
+Fle_Scheme_Choice::~Fle_Scheme_Choice()
+{
+	g_schemeChoices.erase(std::find(g_schemeChoices.begin(), g_schemeChoices.end(), this));
+}
+
 void fle_define_schemes()
 {
 	// Scheme 1 - 3D scheme designed for good looks in both dark and light colors
@@ -51,6 +105,54 @@ void fle_set_scheme2()
 	Fl::set_boxtype(FL_THIN_DOWN_BOX, FLE_SCHEME2_THIN_DOWN_BOX);
 	Fl::set_boxtype(FL_THIN_UP_FRAME, FLE_SCHEME2_THIN_UP_FRAME);
 	Fl::set_boxtype(FL_THIN_DOWN_FRAME, FLE_SCHEME2_THIN_DOWN_FRAME);
+}
+
+void fle_set_scheme(const char* scheme)
+{
+	if (!g_fleSchemesDefined)
+	{
+		fle_define_schemes();
+		g_fleSchemesDefined = true;
+	}
+
+	if (strcmp("fle_scheme1", scheme) == 0)
+	{
+		fle_set_scheme1();
+		g_currentScheme = 5;
+	}
+	else if (strcmp("fle_scheme2", scheme) == 0)
+	{
+		fle_set_scheme2();
+		g_currentScheme = 6;
+	}
+	else if (strcmp("gleam", scheme) == 0)
+	{
+		Fl::scheme("gleam");
+		g_currentScheme = 3;
+	}
+	else if (strcmp("gtk+", scheme) == 0)
+	{
+		Fl::scheme("gtk+");
+		g_currentScheme = 2;
+	}
+	else if (strcmp("plastic", scheme) == 0)
+	{
+		Fl::scheme("plastic");
+		g_currentScheme = 1;
+	}
+	else if (strcmp("oxy", scheme) == 0)
+	{
+		Fl::scheme("oxy");
+		g_currentScheme = 4;
+	}
+	else
+	{
+		Fl::scheme("base");
+		g_currentScheme = 0;
+	}
+
+	for(int i = 0; i < g_schemeChoices.size(); i++)
+		g_schemeChoices[i]->value(g_currentScheme);
 }
 
 void fle_scheme1_up_box_draw(int x, int y, int w, int h, Fl_Color c)
