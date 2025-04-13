@@ -751,11 +751,16 @@ void Fle_Listview::clear_items()
 void Fle_Listview::deselect_all(int otherThan)
 {
 	set_redraw(false);
+	bool otherThanSelected = false;
 	for (int i : m_selected)
 	{
-		if(i == otherThan) continue;
-
 		Fle_Listview_Item* item = get_item(i);
+		if (i == otherThan) 
+		{
+			otherThanSelected = item->is_selected();
+			continue;
+		}
+
 		item->set_selected(false);
 		if (when() & FL_WHEN_CHANGED)
 		{
@@ -763,7 +768,7 @@ void Fle_Listview::deselect_all(int otherThan)
 		}
 	}
 	m_selected.clear();
-	if (otherThan != -1) m_selected.push_back(otherThan);
+	if (otherThan != -1 && otherThanSelected) m_selected.push_back(otherThan);
 	set_redraw(true);
 
 	listview_redraw();
