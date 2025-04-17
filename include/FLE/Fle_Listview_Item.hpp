@@ -6,6 +6,9 @@
 
 #include <string>
 
+/// \enum Fle_Listview_Display_Mode
+/// Listview display modes
+/// 
 enum Fle_Listview_Display_Mode
 {
 	FLE_LISTVIEW_DISPLAY_ICONS = 1,
@@ -16,21 +19,32 @@ enum Fle_Listview_Display_Mode
 
 class Fle_Listview;
 
+/** \class Fle_Listview_Item
+	
+	Listview item class. This class is used to represent a listview item
+	and manages it's various properties such as name, display name, icons, text
+	and background colors. For all but the simplest use cases, a subclass of 
+	Fle_Listview_Item should be used. In the subclass, you can add several new
+	properties and override the draw_property() method to draw them inside the
+	rectangle calculated by the listview. Also, it is required to override the
+	is_greater() method to compare items according to the new properties that
+	have been added.
+**/ 
 class Fle_Listview_Item
 {
 	friend class Fle_Listview;
 
 	Fle_Listview_Display_Mode m_displayMode;
 
-	std::string m_name;
-	std::string m_displayName;
-	bool m_selected;
-	bool m_focused;
-	Fl_Color m_textcolor;
-	Fl_Color m_bgcolor;
-	Fl_Pixmap* m_smallIcon;
-	Fl_Pixmap* m_bigIcon;
-	Fle_Listview* m_listview;
+	std::string m_name; ///< Internal name of the item
+	std::string m_displayName; ///< Display name
+	bool m_selected; ///< Whether the item is selected
+	bool m_focused; ///< Whether the item is focused
+	Fl_Color m_textcolor; ///< Text color
+	Fl_Color m_bgcolor;  ///< Background color
+	Fl_Pixmap* m_smallIcon; ///< 16x16 icon
+	Fl_Pixmap* m_bigIcon; ///< 32x32 icon
+	Fle_Listview* m_listview; ///< Pointer to the listview
 	int m_x;
 	int m_y;
 	int m_w;
@@ -39,33 +53,54 @@ class Fle_Listview_Item
 	void set_display_name();
 
 protected:
+	/// Set the display mode. You can use a custom one.
 	virtual void set_display_mode(Fle_Listview_Display_Mode mode);
+	/// Whether this item is greater than the other item. This
+	/// needs to be overriden in a subclass.
 	virtual bool is_greater(Fle_Listview_Item* other, int property);
+	/// Draw a property. Usually this is overridden in a subclass.
 	virtual void draw_property(int property, int X, int Y, int W, int H);
+	/// Returns true if a click at the given coordinates should
+	/// initiate a drag operation.
 	virtual bool is_inside_drag_area(int X, int Y);
+	/// Get the rectangle containing the item's text.
 	virtual void get_text_xywh(int& X, int& Y, int& W, int& H);
 
+	/// Set whether the item is selected.
 	void set_selected(bool selected);
-	void set_focus(bool focus);
 
+	/// Set whether the item is focused.
+	void set_focus(bool focus);
+	/// Change the drawing location in relation to the listview.
+	void resize(int X, int Y, int W, int H);
+
+	/// Draw the item.
 	virtual void draw_item(int index);
 
 
 public:
+	/// Constructs a parent-less item and sets it's name and display name.
 	Fle_Listview_Item(const char* name);
-
+	/// Gets the listview.
 	Fle_Listview* get_listview() const;
 	
+	/// Get whether the item is selected.
 	bool is_selected() const;
 	
+	/// Set the item text color
 	void textcolor(Fl_Color color);
+	/// Get the item text color
 	Fl_Color textcolor() const;
+	/// Set the item background color
 	void bgcolor(Fl_Color color);
+	/// Get the item background color
 	Fl_Color bgcolor() const;
+	/// Set the item icon, both 16x16 and 32x32
 	void set_icon(Fl_Pixmap* small, Fl_Pixmap* big);
+	/// Set the item name.
 	void set_name(std::string newname);
+	/// Get the item name
 	const std::string& get_name() const;
-	void resize(int X, int Y, int W, int H);
 
 	int get_label_width() const;
 

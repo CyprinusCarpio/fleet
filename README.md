@@ -42,7 +42,8 @@ Currently, the docking implementation is incompatible with with the server side 
 #### Listview
 ![image](./listview.png)
 
-The listview has 4 display modes: icons, small icons, list and details. More can be added in a subclass. The items can be sorted in ascending/descending order or be left unsorted.
+The listview has 4 display modes: icons, small icons, list and details. More can be added in a subclass. The items can be sorted in ascending/descending order or be left unsorted. Items can be added, inserted at a specified position and removed. The listview produces several callbacks that cover most use cases, such as item selected/deselected/reselected, item added/removed, DND event begin and end.
+
 
 #### Code style
 The preferred style for FLEET development is Allman style indentation, snake_case and no `auto` keyword.
