@@ -3,6 +3,8 @@
 
 #include <FL/Fl_Flex.H>
 
+/// \class Fle_Orientable_Flex
+/// Flex that can be set to vertical or horizontal at runtime.
 class Fle_Orientable_Flex : public Fl_Flex
 {
 	int m_lastLayoutOrientation; // 0 - vertical 1 - horizontal
@@ -14,6 +16,8 @@ public:
 
 	int handle(int e) override;
 
+	/// Set orientation
+	/// \param orientation 0 - vertical 1 - horizontal
 	void set_orientation(int orientation);
 };
 
