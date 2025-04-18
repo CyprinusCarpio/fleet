@@ -215,94 +215,183 @@ public:
 	~Fle_Listview();
 
 	/// Adds an item
+	/// 
+	/// \param item Pointer to the item
 	void add_item(Fle_Listview_Item* item);
 	/// Inserts an item
+	///
+	/// \param item Pointer to the item
 	void insert_item(Fle_Listview_Item* item, int index);
 	/// Removes an item
+	/// This does not delete the item.
+	/// 
+	/// \param item Pointer to the item
 	void remove_item(Fle_Listview_Item* item);
 	/// Removes an item at given index
+	/// This does delete the item.
+	/// 
+	/// \param index Index of the item
 	void remove_item(int index);
 	/// Removes all selected items
+	/// This does delete all selected items.
 	void remove_selected();
 	/// Removes all items
+	/// This does delete all items.
 	void clear_items();
 
 	/// Returns the number of items
+	///
+	/// \return Number of items
 	int get_item_count() const;
 	/// Returns the number of selected items
+	///
+	/// \return Number of selected items
 	int get_selected_count() const;
 
 	/// Returns the current display mode
+	///
+	/// \return Current display mode
 	Fle_Listview_Display_Mode get_display_mode() const;
 	/// Returns the item at given index
+	///
+	/// \param index Index of the item
+	/// \return Pointer to the item
 	Fle_Listview_Item* get_item(int index) const;
 	/// Returns the item, if any at given coordinates
+	///
+	/// \param x X coordinate
+	/// \param y Y coordinate
+	/// \return Pointer to the item
 	Fle_Listview_Item* get_item_at(int x, int y) const;
 	/// Returns the item, if any at the drag zone at given coordinates
+	///
+	/// \param x X coordinate
+	/// \param y Y coordinate
+	/// \return Pointer to the item
 	Fle_Listview_Item* get_item_drag_at(int x, int y) const;
 	/// Returns the item, if any, associated with the current callback
+	///
+	/// \return Pointer to the callback item
 	Fle_Listview_Item* get_callback_item() const;
 
 	/// Get vector of selected indices
+	///
+	/// \return Vector of selected item indices
 	const std::vector<int>& get_selected() const;
 
 	/// Sets the display mode
+	///
+	/// \param mode Display mode
 	void set_display_mode(Fle_Listview_Display_Mode mode);
 	/// Ensures the item is visible
+	///
+	/// \param item Pointer to the item
 	void ensure_item_visible(Fle_Listview_Item* item);
 	/// Deselects all items
+	///
+	/// \param otherThan Index of the item that should not be deselected
 	void deselect_all(int otherThan = -1);
 	/// Sets the selection status of an item
+	///
+	/// \param index Index of the item
+	/// \param selected Selection status
 	void select_item(int index, bool selected);
 	/// Sets the selection status of an item
+	///
+	/// \param item Pointer to the item
+	/// \param selected Selection status
 	void select_item(Fle_Listview_Item* item, bool selected);
 	/// Set display mode
+	///
+	/// \param mode Display mode
 	void set_details_mode(int mode);
 	/// Get mode of details display mode
+	///
+	/// \return Details display mode
 	int get_details_mode() const;
 	/// Set header color
+	///
+	/// \param c Color
 	void set_headers_color(Fl_Color c);
 
-	// Set single selection
+	/// Set single selection
+	///
+	/// \param se Single selection
 	void single_selection(bool se);
-	// Get single selection
+	/// Get single selection
+	///
+	/// \return Single selection enabled
 	bool single_selection() const;
 
-	// Set drag and drop
+	/// Set drag and drop
+	///
+	/// \param dnd Drag and drop enabled
 	void dnd(bool dnd);
-	// Get drag and drop
+	/// Get drag and drop
+	///
+	/// \return Drag and drop enabled
 	bool dnd() const { return m_state & FLE_LISTVIEW_DND; }
 
-	// Add property
+	/// Add property
+	///
+	/// \param name Name of the property
 	void add_property_name(std::string name);
-	// Set property order
+	/// Set property order
+	///
+	/// \param order Property order
 	void set_property_order(std::vector<int> order);
-	// Get property order
+	/// Get property order
+	///
+	/// \return Property order
 	const std::vector<int>& get_property_order() const;
-	// Set property display widths
+	/// Set property display widths
+	///
+	/// \param widths Property widths
 	void set_property_widths(std::vector<int> widths);
-	// Set minimal width of name property
+	/// Set minimal width of name property
+	///
+	/// \param width Minimal width
 	void set_name_min_width(int width);
 	/// Get width of specified property
+	///
+	/// \param property Property index
+	/// \return Property width
 	int  get_property_header_width(int property) const;
 	/// Set margin
+	///
+	/// \param m Margin
 	void set_margin(int m);
 	/// Get margin
+	///
+	/// \return Margin
 	int  get_margin() const;
 	/// Get individual item column width
+	///
+	/// \return Item column width
 	int  get_item_column_width() const;
 
 	/// Set name display text
+	///
+	/// \param t Text
 	void set_name_text(std::string t);
 
 	/// Sort items in ascending or descending order by given property
+	///
+	/// \param ascending True for ascending order, false for descending order
+	/// \param property Property
 	void sort_items(bool ascending, int property);
 	/// Get sort direction (ascending or descending or none)
+	///
+	/// \return Sort direction: -1 = none, 0 = ascending, 1 = descending
 	int get_sort_direction() const;
 	/// Get sorted by property
+	///
+	/// \return Sorted by property
 	int get_sorted_by_property() const;
 
 	/// Allow/disallow redraw
+	///
+	/// \param redraw Allow redraw
 	void set_redraw(bool redraw);
 
 	/// FLTK handle override

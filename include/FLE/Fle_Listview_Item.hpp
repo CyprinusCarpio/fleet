@@ -80,26 +80,48 @@ protected:
 
 public:
 	/// Constructs a parent-less item and sets it's name and display name.
+	/// 
+	/// \param name Name of the item
 	Fle_Listview_Item(const char* name);
 	/// Gets the listview.
+	///
+	/// \return Pointer to the listview
 	Fle_Listview* get_listview() const;
 	
 	/// Get whether the item is selected.
+	///
+	/// \return Whether the item is selected
 	bool is_selected() const;
 	
 	/// Set the item text color
+	///
+	/// \param color Text color
 	void textcolor(Fl_Color color);
 	/// Get the item text color
+	///
+	/// \return Text color
 	Fl_Color textcolor() const;
 	/// Set the item background color
+	///
+	/// \param color Background color
 	void bgcolor(Fl_Color color);
 	/// Get the item background color
+	///
+	/// \return Background color
 	Fl_Color bgcolor() const;
-	/// Set the item icon, both 16x16 and 32x32
+	/// Set the item icon, both 16x16 and 32x32.
+	/// This does not make a copy of the icons.
+	/// 
+	/// \param small 16x16 icon
+	/// \param big 32x32 icon
 	void set_icon(Fl_Pixmap* small, Fl_Pixmap* big);
 	/// Set the item name.
+	///
+	/// \param newname New name
 	void set_name(std::string newname);
 	/// Get the item name
+	///
+	/// \return Name
 	const std::string& get_name() const;
 
 	int get_label_width() const;
