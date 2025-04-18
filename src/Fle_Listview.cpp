@@ -733,7 +733,7 @@ void Fle_Listview::remove_selected()
 	set_focused(-1);
 	for (int i = 0; i < selected.size(); i++)
 	{
-		remove_item(get_item(selected[i]));
+		remove_item(selected[i]);
 	}
 	set_redraw(true);
 	listview_redraw();
