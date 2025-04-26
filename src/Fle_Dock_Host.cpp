@@ -2580,7 +2580,7 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 	return addedToDirection;
 }
 
-inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, int V)
+inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, bool V)
 {
 	x = X;
 	y = Y;
@@ -2592,7 +2592,7 @@ inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, int V)
 	direction = nullptr;
 }
 
-inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, int V, Fle_Dock_Group* A, Fle_Dock_Group* B)
+inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, bool V, Fle_Dock_Group* A, Fle_Dock_Group* B)
 {
 	x = X;
 	y = Y;
@@ -2603,7 +2603,7 @@ inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, int V, Fle_Dock_Gro
 	direction = nullptr;
 }
 
-inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, int V, std::list<std::list<Fle_Dock_Group*>>::iterator IT, std::list<std::list<Fle_Dock_Group*>>* d)
+inline Fle_Edge_Helper::Fle_Edge_Helper(int X, int Y, int L, bool V, std::list<std::list<Fle_Dock_Group*>>::iterator IT, std::list<std::list<Fle_Dock_Group*>>* d)
 {
 	x = X;
 	y = Y;
