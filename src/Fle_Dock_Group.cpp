@@ -784,8 +784,8 @@ void Fle_Dock_Group::draw()
 				// Draw gripper dots
 				for (int X = x() + 12 + get_label_width(); X <= x() + w() - 46; X += 12)
 				{
-					fl_draw_box(FL_GTK_THIN_UP_BOX, X, y() + 3, 6, 6, FL_BACKGROUND_COLOR);
-					fl_draw_box(FL_GTK_THIN_UP_BOX, X + 5, y() + 11, 6, 6, FL_BACKGROUND_COLOR);
+					fl_draw_box(FL_THIN_UP_BOX, X, y() + 3, 6, 6, FL_BACKGROUND_COLOR);
+					fl_draw_box(FL_THIN_UP_BOX, X + 5, y() + 11, 6, 6, FL_BACKGROUND_COLOR);
 				}
 			}
 		}
