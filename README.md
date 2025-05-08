@@ -4,7 +4,7 @@
 It's designed to build on the capabilities of FLTK to add new, universal and useful widgets.
 
 #### Disclaimer
-This is pre-Alpha software. It has a few bugs and many things are not yet implemented. Breaking changes are guaranteed in future. Documentation is provided for most widgets, and is planned to be made available as a GitHub page. Use for any reason other than testing is not recommended.
+This is pre-Alpha software. It has a few bugs and many things are not yet implemented. Breaking changes are guaranteed in future. Documentation is provided for most widgets, and is available at https://cyprinuscarpio.github.io/fleet/doc/html/index.html. 
 
 #### New widgets:
 - `Fle_Flat_Button`  
