@@ -4,7 +4,7 @@
 It's designed to build on the capabilities of FLTK to add new, universal and useful widgets.
 
 #### Disclaimer
-This is pre-Alpha software. It has a few bugs and many things are not yet implemented. Breaking changes are guaranteed in future. Documentation is sparse. Use for any reason other than testing is not recommended.
+This is pre-Alpha software. It has a few bugs and many things are not yet implemented. Breaking changes are guaranteed in future. Documentation is provided for most widgets, and is planned to be made available as a GitHub page. Use for any reason other than testing is not recommended.
 
 #### New widgets:
 - `Fle_Flat_Button`  
@@ -44,11 +44,20 @@ Currently, the docking implementation is incompatible with with the server side 
 
 The listview has 4 display modes: icons, small icons, list and details. More can be added in a subclass. The items can be sorted in ascending/descending order or be left unsorted. Items can be added, inserted at a specified position and removed. The listview produces several callbacks that cover most use cases, such as item selected/deselected/reselected, item added/removed, DND event begin and end.
 
+#### Accordion
+![image](./accordion.png)
+
+A simple container widget that is useful for containing lots of widgets in a small area. The widgets are contained in individual, vertically positioned groups that can be opened or closed. Resizing the groups is made possible with dragging on their borders.
 
 #### Code style
 The preferred style for FLEET development is Allman style indentation, snake_case and no `auto` keyword.
 
 #### Usage
-Currently FLEET is heavily WIP, and exists as a simple demo program to test and develop it's features. 
+FLEET is meant to be used as a statically linked submodule in your project. To include it in your compilation, simply use the `add_subdirectory` function in your CMakeLists.txt, and link against `Fleet`, like so:
+```
+add_subdirectory(fleet)
+...
+target_link_libraries(FleetUsingProject PRIVATE fltk Fleet)
+```
 
 The only dependency is FLTK 1.4 or above.
