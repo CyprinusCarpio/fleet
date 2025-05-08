@@ -15,6 +15,8 @@
 #include "FLE/Fle_Toolbar.hpp"
 #include "FLE/Fle_Listview.hpp"
 #include "FLE/Fle_Listview_Item.hpp"
+#include "FLE/Fle_Accordion.hpp"
+#include "FLE/Fle_Accordion_Group.hpp"
 
 #define FLE_BOXTYPES_BEGIN FL_FREE_BOXTYPE
 #include "FLE/Fle_Schemes.hpp"
@@ -499,11 +501,18 @@ int main(int argc, char** argv)
     sthBox->color(FL_BACKGROUND2_COLOR);
     vertGroup4->add_band_widget(sthBox);
 
-    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Sth", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 75, 180, false);
-    Fl_Box* sthBox1 = new Fl_Box(0, 0, 0, 0, "Something");
-    sthBox1->box(FL_DOWN_BOX);
-    sthBox1->color(FL_BACKGROUND2_COLOR);
-    vertGroup5->add_band_widget(sthBox1);
+    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Accordion", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 75, 180, false);
+    Fle_Accordion* accordion = new Fle_Accordion(0, 0, 0, 0, "");
+    
+
+    for(int i = 0; i < 6; i++)
+    {
+        Fle_Accordion_Group* accordgroup = new Fle_Accordion_Group(new Fl_Box(0, 0, 0, 0, "Group"), 60, 90,  "Group");
+        accordion->add_group(accordgroup);
+        //accordgroup->open();
+    }
+
+    vertGroup5->add_band_widget(accordion);
 
     Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Favourites", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 120, 180, false);
     Fl_Box* favs = new Fl_Box(0, 0, 0, 0, "");

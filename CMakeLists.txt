@@ -23,6 +23,8 @@ set(FLE_CPP_FILES
 	src/Fle_Listview_Item.cpp
 	src/Fle_Listview.cpp
 	src/Fle_Colors.cpp
+	src/Fle_Accordion.cpp
+	src/Fle_Accordion_Group.cpp
 )
 
 set(FLE_HPP_FILES
@@ -35,6 +37,8 @@ set(FLE_HPP_FILES
 	include/FLE/Fle_Listview_Item.hpp
 	include/FLE/Fle_Listview.hpp
 	include/FLE/Fle_Colors.hpp
+	include/FLE/Fle_Accordion.hpp
+	include/FLE/Fle_Accordion_Group.hpp
 )
 
 add_library(Fleet ${FLE_CPP_FILES})
