@@ -10,3 +10,5 @@ CMakeFiles
 CMakeCache.txt
 CMakeSettings.json
 cmake_install.cmake
+
+doc/html
