@@ -115,69 +115,69 @@ $(document).ready(function(){initNavTree('Fle__Listview__Item_8hpp_source.html',
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">class </span><a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>;</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classFle__Listview__Item.html">   33</a></span><span class="keyword">class </span><a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">friend</span> <span class="keyword">class </span><a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    Fle_Listview_Display_Mode m_displayMode;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    std::string m_name; </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    std::string m_displayName; </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">bool</span> m_selected; </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">bool</span> m_focused; </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    Fl_Color m_textcolor; </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    Fl_Color m_bgcolor;  </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    Fl_Pixmap* m_smallIcon; </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    Fl_Pixmap* m_bigIcon; </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>* m_listview; </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">int</span> m_x;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">int</span> m_y;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordtype">int</span> m_w;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordtype">int</span> m_h;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">void</span> set_display_name();</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keyword">protected</span>:</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#ac0882a919e48a9f15f45268a52db3ba3">set_display_mode</a>(Fle_Listview_Display_Mode mode);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classFle__Listview__Item.html#a44db9a5e182d9112ab8b3a6333b3c5c7">is_greater</a>(<a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a>* other, <span class="keywordtype">int</span> property);</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a81c2ed33bedbcbd46775c88628cf7c19">draw_property</a>(<span class="keywordtype">int</span> property, <span class="keywordtype">int</span> X, <span class="keywordtype">int</span> Y, <span class="keywordtype">int</span> W, <span class="keywordtype">int</span> H);</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classFle__Listview__Item.html#a6ba2d90c979ee760ba106f2375ca6250">is_inside_drag_area</a>(<span class="keywordtype">int</span> X, <span class="keywordtype">int</span> Y);</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#ab6da2d9098f2137f21cf52efdd184773">get_text_xywh</a>(<span class="keywordtype">int</span>&amp; X, <span class="keywordtype">int</span>&amp; Y, <span class="keywordtype">int</span>&amp; W, <span class="keywordtype">int</span>&amp; H);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a257162ce373e37efeaa06e17ed392d01">set_selected</a>(<span class="keywordtype">bool</span> selected);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a4d12cfb7adbc2e6bc2d8d05c12f1826e">set_focus</a>(<span class="keywordtype">bool</span> focus);</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a94f8fff6447d97e0a0f87b2bd960d8c4">resize</a>(<span class="keywordtype">int</span> X, <span class="keywordtype">int</span> Y, <span class="keywordtype">int</span> W, <span class="keywordtype">int</span> H);</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#afd8be8fc31036f5441010e2c6d0c41a1">draw_item</a>(<span class="keywordtype">int</span> index);</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="};">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classFle__Listview__Item.html">   34</a></span><span class="keyword">class </span><a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>{</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">friend</span> <span class="keyword">class </span><a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    Fle_Listview_Display_Mode m_displayMode;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    std::string m_name; </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    std::string m_displayName; </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">bool</span> m_selected; </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">bool</span> m_focused; </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    Fl_Color m_textcolor; </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    Fl_Color m_bgcolor;  </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    Fl_Pixmap* m_smallIcon; </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    Fl_Pixmap* m_bigIcon; </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>* m_listview; </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordtype">int</span> m_x;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordtype">int</span> m_y;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordtype">int</span> m_w;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordtype">int</span> m_h;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">void</span> set_display_name();</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#ac0882a919e48a9f15f45268a52db3ba3">set_display_mode</a>(Fle_Listview_Display_Mode mode);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classFle__Listview__Item.html#a44db9a5e182d9112ab8b3a6333b3c5c7">is_greater</a>(<a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a>* other, <span class="keywordtype">int</span> property);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a81c2ed33bedbcbd46775c88628cf7c19">draw_property</a>(<span class="keywordtype">int</span> property, <span class="keywordtype">int</span> X, <span class="keywordtype">int</span> Y, <span class="keywordtype">int</span> W, <span class="keywordtype">int</span> H);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classFle__Listview__Item.html#a6ba2d90c979ee760ba106f2375ca6250">is_inside_drag_area</a>(<span class="keywordtype">int</span> X, <span class="keywordtype">int</span> Y);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#ab6da2d9098f2137f21cf52efdd184773">get_text_xywh</a>(<span class="keywordtype">int</span>&amp; X, <span class="keywordtype">int</span>&amp; Y, <span class="keywordtype">int</span>&amp; W, <span class="keywordtype">int</span>&amp; H);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a257162ce373e37efeaa06e17ed392d01">set_selected</a>(<span class="keywordtype">bool</span> selected);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a4d12cfb7adbc2e6bc2d8d05c12f1826e">set_focus</a>(<span class="keywordtype">bool</span> focus);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a94f8fff6447d97e0a0f87b2bd960d8c4">resize</a>(<span class="keywordtype">int</span> X, <span class="keywordtype">int</span> Y, <span class="keywordtype">int</span> W, <span class="keywordtype">int</span> H);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#afd8be8fc31036f5441010e2c6d0c41a1">draw_item</a>(<span class="keywordtype">int</span> index);</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name);</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>* <a class="code hl_function" href="classFle__Listview__Item.html#ab49c023c2fe041e34d6707b54b5d1fe1">get_listview</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classFle__Listview__Item.html#a83cd20998ce6bfd1a767740e83f36e51">is_selected</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#adee2821bccee11b7de1137b23ea0bf61">textcolor</a>(Fl_Color color);</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    Fl_Color <a class="code hl_function" href="classFle__Listview__Item.html#adee2821bccee11b7de1137b23ea0bf61">textcolor</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a9927ca96a4c596611e5e8d0bb7f5e47c">bgcolor</a>(Fl_Color color);</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    Fl_Color <a class="code hl_function" href="classFle__Listview__Item.html#a9927ca96a4c596611e5e8d0bb7f5e47c">bgcolor</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a919aa203df2c620851c868944ef85165">set_icon</a>(Fl_Pixmap* small, Fl_Pixmap* big);</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a65a9add8f061fbd920ca83b5b2cadd94">set_name</a>(std::string newname);</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_function" href="classFle__Listview__Item.html#a6e187ed0af8b6b109f5b96dbbb8ed2ed">get_name</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keywordtype">int</span> get_label_width() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordtype">int</span> x() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordtype">int</span> y() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordtype">int</span> w()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_w; }</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordtype">int</span> h()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_h; }</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>};</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* name);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>* <a class="code hl_function" href="classFle__Listview__Item.html#ab49c023c2fe041e34d6707b54b5d1fe1">get_listview</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classFle__Listview__Item.html#a83cd20998ce6bfd1a767740e83f36e51">is_selected</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#adee2821bccee11b7de1137b23ea0bf61">textcolor</a>(Fl_Color color);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    Fl_Color <a class="code hl_function" href="classFle__Listview__Item.html#adee2821bccee11b7de1137b23ea0bf61">textcolor</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a9927ca96a4c596611e5e8d0bb7f5e47c">bgcolor</a>(Fl_Color color);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    Fl_Color <a class="code hl_function" href="classFle__Listview__Item.html#a9927ca96a4c596611e5e8d0bb7f5e47c">bgcolor</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a919aa203df2c620851c868944ef85165">set_icon</a>(Fl_Pixmap* small, Fl_Pixmap* big);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classFle__Listview__Item.html#a65a9add8f061fbd920ca83b5b2cadd94">set_name</a>(std::string newname);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keyword">const</span> std::string&amp; <a class="code hl_function" href="classFle__Listview__Item.html#a6e187ed0af8b6b109f5b96dbbb8ed2ed">get_name</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordtype">int</span> get_label_width() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordtype">int</span> x() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordtype">int</span> y() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordtype">int</span> w()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_w; }</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordtype">int</span> h()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_h; }</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>};</div>
 </div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassFle__Listview__Item_html"><div class="ttname"><a href="classFle__Listview__Item.html">Fle_Listview_Item</a></div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.hpp:34</div></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassFle__Listview__Item_html"><div class="ttname"><a href="classFle__Listview__Item.html">Fle_Listview_Item</a></div><div class="ttdoc">Listview item with various properties.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.hpp:35</div></div>
 <div class="ttc" id="aclassFle__Listview__Item_html_a257162ce373e37efeaa06e17ed392d01"><div class="ttname"><a href="classFle__Listview__Item.html#a257162ce373e37efeaa06e17ed392d01">Fle_Listview_Item::set_selected</a></div><div class="ttdeci">void set_selected(bool selected)</div><div class="ttdoc">Set whether the item is selected.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:164</div></div>
 <div class="ttc" id="aclassFle__Listview__Item_html_a44db9a5e182d9112ab8b3a6333b3c5c7"><div class="ttname"><a href="classFle__Listview__Item.html#a44db9a5e182d9112ab8b3a6333b3c5c7">Fle_Listview_Item::is_greater</a></div><div class="ttdeci">virtual bool is_greater(Fle_Listview_Item *other, int property)</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:178</div></div>
 <div class="ttc" id="aclassFle__Listview__Item_html_a4d12cfb7adbc2e6bc2d8d05c12f1826e"><div class="ttname"><a href="classFle__Listview__Item.html#a4d12cfb7adbc2e6bc2d8d05c12f1826e">Fle_Listview_Item::set_focus</a></div><div class="ttdeci">void set_focus(bool focus)</div><div class="ttdoc">Set whether the item is focused.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:171</div></div>
@@ -194,7 +194,7 @@ $(document).ready(function(){initNavTree('Fle__Listview__Item_8hpp_source.html',
 <div class="ttc" id="aclassFle__Listview__Item_html_ac0882a919e48a9f15f45268a52db3ba3"><div class="ttname"><a href="classFle__Listview__Item.html#ac0882a919e48a9f15f45268a52db3ba3">Fle_Listview_Item::set_display_mode</a></div><div class="ttdeci">virtual void set_display_mode(Fle_Listview_Display_Mode mode)</div><div class="ttdoc">Set the display mode. You can use a custom one.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:253</div></div>
 <div class="ttc" id="aclassFle__Listview__Item_html_adee2821bccee11b7de1137b23ea0bf61"><div class="ttname"><a href="classFle__Listview__Item.html#adee2821bccee11b7de1137b23ea0bf61">Fle_Listview_Item::textcolor</a></div><div class="ttdeci">Fl_Color textcolor() const</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:198</div></div>
 <div class="ttc" id="aclassFle__Listview__Item_html_afd8be8fc31036f5441010e2c6d0c41a1"><div class="ttname"><a href="classFle__Listview__Item.html#afd8be8fc31036f5441010e2c6d0c41a1">Fle_Listview_Item::draw_item</a></div><div class="ttdeci">virtual void draw_item(int index)</div><div class="ttdoc">Draw the item.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:260</div></div>
-<div class="ttc" id="aclassFle__Listview_html"><div class="ttname"><a href="classFle__Listview.html">Fle_Listview</a></div><div class="ttdoc">Listview class The listview class is used to display a list of items. It is somewhat similar to Fl_Br...</div><div class="ttdef"><b>Definition</b> Fle_Listview.hpp:146</div></div>
+<div class="ttc" id="aclassFle__Listview_html"><div class="ttname"><a href="classFle__Listview.html">Fle_Listview</a></div><div class="ttdoc">Listview class is used to display a list of items. It is somewhat similar to Fl_Browser,...</div><div class="ttdef"><b>Definition</b> Fle_Listview.hpp:146</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

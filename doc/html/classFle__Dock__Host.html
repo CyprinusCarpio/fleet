@@ -112,16 +112,6 @@ Inheritance diagram for Fle_Dock_Host:</div>
 <area shape="poly" title=" " alt="" coords="67,44,67,79,62,79,62,44"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
-<div class="dynheader">
-Collaboration diagram for Fle_Dock_Host:</div>
-<div class="dyncontent">
-<div class="center"><img src="classFle__Dock__Host__coll__graph.png" border="0" usemap="#aFle__Dock__Host_coll__map" alt="Collaboration graph"/></div>
-<map name="aFle__Dock__Host_coll__map" id="aFle__Dock__Host_coll__map">
-<area shape="rect" title="Manages a central work area and surrounding dockable areas." alt="" coords="5,79,124,104"/>
-<area shape="rect" title=" " alt="" coords="25,5,105,31"/>
-<area shape="poly" title=" " alt="" coords="67,44,67,79,62,79,62,44"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -169,7 +159,7 @@ Friends</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Manages a central work area and surrounding dockable areas. </p>
-<p><a class="el" href="classFle__Dock__Host.html" title="Manages a central work area and surrounding dockable areas.">Fle_Dock_Host</a> is the main container for <a class="el" href="classFle__Dock__Group.html">Fle_Dock_Group</a> widgets. It provides docking areas (top, bottom, left, right) where groups can be attached. Groups can be arranged in multiple "lines" in each direction. The host manages the layout, resizing, docking, undocking, and hiding/showing of these groups. It typically contains a central, non-dockable "work widget" that occupies the remaining space. The host handles mouse events for resizing edges between groups, lines, and the work area, and facilitates drag-and-drop docking/undocking.</p>
+<p><a class="el" href="classFle__Dock__Host.html" title="Manages a central work area and surrounding dockable areas.">Fle_Dock_Host</a> is the main container for <a class="el" href="classFle__Dock__Group.html" title="Represents a dockable group widget within a Fle_Dock_Host.">Fle_Dock_Group</a> widgets. It provides docking areas (top, bottom, left, right) where groups can be attached. Groups can be arranged in multiple "lines" in each direction. The host manages the layout, resizing, docking, undocking, and hiding/showing of these groups. It typically contains a central, non-dockable "work widget" that occupies the remaining space. The host handles mouse events for resizing edges between groups, lines, and the work area, and facilitates drag-and-drop docking/undocking.</p>
 <dl class="section user"><dt>API Features:</dt><dd></dd></dl>
 <ul>
 <li>Adding dock groups with <a class="el" href="classFle__Dock__Host.html#a94ef90a723427b19205dcf5b7c5eb463">add_dock_group()</a></li>
@@ -203,7 +193,7 @@ Friends</h2></td></tr>
 <div class="line">listview = make_listview();</div>
 <div class="line"> </div>
 <div class="line">dh-&gt;<a class="code hl_function" href="classFle__Dock__Host.html#ab6f22a625d0ec7e6000890392f05bc8f">add_work_widget</a>(listview);</div>
-<div class="ttc" id="aclassFle__Dock__Group_html"><div class="ttname"><a href="classFle__Dock__Group.html">Fle_Dock_Group</a></div><div class="ttdef"><b>Definition</b> Fle_Dock_Group.hpp:102</div></div>
+<div class="ttc" id="aclassFle__Dock__Group_html"><div class="ttname"><a href="classFle__Dock__Group.html">Fle_Dock_Group</a></div><div class="ttdoc">Represents a dockable group widget within a Fle_Dock_Host.</div><div class="ttdef"><b>Definition</b> Fle_Dock_Group.hpp:102</div></div>
 <div class="ttc" id="aclassFle__Dock__Group_html_ac863e00a42a4e8dad603661200226124"><div class="ttname"><a href="classFle__Dock__Group.html#ac863e00a42a4e8dad603661200226124">Fle_Dock_Group::add_band_widget</a></div><div class="ttdeci">bool add_band_widget(Fl_Widget *widget, int oX=-1, int oY=-1, int oW=-1, int oH=-1)</div><div class="ttdef"><b>Definition</b> Fle_Dock_Group.cpp:818</div></div>
 <div class="ttc" id="aclassFle__Dock__Host_html_a022d1774ec8e0763a7ed9837c5489800"><div class="ttname"><a href="classFle__Dock__Host.html#a022d1774ec8e0763a7ed9837c5489800">Fle_Dock_Host::Fle_Dock_Group</a></div><div class="ttdeci">friend class Fle_Dock_Group</div><div class="ttdef"><b>Definition</b> Fle_Dock_Host.hpp:148</div></div>
 <div class="ttc" id="aclassFle__Dock__Host_html_ab6f22a625d0ec7e6000890392f05bc8f"><div class="ttname"><a href="classFle__Dock__Host.html#ab6f22a625d0ec7e6000890392f05bc8f">Fle_Dock_Host::add_work_widget</a></div><div class="ttdeci">bool add_work_widget(Fl_Widget *widget)</div><div class="ttdef"><b>Definition</b> Fle_Dock_Host.cpp:1036</div></div>
@@ -303,7 +293,7 @@ Friends</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Adds a <a class="el" href="classFle__Dock__Group.html">Fle_Dock_Group</a> to the host. This is the primary method for introducing new dockable groups. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Adds a <a class="el" href="classFle__Dock__Group.html" title="Represents a dockable group widget within a Fle_Dock_Host.">Fle_Dock_Group</a> to the host. This is the primary method for introducing new dockable groups. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">group</td><td>The group to add. </td></tr>
     <tr><td class="paramname">direction</td><td>The initial docking direction (or 0 to add as initially detached). </td></tr>

@@ -25,5 +25,6 @@ var searchData=
   ['m_5fpreviewtimeoutactive_22',['m_previewTimeoutActive',['../classFle__Dock__Group.html#a41174aeb142dd4f3755aeaa3684f8359',1,'Fle_Dock_Group']]],
   ['m_5fresizing_23',['m_resizing',['../classFle__Dock__Group.html#a5a0dda3973640e1a2fe11492e612a6b7',1,'Fle_Dock_Group']]],
   ['m_5fstate_24',['m_state',['../classFle__Dock__Group.html#a048d0ed37a2d0251b5e5fc5277e95c87',1,'Fle_Dock_Group']]],
-  ['m_5funpintext_25',['m_unpinText',['../classFle__Dock__Group.html#a4c419778b6119ca1cbfe14c2e6eb3965',1,'Fle_Dock_Group']]]
+  ['m_5funpintext_25',['m_unpinText',['../classFle__Dock__Group.html#a4c419778b6119ca1cbfe14c2e6eb3965',1,'Fle_Dock_Group']]],
+  ['min_5fheight_26',['min_height',['../classFle__Accordion__Group.html#a910281c0482fad9804b1c71c5c328f42',1,'Fle_Accordion_Group']]]
 ];

@@ -1,7 +1,7 @@
 var annotated_dup =
 [
-    [ "Fle_Accordion", "classFle__Accordion.html", null ],
-    [ "Fle_Accordion_Group", "classFle__Accordion__Group.html", null ],
+    [ "Fle_Accordion", "classFle__Accordion.html", "classFle__Accordion" ],
+    [ "Fle_Accordion_Group", "classFle__Accordion__Group.html", "classFle__Accordion__Group" ],
     [ "Fle_Colors_Choice", "classFle__Colors__Choice.html", null ],
     [ "Fle_Detached_Window", "classFle__Detached__Window.html", null ],
     [ "Fle_Dock_Group", "classFle__Dock__Group.html", "classFle__Dock__Group" ],

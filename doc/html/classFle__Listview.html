@@ -98,7 +98,7 @@ $(document).ready(function(){initNavTree('classFle__Listview.html',''); initResi
 </div><!--header-->
 <div class="contents">
 
-<p>Listview class The listview class is used to display a list of items. It is somewhat similar to Fl_Browser, but it supports more display modes and has more features.  
+<p>Listview class is used to display a list of items. It is somewhat similar to Fl_Browser, but it supports more display modes and has more features.  
  <a href="classFle__Listview.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="Fle__Listview_8hpp_source.html">Fle_Listview.hpp</a>&gt;</code></p>
@@ -107,17 +107,7 @@ Inheritance diagram for Fle_Listview:</div>
 <div class="dyncontent">
 <div class="center"><img src="classFle__Listview__inherit__graph.png" border="0" usemap="#aFle__Listview_inherit__map" alt="Inheritance graph"/></div>
 <map name="aFle__Listview_inherit__map" id="aFle__Listview_inherit__map">
-<area shape="rect" title="Listview class The listview class is used to display a list of items. It is somewhat similar to Fl_Br..." alt="" coords="5,79,108,104"/>
-<area shape="rect" title=" " alt="" coords="17,5,97,31"/>
-<area shape="poly" title=" " alt="" coords="59,44,59,79,54,79,54,44"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
-<div class="dynheader">
-Collaboration diagram for Fle_Listview:</div>
-<div class="dyncontent">
-<div class="center"><img src="classFle__Listview__coll__graph.png" border="0" usemap="#aFle__Listview_coll__map" alt="Collaboration graph"/></div>
-<map name="aFle__Listview_coll__map" id="aFle__Listview_coll__map">
-<area shape="rect" title="Listview class The listview class is used to display a list of items. It is somewhat similar to Fl_Br..." alt="" coords="5,79,108,104"/>
+<area shape="rect" title="Listview class is used to display a list of items. It is somewhat similar to Fl_Browser,..." alt="" coords="5,79,108,104"/>
 <area shape="rect" title=" " alt="" coords="17,5,97,31"/>
 <area shape="poly" title=" " alt="" coords="59,44,59,79,54,79,54,44"/>
 </map>
@@ -283,7 +273,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
 <tr class="separator:a0b2ad701590deab5dfdc17e527a6b433"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Listview class The listview class is used to display a list of items. It is somewhat similar to Fl_Browser, but it supports more display modes and has more features. </p>
+<div class="textblock"><p>Listview class is used to display a list of items. It is somewhat similar to Fl_Browser, but it supports more display modes and has more features. </p>
 <p>By default, the listview has 4 display modes:</p><ul>
 <li>FLE_LISTVIEW_DISPLAY_ICONS: items are displayed as 32x32 icons</li>
 <li>FLE_LISTVIEW_DISPLAY_SMALL_ICONS: items are displayed vertically as 16x16 icons</li>
@@ -327,9 +317,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
 <div class="line">            <span class="keywordflow">break</span>;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassFle__Listview__Item_html"><div class="ttname"><a href="classFle__Listview__Item.html">Fle_Listview_Item</a></div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.hpp:34</div></div>
+<div class="ttc" id="aclassFle__Listview__Item_html"><div class="ttname"><a href="classFle__Listview__Item.html">Fle_Listview_Item</a></div><div class="ttdoc">Listview item with various properties.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.hpp:35</div></div>
 <div class="ttc" id="aclassFle__Listview__Item_html_a6e187ed0af8b6b109f5b96dbbb8ed2ed"><div class="ttname"><a href="classFle__Listview__Item.html#a6e187ed0af8b6b109f5b96dbbb8ed2ed">Fle_Listview_Item::get_name</a></div><div class="ttdeci">const std::string &amp; get_name() const</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:231</div></div>
-<div class="ttc" id="aclassFle__Listview_html"><div class="ttname"><a href="classFle__Listview.html">Fle_Listview</a></div><div class="ttdoc">Listview class The listview class is used to display a list of items. It is somewhat similar to Fl_Br...</div><div class="ttdef"><b>Definition</b> Fle_Listview.hpp:146</div></div>
+<div class="ttc" id="aclassFle__Listview_html"><div class="ttname"><a href="classFle__Listview.html">Fle_Listview</a></div><div class="ttdoc">Listview class is used to display a list of items. It is somewhat similar to Fl_Browser,...</div><div class="ttdef"><b>Definition</b> Fle_Listview.hpp:146</div></div>
 <div class="ttc" id="aclassFle__Listview_html_a6487c52e1b0d27efb6994c9d53a26356"><div class="ttname"><a href="classFle__Listview.html#a6487c52e1b0d27efb6994c9d53a26356">Fle_Listview::get_callback_item</a></div><div class="ttdeci">Fle_Listview_Item * get_callback_item() const</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:867</div></div>
 </div><!-- fragment --><dl class="section user"><dt>Drag and Drop:</dt><dd></dd></dl>
 <p>Drag and drop is optional, and it is enabled by default. To disable drag and drop, call dnd(false). DND operations require the use of callbacks. DND operations rely on the concept of 'drag zones', which are rectangles inside individual item rectangles that typically span just the icon and the text, but not the empty space around the item. This is done so that both dragNdrop and box selection is possible.</p>

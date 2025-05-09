@@ -24,7 +24,8 @@ var searchData=
   ['set_5fvertical_21',['set_vertical',['../classFle__Dock__Group.html#a4c403d6da956cb90c882a36a3bab8b64',1,'Fle_Dock_Group']]],
   ['set_5fwork_5fwidget_5fmin_5fsize_22',['set_work_widget_min_size',['../classFle__Dock__Host.html#ae9bc20c0128aaf436ffba3a0c67a6a1d',1,'Fle_Dock_Host']]],
   ['show_5fgroup_23',['show_group',['../classFle__Dock__Group.html#ad8c6a8592c5fb6155389a61c437b4064',1,'Fle_Dock_Group']]],
-  ['single_5fselection_24',['single_selection',['../classFle__Listview.html#aa1bfee24fd771c2f148779895aa4f964',1,'Fle_Listview::single_selection(bool se)'],['../classFle__Listview.html#aaba3c831540d5e9c4d105b8d64ef06be',1,'Fle_Listview::single_selection() const']]],
-  ['so_3a_25',['Horizontal lines have priority over vertical lines, like so:',['../classFle__Dock__Host.html#autotoc_md0',1,'']]],
-  ['sort_5fitems_26',['sort_items',['../classFle__Listview.html#ad3d8a14299e97644e9d3e01fc02bac89',1,'Fle_Listview']]]
+  ['single_5fopen_24',['single_open',['../classFle__Accordion.html#a31f4a6b06daa466b965b2afd8de98d56',1,'Fle_Accordion::single_open(bool v)'],['../classFle__Accordion.html#ab3e7659c0ce5f3d724c2375b282d496e',1,'Fle_Accordion::single_open() const']]],
+  ['single_5fselection_25',['single_selection',['../classFle__Listview.html#aa1bfee24fd771c2f148779895aa4f964',1,'Fle_Listview::single_selection(bool se)'],['../classFle__Listview.html#aaba3c831540d5e9c4d105b8d64ef06be',1,'Fle_Listview::single_selection() const']]],
+  ['so_3a_26',['Horizontal lines have priority over vertical lines, like so:',['../classFle__Dock__Host.html#autotoc_md0',1,'']]],
+  ['sort_5fitems_27',['sort_items',['../classFle__Listview.html#ad3d8a14299e97644e9d3e01fc02bac89',1,'Fle_Listview']]]
 ];
