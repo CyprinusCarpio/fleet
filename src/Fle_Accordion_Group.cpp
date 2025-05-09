@@ -54,6 +54,11 @@ void Fle_Accordion_Group::open()
         get_accordion()->close_all(this);
 
     get_accordion()->fit_pack();
+
+    if(when())
+    {
+        do_callback(FL_REASON_OPENED);
+    }
 }
 
 void Fle_Accordion_Group::close()
@@ -66,6 +71,11 @@ void Fle_Accordion_Group::close()
     m_child->hide();
 
     get_accordion()->fit_pack();
+
+    if(when())
+    {
+        do_callback(FL_REASON_CLOSED);
+    }
 }
 
 void Fle_Accordion_Group::resize(int X, int Y, int W, int H)

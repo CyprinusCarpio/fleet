@@ -4,7 +4,7 @@
 #include <FL/Fl_Button.H>
 
 /// \class Fle_Flat_Button
-/// Flat button.
+/// \brief Flat button.
 ///
 /// A flat button that displays a thin up frame when
 /// the mouse is over it, and a thin down frame when

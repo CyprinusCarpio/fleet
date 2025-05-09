@@ -15,7 +15,7 @@
 typedef void (Fle_Dock_Host_Min_Size_Callback)(Fle_Dock_Host*, int, int);
 
 /// \class Fle_Edge_Helper
-/// Internal helper class to represent interactive edges for resizing.
+/// \brief Internal helper class to represent interactive edges for resizing.
 ///
 /// This class stores information about a draggable edge within the Fle_Dock_Host.
 /// Edges can exist between the work area and docked groups, between two adjacent

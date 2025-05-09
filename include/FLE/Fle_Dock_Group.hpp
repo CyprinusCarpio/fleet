@@ -44,7 +44,7 @@ enum Fle_Dock_State
 };
 
 /// \class Fle_Detached_Window
-/// A specialized Fl_Double_Window for hosting detached Fle_Dock_Group widgets.
+/// \brief A specialized, internal Fl_Double_Window for hosting detached Fle_Dock_Group widgets.
 ///
 /// This class primarily addresses compatibility issues on Wayland, 
 /// where detached windows need special handling to avoid unwanted resizing behavior
@@ -89,7 +89,7 @@ private:
 };
 
 /// \class Fle_Dock_Group
-/// Represents a dockable group widget within a Fle_Dock_Host.
+/// \brief Represents a dockable group widget within a Fle_Dock_Host.
 ///
 /// Fle_Dock_Group is a container widget (derived from Fl_Group) that can be attached
 /// to the edges of a Fle_Dock_Host or detached into its own floating window

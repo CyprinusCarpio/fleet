@@ -4,6 +4,8 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Choice.H>
 
+/// \class Fle_Colors_Choice
+/// \brief A color theme choice widget.
 class Fle_Colors_Choice : public Fl_Choice
 {
 public:

@@ -60,4 +60,6 @@ add_subdirectory(fleet)
 target_link_libraries(FleetUsingProject PRIVATE fltk Fleet)
 ```
 
+Also, FLEET has a demo application (target `FleetDemo`) that contains several of the included widgets in a program that emulates the layout and appearance, but not function of various file explorer programs.
+
 The only dependency is FLTK 1.4 or above.

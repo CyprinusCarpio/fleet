@@ -39,8 +39,8 @@ enum Fle_Listview_Reason
 };
 
 /** \class Fle_Listview
-	\brief Listview class
-	The listview class is used to display a list of items. It is somewhat similar
+	\brief 
+	Listview class is used to display a list of items. It is somewhat similar
 	to Fl_Browser, but it supports more display modes and has more features.
 
 	By default, the listview has 4 display modes:

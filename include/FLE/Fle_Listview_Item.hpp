@@ -20,8 +20,9 @@ enum Fle_Listview_Display_Mode
 class Fle_Listview;
 
 /** \class Fle_Listview_Item
+	\brief Listview item with various properties.
 	
-	Listview item class. This class is used to represent a listview item
+	This class is used to represent a listview item
 	and manages it's various properties such as name, display name, icons, text
 	and background colors. For all but the simplest use cases, a subclass of 
 	Fle_Listview_Item should be used. In the subclass, you can add several new
