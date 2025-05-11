@@ -23,7 +23,7 @@
 
 #include "FLE/Fle_Colors.hpp"
 
-static char* ikona_xpm[] = {
+static const char* ikona_xpm[] = {
 "16 16 8 1",
 " 	c None",
 ".	c #000000",
