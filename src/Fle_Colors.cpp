@@ -5,28 +5,32 @@
 #include <cstring>
 #include <algorithm>
 
-extern unsigned int fl_cmap[256];
-
 using uint8 = unsigned char;
 
-bool g_defaultColorsDefined = false;
 int  g_currentColors = 0;
 std::vector <Fle_Colors_Choice*> g_colorChoices;
-static std::array<uint8, 256> default_color_map;
+static std::array<Fl_Color, 256> default_color_map;
 
 static void reload_color_map() 
 {
     static bool init = false;
-    if (!init) {
-        std::copy(&fl_cmap[0], &fl_cmap[255], default_color_map.begin());
+    if (!init) 
+    {
+        for (unsigned int i = 0; i < 256; i++) 
+        {
+            default_color_map[i] = Fl::get_color(i);
+        }
         init = true;
     }
-    memcpy(fl_cmap, &default_color_map[0], 256);
+    
+    for (unsigned int i = 0; i < 256; i++) 
+    {
+        Fl::set_color(i, default_color_map[i]);
+    }
 }
 
 constexpr uint8 gray_ramp(uint8 dark, uint8 light, uint8 n)
 {
-
     return static_cast<uint8>(
         dark + ((light - dark) * n + 11) / 23);
 }
