@@ -1,18 +1,90 @@
 #include <FLE/Fle_Colors.hpp>
 
+#include <array>
 #include <vector>
 #include <cstring>
 #include <algorithm>
 
+extern unsigned int fl_cmap[256];
+
+using uint8 = unsigned char;
+
 bool g_defaultColorsDefined = false;
-Fl_Color g_defaultBackground;
-Fl_Color g_defaultBackground2;
-Fl_Color g_defaultForeground;
-Fl_Color g_defaultSelection;
-
 int  g_currentColors = 0;
-
 std::vector <Fle_Colors_Choice*> g_colorChoices;
+static std::array<uint8, 256> default_color_map;
+
+static void reload_color_map() 
+{
+    static bool init = false;
+    if (!init) {
+        std::copy(&fl_cmap[0], &fl_cmap[255], default_color_map.begin());
+        init = true;
+    }
+    memcpy(fl_cmap, &default_color_map[0], 256);
+}
+
+constexpr uint8 gray_ramp(uint8 dark, uint8 light, uint8 n)
+{
+
+    return static_cast<uint8>(
+        dark + ((light - dark) * n + 11) / 23);
+}
+
+constexpr uint8 gray_ramp_inv(uint8 light, uint8 dark, uint8 n)
+{
+    return static_cast<uint8>(
+        light - ((light - dark) * n + 11) / 23);
+}
+
+static void make_dark_ramp(uint8 light, uint8 dark) 
+{
+    for (unsigned int i = 32; i < 56; i++) 
+    {
+        uint8 v = gray_ramp_inv(light, dark, i - 32);
+        Fl::set_color(i, v, v, v);
+    }
+}
+
+static void make_light_ramp(uint8 dark, uint8 light) 
+{
+    for (unsigned int i = 32; i < 56; i++) 
+    {
+        uint8 v = gray_ramp(dark, light, i - 32);
+        Fl::set_color(i, v, v, v);
+    }
+}
+
+constexpr uint8 cube_chan(uint8 i,  uint8 steps, uint8 max) 
+{
+    return static_cast<uint8>(
+        (i * max + (steps - 1) / 2) / (steps - 1));
+}
+
+static void make_color_cube(uint8 cube_max) 
+{
+    for (unsigned int i = 56; i < 256; i++) 
+    {
+        uint8 n = i - 56;
+        uint8 b = n / (5 * 8);
+        uint8 r = (n / 8) % 5;
+        uint8 g = n % 8;
+        Fl::set_color(i, cube_chan(r, 5, cube_max), cube_chan(g, 8, cube_max), cube_chan(b, 5, cube_max));
+    }
+}
+
+static void prep_theme(uint8 gray32, uint8 gray55, uint8 cube_max) 
+{
+    reload_color_map();
+    if (gray32 > gray55) 
+    {
+        make_dark_ramp(gray32, gray55);
+    } else 
+    {
+        make_light_ramp(gray32, gray55);
+    }
+    make_color_cube(cube_max);
+}
 
 void fle_colors_choice_cb(Fl_Widget* w, void* data)
 {
@@ -140,18 +212,10 @@ Fle_Colors_Choice::~Fle_Colors_Choice()
 
 void fle_set_colors(const char* colors)
 {
-    if (!g_defaultColorsDefined)
-    {
-        g_defaultBackground = Fl::get_color(FL_BACKGROUND_COLOR);
-        g_defaultBackground2 = Fl::get_color(FL_BACKGROUND2_COLOR);
-        g_defaultForeground = Fl::get_color(FL_FOREGROUND_COLOR);
-        g_defaultSelection = Fl::get_color(FL_SELECTION_COLOR);
-
-        g_defaultColorsDefined = true;
-    }
-
+    reload_color_map();
     if (strcmp("light", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(235, 235, 235);
         Fl::background2(255, 255, 255);
         Fl::foreground(55, 55, 55);
@@ -160,6 +224,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("dark1", colors) == 0)
     {
+        prep_theme(110, 40, 110);
         Fl::background(55, 55, 55);
         Fl::background2(75, 75, 75);
         Fl::foreground(235, 235, 235);
@@ -168,6 +233,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("dark2", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(35, 35, 40);
         Fl::background2(26, 26, 30);
         Fl::foreground(235, 235, 235);
@@ -176,6 +242,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("tan", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(195, 195, 181);
         Fl::background2(243, 243, 243);
         Fl::foreground(55, 55, 55);
@@ -184,6 +251,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("dark_tan", colors) == 0)
     {
+        prep_theme(180, 40, 180);
         Fl::background(165, 165, 151);
         Fl::background2(223, 223, 223);
         Fl::foreground(55, 55, 55);
@@ -192,6 +260,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("marine", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(136, 192, 184);
         Fl::background2(200, 224, 216);
         Fl::foreground(55, 55, 55);
@@ -200,6 +269,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("blueish", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(210, 213, 215);
         Fl::background2(255, 255, 255);
         Fl::foreground(55, 55, 55);
@@ -208,6 +278,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("nord", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(41, 46, 57);
         Fl::background2(59, 66, 82);
         Fl::foreground(235, 235, 235);
@@ -216,6 +287,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("high_contrast", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(0, 0, 0);
         Fl::background2(20, 20, 20);
         Fl::foreground(255, 255, 255);
@@ -224,6 +296,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("forest", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(34, 51, 34);
         Fl::background2(46, 79, 46);
         Fl::foreground(200, 200, 200);
@@ -232,6 +305,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("purple_dusk", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(48, 25, 52);
         Fl::background2(72, 50, 72);
         Fl::foreground(220, 220, 220);
@@ -240,6 +314,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("solarized_light", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(253, 246, 227);
         Fl::background2(238, 232, 213);
         Fl::foreground(101, 123, 131);
@@ -248,6 +323,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("solarized_dark", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(0, 43, 54);
         Fl::background2(7, 54, 66);
         Fl::foreground(131, 148, 150);
@@ -256,6 +332,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("monokai", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(39, 40, 34);
         Fl::background2(51, 52, 46);
         Fl::foreground(249, 249, 249);
@@ -264,6 +341,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("gruvbox_light", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(251, 237, 193);
         Fl::background2(235, 219, 178);
         Fl::foreground(56, 52, 46);
@@ -272,6 +350,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("gruvbox_dark", colors) == 0)
     {
+        prep_theme(110, 40, 110);
         Fl::background(40, 40, 40);
         Fl::background2(60, 60, 60);
         Fl::foreground(220, 208, 184);
@@ -280,6 +359,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("dracula", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(40, 42, 54);
         Fl::background2(68, 71, 90);
         Fl::foreground(248, 248, 242);
@@ -288,6 +368,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("oceanic_next", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(45, 52, 54);
         Fl::background2(60, 68, 70);
         Fl::foreground(220, 220, 220);
@@ -296,6 +377,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("minimalist", colors) == 0)
     {
+        prep_theme(40, 200, 255);   
         Fl::background(240, 240, 240); 
         Fl::background2(230, 230, 230);
         Fl::foreground(50, 50, 50);
@@ -304,6 +386,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("autumn", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(245, 245, 220);
         Fl::background2(230, 230, 200);
         Fl::foreground(80, 50, 10);
@@ -312,6 +395,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("cyberpunk", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(30, 30, 75); 
         Fl::background2(20, 20, 50);
         Fl::foreground(0, 255, 0);
@@ -320,6 +404,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("material_dark", colors) == 0)
     {
+        prep_theme(180, 40, 110);
         Fl::background(28, 28, 28);
         Fl::background2(40, 40, 40);
         Fl::foreground(255, 255, 255);
@@ -328,6 +413,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("mint", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(200, 240, 200); 
         Fl::background2(180, 220, 180);
         Fl::foreground(50, 100, 50);
@@ -336,6 +422,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("vintage", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(240, 230, 200);
         Fl::background2(220, 210, 180);
         Fl::foreground(80, 50, 30);
@@ -344,6 +431,7 @@ void fle_set_colors(const char* colors)
     }
     else if (strcmp("gray", colors) == 0)
     {
+        prep_theme(40, 200, 255);
         Fl::background(192, 192, 192);
         Fl::background2(255, 255, 255);
         Fl::foreground(0, 0, 0);
@@ -352,14 +440,6 @@ void fle_set_colors(const char* colors)
     }
     else
     {
-        uchar r, g, b;
-        Fl::get_color(g_defaultBackground, r, g, b);
-        Fl::background(r, g, b);
-        Fl::get_color(g_defaultForeground, r, g, b);
-        Fl::foreground(r, g, b);
-        Fl::get_color(g_defaultBackground2, r, g, b);
-        Fl::background2(r, g, b);
-        Fl::set_color(FL_SELECTION_COLOR, g_defaultSelection);
         g_currentColors = 0;
     }
 
