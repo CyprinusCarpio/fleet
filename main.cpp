@@ -6,6 +6,7 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Scheme_Choice.H>
 #include <FL/fl_draw.H>
+#include <FL/fl_show_colormap.H>  // TEST: added by Albrecht-S
 
 #include <iostream>
 
@@ -267,10 +268,14 @@ void view_cb(Fl_Widget* w, void* d)
     if (d == (void*)6) listview->set_details_mode(FLE_LISTVIEW_DETAILS_HIGHLIGHT);
 }
 
+void colormap_cb(Fl_Widget *, void *v) {    // TEST: changed by Albrecht-S
+    fl_show_colormap(fl_int(v));
+}
+
 Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 {
     Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 9, "Debug", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP, 270, 26, true);
-    Fl_Group* tbg = new Fl_Group(0, 0, 85 * 4 + 2, 24);
+    Fl_Group* tbg = new Fl_Group(0, 0, 85 * 5 + 2, 24);  // TEST: changed by Albrecht-S
     Fle_Flat_Button* btn1 = new Fle_Flat_Button(0, 0, 85, 24, "Save layout");
     btn1->callback(saveLayoutCb);
     Fle_Flat_Button* btn2 = new Fle_Flat_Button(85, 0, 85, 24, "Load layout");
@@ -279,9 +284,18 @@ Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
     Fle_Scheme_Choice* schemeChoice = new Fle_Scheme_Choice(85 * 2, 0, 85, 24, "");
     Fle_Colors_Choice* colorsChoice = new Fle_Colors_Choice(85 * 3, 0, 85, 24, "");
 
-    Fl_Box* r = new Fl_Box(85 * 4, 0, 2, 24);
-    tbg->resizable(r);
+    // TEST: added by Albrecht-S:
+    Fl_Button* colorMap = new Fl_Button (85 * 4, 0, 85, 24, "colormap");
+    colorMap->callback(colormap_cb, (void *)FL_YELLOW);
+    colorMap->color(FL_YELLOW);
+    colorMap->tooltip("show color map");  
+    // disable the annoying focus rectangle in these small widgets
+    schemeChoice->visible_focus(0);
+    colorsChoice->visible_focus(0);
+    colorMap->visible_focus(0);   
+    Fl_Box* r = new Fl_Box(85 * 5, 0, 2, 24);   // TEST: changed by Albrecht-S
 
+    tbg->resizable(r);
     tb->add_band_widget(tbg);
 
     return tb;
