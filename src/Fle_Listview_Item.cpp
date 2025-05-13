@@ -132,7 +132,8 @@ void Fle_Listview_Item::set_display_name()
 			}
 
 			prevBytes = bytes;
-
+			
+			fl_font(FL_HELVETICA, 14);
 			fl_measure(codePoint, mw, mh, align);
 			lineLength += mw;
 			if (lineLength >= 70)
