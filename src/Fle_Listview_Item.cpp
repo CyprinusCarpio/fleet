@@ -270,6 +270,13 @@ void Fle_Listview_Item::draw_item(int index)
 		fl_color(fl_color_average(m_listview->color(), FL_BACKGROUND_COLOR, 0.50f));
 		fl_rectf(x(), y(), w(), h());
 	}
+	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
+	{
+		textX -= 2;
+		textY -= 2;
+		textW += 4;
+		textH += 4;
+	}
 	if (m_selected) 
 	{
 		fl_color(FL_SELECTION_COLOR);

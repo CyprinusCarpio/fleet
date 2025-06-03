@@ -194,9 +194,9 @@ void Fle_Listview::keyboard_select(int key)
 		if (key == FL_Left)
 			itemToFocus = m_focusedItem - 1;
 		if (key == FL_Down)
-			itemToFocus = m_focusedItem + (int)((w() - (2 * m_margin)) / itemWidth);
+			itemToFocus = m_focusedItem + (int)((w() - (2 * m_margin) - Fl::scrollbar_size()) / itemWidth);
 		if (key == FL_Up)
-			itemToFocus = m_focusedItem - (int)((w() - (2 * m_margin)) / itemWidth);
+			itemToFocus = m_focusedItem - (int)((w() - (2 * m_margin) - Fl::scrollbar_size()) / itemWidth);
 		break;
 	}
 
@@ -1265,13 +1265,7 @@ int Fle_Listview::handle(int e)
 
 void Fle_Listview::resize(int X, int Y, int W, int H)
 {
-	int oldW = w();
-	int oldH = h();
-
 	Fl_Widget::resize(X, Y, W, H);
-
-	int y = Y;
-	int h = H;
 
 	arrange_items();
 }
