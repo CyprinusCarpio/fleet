@@ -25,6 +25,7 @@ set(FLE_CPP_FILES
 	src/Fle_Colors.cpp
 	src/Fle_Accordion.cpp
 	src/Fle_Accordion_Group.cpp
+	src/Fle_Stack.cpp
 )
 
 set(FLE_HPP_FILES
@@ -39,6 +40,7 @@ set(FLE_HPP_FILES
 	include/FLE/Fle_Colors.hpp
 	include/FLE/Fle_Accordion.hpp
 	include/FLE/Fle_Accordion_Group.hpp
+	include/FLE/Fle_Stack.hpp
 )
 
 add_library(Fleet ${FLE_CPP_FILES})

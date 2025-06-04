@@ -18,6 +18,7 @@
 #include "FLE/Fle_Listview_Item.hpp"
 #include "FLE/Fle_Accordion.hpp"
 #include "FLE/Fle_Accordion_Group.hpp"
+#include "FLE/Fle_Stack.hpp"
 
 #define FLE_BOXTYPES_BEGIN FL_FREE_BOXTYPE
 #include "FLE/Fle_Schemes.hpp"
@@ -509,11 +510,42 @@ int main(int argc, char** argv)
     Fl_Tree* tree = make_tree();
 	vertGroup1->add_band_widget(tree);
 
-    Fle_Dock_Group* vertGroup4 = new Fle_Dock_Group(dh, 2, "Inflexible 1", FLE_DOCK_LOCKED | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT,  FLE_DOCK_RIGHT, 75, 180, false);
-    Fl_Box* sthBox = new Fl_Box(0, 0, 0, 0, "Inflexible group 1");
-    sthBox->box(FL_DOWN_BOX);
-    sthBox->color(FL_BACKGROUND2_COLOR);
-    vertGroup4->add_band_widget(sthBox);
+    Fle_Dock_Group* vertGroup4 = new Fle_Dock_Group(dh, 2, "Stack", FLE_DOCK_LOCKED | FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT,  FLE_DOCK_RIGHT, 140, 180, false);
+    Fle_Stack* stack = new Fle_Stack(0, 0, 20, 70, FLE_STACK_VERTICAL);
+    Fl_Box* stackBox1 = new Fl_Box(0, 0, 0, 0, "Stack Box 1");
+    stackBox1->box(FL_DOWN_BOX);
+    Fl_Box* stackBox2 = new Fl_Box(0, 0, 0, 0, "Stack Box 2");
+    stackBox2->box(FL_DOWN_BOX);
+    stackBox2->color(FL_CYAN);
+    Fl_Box* stackBox3 = new Fl_Box(0, 0, 0, 0, "Stack Box 3");
+    stackBox3->box(FL_DOWN_BOX);
+    stackBox3->color(FL_RED);
+    Fl_Box* stackBox4 = new Fl_Box(0, 0, 0, 0, "Stack Box 4");
+    stackBox4->box(FL_DOWN_BOX);
+    Fl_Box* stackBox5 = new Fl_Box(0, 0, 0, 0, "Stack Box 5");
+    stackBox5->box(FL_DOWN_BOX);
+    stackBox5->color(FL_GREEN);
+    Fl_Box* stackBox6 = new Fl_Box(0, 0, 0, 0, "Stack Box 6");
+    stackBox6->box(FL_DOWN_BOX);
+    Fle_Stack* stack2 = new Fle_Stack(0, 0, 20, 70, FLE_STACK_HORIZONTAL);
+    Fl_Box* stack2Box1 = new Fl_Box(0, 0, 0, 0, "2-1");
+    stack2Box1->box(FL_DOWN_BOX);
+    Fl_Box* stack2Box2 = new Fl_Box(0, 0, 0, 0, "2-2");
+    stack2Box2->box(FL_DOWN_BOX);
+    Fl_Box* stack2Box3 = new Fl_Box(0, 0, 0, 0, "2-3");
+    stack2Box3->box(FL_DOWN_BOX);
+    stack2->add(stack2Box1, 14, 30);
+    stack2->add(stack2Box2, 14, 14);
+    stack2->add(stack2Box3, 20, 20);
+
+    stack->add(stackBox1, 14, 30);
+    stack->add(stackBox2, 14, 14,14);
+    stack->add(stackBox3, 20, 20, 20);
+    stack->add(stackBox4, 14, 60);
+    stack->add(stackBox5, 20, 20, 20);
+    stack->add(stackBox6, 14, 14);
+    stack->add(stack2, 30, 30);
+    vertGroup4->add_band_widget(stack);
 
     Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Accordion", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 75, 180, false);
     Fle_Accordion* accordion = new Fle_Accordion(0, 0, 0, 0, "");
@@ -533,12 +565,6 @@ int main(int argc, char** argv)
     favs->box(FL_DOWN_BOX);
     favs->color(FL_BACKGROUND2_COLOR);
     vertGroup2->add_band_widget(favs);
-
-    Fle_Dock_Group* vertGroup3 = new Fle_Dock_Group(dh, 5, "Inflexible 2", FLE_DOCK_DETACHABLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 220, 180, false);
-    Fl_Box* large = new Fl_Box(0, 0, 0, 0, "Inflexible group 2");
-    large->box(FL_DOWN_BOX);
-    large->color(FL_BACKGROUND2_COLOR);
-    vertGroup3->add_band_widget(large);
 
     Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, 6, "Menubar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_BOTTOM, 240, 26, true);
     FlatMenuBar* menu = new FlatMenuBar(0, 0, 0, 0, "");
