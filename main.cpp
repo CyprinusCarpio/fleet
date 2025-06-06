@@ -273,6 +273,20 @@ void colormap_cb(Fl_Widget *, void *v) {    // TEST: changed by Albrecht-S
     fl_show_colormap(fl_int(v));
 }
 
+void stackbtn1_cb(Fl_Widget* btn, void*) 
+{
+    Fl::delete_widget(btn);
+}
+
+void stackbtn2_cb(Fl_Widget* btn, void*) 
+{
+    Fle_Stack* stack = (Fle_Stack*)btn->parent();
+
+    Fl_Button* newBtn = new Fl_Button(0, 0, 0, 0, "Added");
+    newBtn->callback(stackbtn1_cb);
+    stack->add(newBtn, 20, 20);
+}
+
 Fle_Dock_Group* make_debug_toolbar(Fle_Dock_Host* dh)
 {
     Fle_Dock_Group* tb = new Fle_Dock_Group(dh, 9, "Debug", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_BOTTOM, FLE_DOCK_TOP, 270, 26, true);
@@ -527,6 +541,10 @@ int main(int argc, char** argv)
     stackBox5->color(FL_GREEN);
     Fl_Box* stackBox6 = new Fl_Box(0, 0, 0, 0, "Stack Box 6");
     stackBox6->box(FL_DOWN_BOX);
+    Fl_Button* stackButton1 = new Fl_Button(0, 0, 0, 0, "Stack Button 1");
+    stackButton1->callback(stackbtn1_cb);
+    Fl_Button* stackButton2 = new Fl_Button(0, 0, 0, 0, "Stack Button 2");
+    stackButton2->callback(stackbtn2_cb);
     Fle_Stack* stack2 = new Fle_Stack(0, 0, 20, 70, FLE_STACK_HORIZONTAL);
     Fl_Box* stack2Box1 = new Fl_Box(0, 0, 0, 0, "2-1");
     stack2Box1->box(FL_DOWN_BOX);
@@ -538,6 +556,8 @@ int main(int argc, char** argv)
     stack2->add(stack2Box2, 14, 14);
     stack2->add(stack2Box3, 20, 20);
 
+    stack->add(stackButton1, 20, 20);
+    stack->add(stackButton2, 20, 20, 20);
     stack->add(stackBox1, 14, 30);
     stack->add(stackBox2, 14, 14,14);
     stack->add(stackBox3, 20, 20, 20);

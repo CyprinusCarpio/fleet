@@ -13,11 +13,58 @@ Fle_Stack::Fle_Stack(int X, int Y, int W, int H, Fle_Stack_Orientation direction
 
 void Fle_Stack::on_remove(int index)
 {
+    int removedSize = get_widget_actual_size(index);
+
+    if(children() > 1)
+    {
+        bool spaceFilled = false;
+
+        for(int i = index - 1; i >= 0; i--)
+        {
+            if(m_widgetMaxSizes[i] == 2147483647)
+            {
+                spaceFilled = true;
+                set_widget_actual_size(i, get_widget_actual_size(i) + removedSize);
+                m_widgetPreferredSizes[i] = get_widget_actual_size(i);
+                break;
+            }
+        }
+        if(!spaceFilled)
+        {
+            for(int i = index + 1; i < children(); i++)
+            {
+                if(m_widgetMaxSizes[i] == 2147483647)
+                {
+                    spaceFilled = true;
+                    if(m_orientation == FLE_STACK_HORIZONTAL)
+                    {
+                        child(i)->resize(child(i)->x() - removedSize, child(i)->y(), child(i)->w() + removedSize, child(i)->h());
+                    }
+                    else
+                    {
+                        child(i)->resize(child(i)->x(), child(i)->y() - removedSize, child(i)->w(), child(i)->h() + removedSize);
+                    }
+                    m_widgetPreferredSizes[i] = get_widget_actual_size(i);
+                    for(int j = i - 1; j >= 0; j--)
+                    {
+                        if(m_orientation == FLE_STACK_HORIZONTAL)
+                        {
+                            child(j)->resize(child(j)->x() - removedSize, child(j)->y(), child(j)->w(), child(j)->h());
+                        }
+                        else
+                        {
+                            child(j)->resize(child(j)->x(), child(j)->y() - removedSize, child(j)->w(), child(j)->h());
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     m_widgetMinSizes.erase(m_widgetMinSizes.begin() + index);
     m_widgetPreferredSizes.erase(m_widgetPreferredSizes.begin() + index);
     m_widgetMaxSizes.erase(m_widgetMaxSizes.begin() + index);
-
-    position_children();
 
     Fl_Group::on_remove(index);
 }
@@ -112,12 +159,7 @@ void Fle_Stack::update_preferred_sizes()
 {
     for(int i = 0; i < children(); i++)
     {
-        Fl_Widget* c = child(i);
-        m_widgetPreferredSizes[i] = c->h();
-        if(m_orientation == FLE_STACK_HORIZONTAL)
-        {
-            m_widgetPreferredSizes[i] = c->w();
-        }
+        m_widgetPreferredSizes[i] = get_widget_actual_size(i);
     }
 }
 
@@ -355,6 +397,8 @@ bool Fle_Stack::insert(Fl_Widget* widget, int index, int minSize, int preferredS
     m_widgetMaxSizes.insert(m_widgetMaxSizes.begin() + index, maxSize);
 
     Fl_Group::insert(*widget, index);
-
+    
+    position_children();
+    redraw();
     return true;
 }

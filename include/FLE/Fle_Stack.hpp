@@ -43,6 +43,7 @@ public:
     bool insert(Fl_Widget* widget, int index, int minSize, int preferredSize, int maxSize = 2147483647);
 
     int min_size_sum() const { return std::accumulate(m_widgetMinSizes.begin(), m_widgetMinSizes.end(), 0); }
+    Fle_Stack_Orientation orientation() const { return m_orientation; }
 };
 
 #endif
