@@ -402,3 +402,54 @@ bool Fle_Stack::insert(Fl_Widget* widget, int index, int minSize, int preferredS
     redraw();
     return true;
 }
+
+void Fle_Stack::set_min_size(int index, int minSize)
+{
+    if(index >= 0 && index < m_widgetMinSizes.size())
+    {
+        m_widgetMinSizes[index] = minSize;
+    }
+}
+
+void Fle_Stack::set_preferred_size(int index, int preferredSize)
+{
+    if(index >= 0 && index < m_widgetPreferredSizes.size())
+    {
+        m_widgetPreferredSizes[index] = preferredSize;
+    }
+}
+
+void Fle_Stack::set_max_size(int index, int maxSize)
+{
+    if(index >= 0 && index < m_widgetMaxSizes.size())
+    {
+        m_widgetMaxSizes[index] = maxSize;
+    }
+}
+
+int Fle_Stack::get_min_size(int index) const
+{
+    if(index >= 0 && index < m_widgetMinSizes.size())
+    {
+        return m_widgetMinSizes[index];
+    }
+    return 0;
+}
+
+int Fle_Stack::get_preferred_size(int index) const
+{
+    if(index >= 0 && index < m_widgetPreferredSizes.size())
+    {
+        return m_widgetPreferredSizes[index];
+    }
+    return 0;
+}
+
+int Fle_Stack::get_max_size(int index) const
+{
+    if(index >= 0 && index < m_widgetMaxSizes.size())
+    {
+        return m_widgetMaxSizes[index];
+    }
+    return 0;
+}
