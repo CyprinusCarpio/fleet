@@ -28,6 +28,7 @@ Fle_Dock_Host::Fle_Dock_Host(int X, int Y, int W, int H, const char* l, int acti
 	m_previewY = 0;
 	m_previewW = 0;
 	m_previewH = 0;
+	m_previewTimeout = 0.25f;
 
 	m_previewColor = FL_SELECTION_COLOR;
 

@@ -158,6 +158,7 @@ class Fle_Dock_Host : public Fl_Group
 	int m_workWidgetMinH;        ///< Minimum height constraint for the work widget. 
 	int m_oldMinW;               ///< Previously calculated minimum width for the host. 
 	int m_oldMinH;               ///< Previously calculated minimum height for the host. 
+	float m_previewTimeout;      ///< Time in seconds before the docking preview rectangle is shown.
 	/// Layout is saved when detaching a non-detachable group 
 	/// If the user fails to attach the non-detachable group,
 	/// the saved layout is loaded 
@@ -353,6 +354,13 @@ public:
 	/// Sets the color used for drawing the docking preview rectangle.
 	/// \param color The Fl_Color value.
 	void set_preview_color(const Fl_Color& color);
+	/// Sets the timeout (in seconds) for the preview rectangle.
+	/// \param timeout The timeout value in seconds.
+	void set_preview_timeout(float timeout) { m_previewTimeout = timeout; }
+	/// Gets the preview timeout.
+	/// \return The timeout value in seconds.
+	float get_preview_timeout() const { return m_previewTimeout; }
+
 	/// Layout save and load functions 
 
 	/// Saves the layout of groups to a buffer.  The user is responsible for freeing the buffer afterwards 

@@ -8,8 +8,6 @@
 #include <FLE/Fle_Dock_Host.hpp>
 #include <FLE/Fle_Events.hpp>
 
-#define PREVIEW_TIMEOUT 0.25f
-
 std::string Fle_Dock_Group::m_closeText = u8"Close group";
 std::string Fle_Dock_Group::m_pinText = u8"Pin";
 std::string Fle_Dock_Group::m_unpinText = u8"Unpin";
@@ -542,7 +540,7 @@ int Fle_Dock_Group::handle(int e)
 		}
 	}
 
-	if (e == FL_PUSH && Fl::event_button() == FL_LEFT_MOUSE)
+	if (e == FL_PUSH && Fl::event_button() == FL_LEFT_MOUSE) 
 	{
 		m_offsetX = 0;
 		m_offsetY = 0;
@@ -739,7 +737,7 @@ int Fle_Dock_Group::handle(int e)
 				}
 				else
 					m_host->detached_drag(this, 2121420, -1);
-				Fl::add_timeout(PREVIEW_TIMEOUT, Fle_Dock_Group::preview_timeout_cb, this);
+				Fl::add_timeout(m_host->get_preview_timeout(), Fle_Dock_Group::preview_timeout_cb, this);
 				m_previewTimeoutActive = true;
 				return 1;
 			}
