@@ -169,6 +169,8 @@ void Fle_Listview::arrange_items()
 
 void Fle_Listview::keyboard_select(int key)
 {	
+	if(m_items.size() <= 1) return;
+
 	if (m_focusedItem == -1) m_focusedItem = 0;
 
 	int itemToFocus = -1;
@@ -573,6 +575,13 @@ void Fle_Listview::draw_background()
 
 void Fle_Listview::draw()
 {
+	if(m_state & FLE_LISTVIEW_INDICES_INVALIDATED)
+	{
+		set_focused(-1);
+		deselect_all();
+		m_lastSelectedItem = -1;
+		m_state &= ~FLE_LISTVIEW_INDICES_INVALIDATED;
+	}
 	Fle_Listview_Display_Mode mode = get_display_mode();
 
 	draw_background();
@@ -678,6 +687,8 @@ void Fle_Listview::add_item(Fle_Listview_Item* item)
 
 	if(when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_ADDED);
 
+	m_state |= FLE_LISTVIEW_INDICES_INVALIDATED;
+
 	listview_redraw();
 }
 
@@ -695,6 +706,8 @@ void Fle_Listview::insert_item(Fle_Listview_Item* item, int index)
 
 	if (when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_ADDED);
 
+	m_state |= FLE_LISTVIEW_INDICES_INVALIDATED;
+
 	listview_redraw();
 }
 
@@ -710,6 +723,8 @@ void Fle_Listview::remove_item(Fle_Listview_Item* item)
 	m_state |= FLE_LISTVIEW_NEEDS_ARRANGING;
 
 	if (when() & FL_WHEN_CHANGED) do_callback_for_item(item, FLE_LISTVIEW_REASON_REMOVED);
+
+	m_state |= FLE_LISTVIEW_INDICES_INVALIDATED;
 
 	listview_redraw();
 }
@@ -746,6 +761,7 @@ void Fle_Listview::clear_items()
 	{
 		delete item;
 	}
+	m_state |= FLE_LISTVIEW_INDICES_INVALIDATED;
 	m_items.clear();
 	m_selected.clear();
 	m_vscrollbar.value(0);
