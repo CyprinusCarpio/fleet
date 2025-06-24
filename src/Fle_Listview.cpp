@@ -348,7 +348,7 @@ void Fle_Listview::set_focused(Fle_Listview_Item* item, bool focused)
 
 void Fle_Listview::set_focused(int item)
 {
-	if (item == m_focusedItem) return;
+	if (item == m_focusedItem || item > m_items.size() - 1) return;
 
 	// Unfocus current
 	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
@@ -741,11 +741,18 @@ void Fle_Listview::remove_selected()
 
 void Fle_Listview::clear_items()
 {
+	set_redraw(false);
 	for(Fle_Listview_Item* item : m_items)
 	{
 		delete item;
 	}
 	m_items.clear();
+	m_selected.clear();
+	m_vscrollbar.value(0);
+	m_hscrollbar.value(0);
+	set_focused(-1);
+	set_redraw(true);
+	listview_redraw();
 }
 
 void Fle_Listview::deselect_all(int otherThan)
