@@ -350,11 +350,6 @@ void Fle_Listview::set_focused(Fle_Listview_Item* item, bool focused)
 
 void Fle_Listview::set_focused(int item)
 {
-	if (item == m_focusedItem || item > m_items.size() - 1) return;
-
-	// Unfocus current
-	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
-
 	// item == -1 means clear focus
 	if (item == -1) 
 	{
@@ -362,6 +357,11 @@ void Fle_Listview::set_focused(int item)
 		listview_redraw();
 		return;
 	}
+
+	if (item == m_focusedItem || item > m_items.size() - 1) return;
+
+	// Unfocus current
+	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
 
 	// Focus selected
 	Fle_Listview_Item* i = m_items[item];
