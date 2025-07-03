@@ -247,11 +247,11 @@ void Fle_Listview::drag_select(int x1, int y1, int x2, int y2)
 		{
 			if (item->is_selected())
 			{
+				m_selected.push_back(i);
+				
 				// reselect callback
 				if (when() & FL_WHEN_CHANGED)
 					do_callback_for_item(item, FLE_LISTVIEW_REASON_RESELECTED);
-
-				m_selected.push_back(i);
 			}
 			else
 			{
@@ -773,16 +773,20 @@ void Fle_Listview::clear_items()
 
 void Fle_Listview::deselect_all(int otherThan)
 {
+	if(m_selected.size() == 0) return;
 	set_redraw(false);
 	bool otherThanSelected = false;
-	for (int i : m_selected)
+	for(std::vector<int>::iterator it = m_selected.begin(); it != m_selected.end();)
 	{
-		Fle_Listview_Item* item = get_item(i);
-		if (i == otherThan) 
+		Fle_Listview_Item* item = get_item(*it);
+		if (*it == otherThan) 
 		{
 			otherThanSelected = item->is_selected();
+			it++;
 			continue;
 		}
+
+		it = m_selected.erase(it);
 
 		item->set_selected(false);
 		if (when() & FL_WHEN_CHANGED)
@@ -790,8 +794,6 @@ void Fle_Listview::deselect_all(int otherThan)
 			do_callback_for_item(item, FLE_LISTVIEW_REASON_DESELECTED);
 		}
 	}
-	m_selected.clear();
-	if (otherThan != -1 && otherThanSelected) m_selected.push_back(otherThan);
 	set_redraw(true);
 
 	listview_redraw();
