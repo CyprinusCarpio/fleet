@@ -383,7 +383,7 @@ public:
 	void sort_items(bool ascending, int property);
 	/// Get sort direction (ascending or descending or none)
 	///
-	/// \return Sort direction: -1 = none, 0 = ascending, 1 = descending
+	/// \return Sort direction: -1 = none, 0 = descending, 1 = ascending
 	int get_sort_direction() const;
 	/// Get sorted by property
 	///
