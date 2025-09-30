@@ -14,5 +14,6 @@ public:
 };
 
 void fle_set_colors(const char* colors);
+const char* fle_get_colors();
 
 #endif 

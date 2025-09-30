@@ -44,6 +44,7 @@ public:
 };
 
 void fle_set_scheme(const char* scheme);
+const char* fle_get_scheme();
 
 void fle_scheme1_up_box_draw(int x, int y, int w, int h, Fl_Color c);
 void fle_scheme1_down_box_draw(int x, int y, int w, int h, Fl_Color c);

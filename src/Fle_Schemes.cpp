@@ -7,7 +7,7 @@
 
 bool g_fleSchemesDefined = false;
 int  g_currentScheme = 0;
-std::vector <Fle_Scheme_Choice*> g_schemeChoices;
+std::vector<Fle_Scheme_Choice*> g_schemeChoices;
 
 void fle_scheme_choice_cb(Fl_Widget* w, void* data)
 {
@@ -154,6 +154,21 @@ void fle_set_scheme(const char* scheme)
 
 	for(int i = 0; i < g_schemeChoices.size(); i++)
 		g_schemeChoices[i]->value(g_currentScheme);
+}
+
+const char* fle_get_scheme()
+{
+	switch (g_currentScheme)
+	{
+	case 0: return "base";
+	case 1: return "plastic";
+	case 2: return "gtk+";
+	case 3: return "gleam";
+	case 4: return "oxy";
+	case 5: return "fle_scheme1";
+	case 6: return "fle_scheme2";
+	default: return "base";
+	}
 }
 
 void fle_scheme1_up_box_draw(int x, int y, int w, int h, Fl_Color c)
