@@ -32,6 +32,9 @@ struct Fle_Color_Theme
     unsigned char selectionB;
 };
 
+void(*g_colorsChangedCB)(void*) = nullptr;
+void* g_colorsChangedCBData = nullptr;
+
 int  g_currentColors = 0;
 std::vector<Fle_Colors_Choice*> g_colorChoices;
 std::vector<Fle_Color_Theme> g_colorThemes =
@@ -195,7 +198,16 @@ void fle_set_colors(const char* colors)
         (*it)->value(g_currentColors);
     }
 
+    if(g_colorsChangedCB)
+        g_colorsChangedCB(g_colorsChangedCBData);
+
     Fl::redraw();
+}
+
+void fle_colors_changed_callback(void(*cb)(void*), void* data)
+{
+	g_colorsChangedCB = cb;
+	g_colorsChangedCBData = data;
 }
 
 const char* fle_get_colors()

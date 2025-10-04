@@ -400,6 +400,16 @@ void listview_cb(Fl_Widget* w, void* d)
     std::cout << "Item " << lv->get_callback_item()->get_name() << " " << callbackReason << std::endl;
 }
 
+void scheme_changed_cb(void* data)
+{
+    std::cout << "scheme changed" << std::endl;
+}
+
+void colors_changed_cb(void* data)
+{
+    std::cout << "colors changed" << std::endl;
+}
+
 int main(int argc, char** argv)
 {
     img = new Fl_Pixmap(ikona_xpm);
@@ -659,6 +669,9 @@ int main(int argc, char** argv)
     layout = dh->save_layout(s);
 
     //setenv("LIBDECOR_FORCE_CSD", "1", 1);
+
+    fle_scheme_changed_callback(scheme_changed_cb, 0);
+    fle_colors_changed_callback(colors_changed_cb, 0);
 
     win->show(argc, argv);
 

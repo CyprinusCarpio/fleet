@@ -8,6 +8,8 @@
 bool g_fleSchemesDefined = false;
 int  g_currentScheme = 0;
 std::vector<Fle_Scheme_Choice*> g_schemeChoices;
+void(*g_schemeChangedCB)(void*) = nullptr;
+void* g_schemeChangedCBData = nullptr;
 
 void fle_scheme_choice_cb(Fl_Widget* w, void* data)
 {
@@ -154,6 +156,15 @@ void fle_set_scheme(const char* scheme)
 
 	for(int i = 0; i < g_schemeChoices.size(); i++)
 		g_schemeChoices[i]->value(g_currentScheme);
+	
+	if(g_schemeChangedCB)
+		g_schemeChangedCB(g_schemeChangedCBData);
+}
+
+void fle_scheme_changed_callback(void(*cb)(void*), void* data)
+{
+	g_schemeChangedCB = cb;
+	g_schemeChangedCBData = data;
 }
 
 const char* fle_get_scheme()

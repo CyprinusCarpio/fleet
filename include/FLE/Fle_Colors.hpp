@@ -14,6 +14,7 @@ public:
 };
 
 void fle_set_colors(const char* colors);
+void fle_colors_changed_callback(void(*cb)(void*), void* data);
 const char* fle_get_colors();
 
 #endif 
