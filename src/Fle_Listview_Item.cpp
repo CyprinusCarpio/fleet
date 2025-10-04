@@ -136,12 +136,12 @@ void Fle_Listview_Item::set_display_name()
 			fl_font(FL_HELVETICA, 14);
 			fl_measure(codePoint, mw, mh, align);
 			lineLength += mw;
-			if (lineLength >= 70)
+			if (lineLength >= 76)
 			{
 				lineLength = 0;
 				if (secondLine)
 				{
-					m_displayName.erase(m_displayName.begin() + i - bytes - prevBytes - 1, m_displayName.end());
+					m_displayName.erase(m_displayName.begin() + i - bytes - prevBytes - 2, m_displayName.end());
 					m_displayName.append("...");
 					break;
 				}
@@ -229,7 +229,11 @@ void Fle_Listview_Item::set_name(std::string newname)
 	m_name = std::move(newname);
 }
 
-const std::string& Fle_Listview_Item::get_name() const
+void Fle_Listview_Item::set_tooltip(std::string tooltip)
+{
+	m_tooltip = std::move(tooltip);
+}
+const std::string &Fle_Listview_Item::get_name() const
 {
 	return m_name;
 }
@@ -240,6 +244,11 @@ void Fle_Listview_Item::resize(int X, int Y, int W, int H)
 	m_y = Y;
 	m_w = W;
 	m_h = H;
+}
+
+const std::string &Fle_Listview_Item::get_tooltip() const
+{
+    return m_tooltip.empty() ? m_name : m_tooltip;
 }
 
 int Fle_Listview_Item::get_label_width() const
@@ -291,7 +300,7 @@ void Fle_Listview_Item::draw_item(int index)
 	// Draw icon
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
 	{
-		m_bigIcon->draw(x() + 19, y());
+		m_bigIcon->draw(x() + 21, y());
 	}
 	else
 	{
@@ -302,15 +311,13 @@ void Fle_Listview_Item::draw_item(int index)
 	fl_color(textcolor());
 	if (m_displayMode == FLE_LISTVIEW_DISPLAY_ICONS)
 	{
-		Fl_Align align;
-		align = FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_WRAP;
+		Fl_Align align = FL_ALIGN_CENTER | FL_ALIGN_INSIDE | FL_ALIGN_WRAP;
 
 		fl_draw(m_displayName.c_str(), textX, textY, textW, textH, align);
 	}
 	else
 	{
-		Fl_Align align;
-		align = FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP;
+		Fl_Align align = FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP;
 
 		if (m_listview->get_item_column_width() != 0 && get_label_width() + 16 > m_listview->get_item_column_width())
 		{
@@ -371,12 +378,11 @@ void Fle_Listview_Item::get_text_xywh(int& X, int& Y, int& W, int& H)
 		Y += 32;
 		H = 14;
 
-		Fl_Align align;
-		align = FL_ALIGN_TOP | FL_ALIGN_INSIDE;
+		Fl_Align align = FL_ALIGN_TOP | FL_ALIGN_INSIDE;
 		int mw, mh;
 		fl_measure(m_name.c_str(), mw, mh, align);
 
-		if (mw > 70) H = 28;
+		if (mw > 76) H = 28;
 	}
 	else
 	{

@@ -2,6 +2,7 @@
 
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
+#include <FL/Fl_Tooltip.H>
 
 #include <algorithm>
 #include <iostream>
@@ -102,12 +103,12 @@ void Fle_Listview::arrange_items()
 		switch (mode)
 		{
 		case FLE_LISTVIEW_DISPLAY_ICONS:
-			W = 70;
-			H = 70;
+			W = 76;
+			H = 76;
 			if (X + W > w() - Fl::scrollbar_size() - (2 * m_margin))
 			{
 				X = 0;
-				Y += 70;
+				Y += 76;
 			}
 			break;
 		case FLE_LISTVIEW_DISPLAY_SMALL_ICONS:
@@ -148,7 +149,7 @@ void Fle_Listview::arrange_items()
 		switch (mode)
 		{
 		case FLE_LISTVIEW_DISPLAY_ICONS:
-			X += 70;
+			X += 76;
 			break;
 		case FLE_LISTVIEW_DISPLAY_SMALL_ICONS:
 			X += widest;
@@ -224,8 +225,8 @@ void Fle_Listview::get_grid_xy_at(int X, int Y, int& gridX, int& gridY)
 	}
 	else if (mode == FLE_LISTVIEW_DISPLAY_ICONS)
 	{
-		gridX = (X - x() - m_margin + scrX) / 70;
-		gridY = (Y - y() - m_margin + scrY) / 70;
+		gridX = (X - x() - m_margin + scrX) / 76;
+		gridY = (Y - y() - m_margin + scrY) / 76;
 	}
 	else
 	{
@@ -524,6 +525,18 @@ void Fle_Listview::dnd(bool dnd)
 	}
 	else
 		m_state &= ~FLE_LISTVIEW_DND;
+}
+
+void Fle_Listview::item_tooltips(bool tooltips)
+{
+	if(tooltips)
+	{
+		m_state |= FLE_LISTVIEW_ITEM_TOOLTIPS;
+
+		copy_tooltip("FLEET!!!");
+	}
+	else
+		m_state &= ~FLE_LISTVIEW_ITEM_TOOLTIPS;
 }
 
 void Fle_Listview::do_callback_for_item(Fle_Listview_Item* item, Fle_Listview_Reason reason)
@@ -975,12 +988,28 @@ int Fle_Listview::handle(int e)
 	static int resizingHeaderProperty = -2;
 	static int lastGridX, lastGridY;
 	static bool itemDrag = false;
+	static Fle_Listview_Item* lastAtItem = nullptr;
 
 	int ex = Fl::event_x();
 	int ey = Fl::event_y();
 	int gridX, gridY;
 	Fle_Listview_Item* atItem = get_item_at(ex, ey);
 	
+	if(item_tooltips())
+	{
+		if(e == FL_BEFORE_TOOLTIP)
+		{
+			Fl_Tooltip::override_text(atItem ? atItem->get_tooltip().c_str() : "");
+
+			return 1;
+		}
+		if(lastAtItem != atItem)
+		{
+			Fl_Tooltip::enter(nullptr);
+			Fl_Tooltip::enter(this);
+		}
+	}
+
 	if (dnd())
 	{
 		if (e == FL_DND_ENTER || e == FL_DND_DRAG || e == FL_DND_RELEASE)
@@ -1284,6 +1313,8 @@ int Fle_Listview::handle(int e)
 			break;
 		}
 	}
+
+	lastAtItem = atItem;
 
 	return ret;
 }

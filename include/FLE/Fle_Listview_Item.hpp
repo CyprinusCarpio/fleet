@@ -39,6 +39,7 @@ class Fle_Listview_Item
 
 	std::string m_name; ///< Internal name of the item
 	std::string m_displayName; ///< Display name
+	std::string m_tooltip; ///< Custom tooltip for the item
 	bool m_selected; ///< Whether the item is selected
 	bool m_focused; ///< Whether the item is focused
 	Fl_Color m_textcolor; ///< Text color
@@ -120,10 +121,18 @@ public:
 	///
 	/// \param newname New name
 	void set_name(std::string newname);
+	/// Set a custom tooltip for the item. By default, it's name is used.
+	///
+	/// \param tooltip New tooltip
+	void set_tooltip(std::string tooltip);
 	/// Get the item name
 	///
 	/// \return Name
 	const std::string& get_name() const;
+	/// Get the tooltip
+	///
+	/// \return Tooltip
+	const std::string& get_tooltip() const;
 
 	int get_label_width() const;
 

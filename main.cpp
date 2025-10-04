@@ -513,6 +513,21 @@ int main(int argc, char** argv)
         item = new Test_Listview_Item("icon_64x64.png", 8, "root"); listview->add_item(item);
         item = new Test_Listview_Item("brochure_design_2023.ai", 921, "Wald"); listview->add_item(item);
         item = new Test_Listview_Item("extremely_long_named_item_2021.txt", 921, "Wald"); listview->add_item(item);
+
+        // And a couple of manually identified label drawing trouble makers
+        // The following were identified during development of another program
+        // the rendering of their labels in big icon mode was broken
+        item = new Test_Listview_Item("folder.json", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("bitesize.bt", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("gennorm2", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("kf5-core22", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("msexpand", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("pamtopfm", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("pstree.x11", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("fltk_ext.tar", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("__MACOSX", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("Documents and Settings", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("System Volume Information", 921, "Tester"); listview->add_item(item);
     }
 
     dh->add_work_widget(listview);

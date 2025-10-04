@@ -23,6 +23,7 @@ enum Fle_Listview_Flags
 	FLE_LISTVIEW_NEEDS_ARRANGING = 1 << 8, ///< Whether the items needs to be rearranged
 	FLE_LISTVIEW_DND = 1 << 9, ///< Whether the listview allows drag and drop
 	FLE_LISTVIEW_INDICES_INVALIDATED = 1 << 10, ///< Stored indices may be invalidated during CB
+	FLE_LISTVIEW_ITEM_TOOLTIPS = 1 << 11, ///< Does the listview show item tooltips?
 };
 
 /// \enum Fle_Listview_Reason
@@ -332,6 +333,16 @@ public:
 	///
 	/// \return Drag and drop enabled
 	bool dnd() const { return m_state & FLE_LISTVIEW_DND; }
+
+	/// Set item tooltips flag
+	/// When it's set to true, individual items will have tooltips
+	///
+	/// \param tooltips Item tooltips
+	void item_tooltips(bool tooltips);
+	/// Get item tooltips flag
+	///
+	/// \return Item tooltips
+	bool item_tooltips() const { return m_state & FLE_LISTVIEW_ITEM_TOOLTIPS; }
 
 	/// Add property
 	///
