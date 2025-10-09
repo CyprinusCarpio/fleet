@@ -351,22 +351,21 @@ void Fle_Listview::set_focused(Fle_Listview_Item* item, bool focused)
 
 void Fle_Listview::set_focused(int item)
 {
-	// item == -1 means clear focus
-	if (item == -1) 
+	// Unfocus current
+	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
+	// Check for bounds and if already focused
+	if (item == m_focusedItem || item > m_items.size() - 1) return;
+
+	// Focus selected
+	m_focusedItem = item;
+
+	if(m_focusedItem == -1)
 	{
-		m_focusedItem = -1;
 		listview_redraw();
 		return;
 	}
 
-	if (item == m_focusedItem || item > m_items.size() - 1) return;
-
-	// Unfocus current
-	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
-
-	// Focus selected
 	Fle_Listview_Item* i = m_items[item];
-	m_focusedItem = item;
 	i->set_focus(true);
 
 	ensure_item_visible(i);
@@ -670,7 +669,7 @@ void Fle_Listview::draw()
 	}
 
 	// Draw focus rectangle
-	if (m_focusedItem != -1)
+	if (Fl::focus() == this && m_focusedItem != -1)
 	{
 		Fle_Listview_Item *item = m_items[m_focusedItem];
 		Fl_Color c = item->is_selected() ? FL_SELECTION_COLOR : color();
@@ -1029,10 +1028,6 @@ int Fle_Listview::handle(int e)
 		if(Fl::focus() != this)
 		{
 			Fl::focus(this);
-			if (m_items.size() > 0)
-			{
-				set_focused(0);
-			}
 		}
 		if (atItem)
 		{
@@ -1190,26 +1185,33 @@ int Fle_Listview::handle(int e)
 			}
 		}
 
-		if (resizingHeaderProperty == -2 && (gridX != lastGridX || gridY != lastGridY) && !single_selection() && (std::abs(dragX - ex) >= 6 || std::abs(dragY - ey) >= 6))
+		if (resizingHeaderProperty == -2 && !single_selection() && (std::abs(dragX - ex) >= 6 || std::abs(dragY - ey) >= 6))
 		{
-			if (itemDrag)
+			if(gridX != lastGridX || gridY != lastGridY)
 			{
-				// Start drag of selected items
-				if (when() & FL_WHEN_CHANGED)
+				if (itemDrag)
 				{
-					do_callback((Fl_Callback_Reason)FLE_LISTVIEW_REASON_DND_START);
-					Fl::dnd();
+					// Start drag of selected items
+					if (when() & FL_WHEN_CHANGED)
+					{
+						do_callback((Fl_Callback_Reason)FLE_LISTVIEW_REASON_DND_START);
+						Fl::dnd();
+
+						return 1;
+					}
+				}
+				else
+				{
+					drag_select(dragX, dragY, ex, ey);
+					window()->make_current();
+					listview_redraw();
+					lastGridX = gridX;
+					lastGridY = gridY;
 				}
 			}
-			else
-			{
-				drag_select(dragX, dragY, ex, ey);
-				window()->make_current();
-				listview_redraw();
-				fl_overlay_rect(dragX, dragY, ex - dragX, ey - dragY);
-				lastGridX = gridX;
-				lastGridY = gridY;
-			}
+
+			window()->make_current();
+			fl_overlay_rect(dragX, dragY, ex - dragX, ey - dragY);
 
 			return 1;
 		}
@@ -1276,15 +1278,10 @@ int Fle_Listview::handle(int e)
 	}
 	else if (e == FL_FOCUS)
 	{
-		if(m_items.size() > 0)
+		if(m_items.size() > 0 && m_focusedItem == -1)
 		{
 			set_focused(0);
 		}
-		return 1;
-	}
-	else if (e == FL_UNFOCUS)
-	{
-		if (m_focusedItem != -1) set_focused(-1);
 		return 1;
 	}
 	else if (e == FL_KEYDOWN && Fl::focus() == this)

@@ -538,6 +538,17 @@ int main(int argc, char** argv)
         item = new Test_Listview_Item("__MACOSX", 921, "Tester"); listview->add_item(item);
         item = new Test_Listview_Item("Documents and Settings", 921, "Tester"); listview->add_item(item);
         item = new Test_Listview_Item("System Volume Information", 921, "Tester"); listview->add_item(item);
+        //whack a mole
+        item = new Test_Listview_Item("Documents", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("era_restore", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("monodocer", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("pylupdate6", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("ppmtoterm", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("qmlprofiler", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("ntfsrecover", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("llvm-nm-18", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("pinentry-qt", 921, "Tester"); listview->add_item(item);
+        item = new Test_Listview_Item("mono-sgen", 921, "Tester"); listview->add_item(item);
     }
 
     dh->add_work_widget(listview);

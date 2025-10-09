@@ -382,7 +382,7 @@ void Fle_Listview_Item::get_text_xywh(int& X, int& Y, int& W, int& H)
 		int mw, mh;
 		fl_measure(m_name.c_str(), mw, mh, align);
 
-		if (mw > 76) H = 28;
+		if (mw > 74) H = 28;
 	}
 	else
 	{
