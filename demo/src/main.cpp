@@ -20,6 +20,8 @@
 #include "FLE/Fle_Accordion_Group.hpp"
 #include "FLE/Fle_Stack.hpp"
 
+#include "tile_ex_test.h"
+
 #define FLE_BOXTYPES_BEGIN FL_FREE_BOXTYPE
 #include "FLE/Fle_Schemes.hpp"
 
@@ -686,6 +688,9 @@ int main(int argc, char** argv)
     fle_colors_changed_callback(colors_changed_cb, 0);
 
     win->show(argc, argv);
+
+    Fl_Double_Window* tileExWnd = make_test_tileex_wnd();
+    tileExWnd->show(argc, argv);
 
     return Fl::run();
 }

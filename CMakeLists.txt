@@ -26,6 +26,7 @@ set(FLE_CPP_FILES
 	src/Fle_Accordion.cpp
 	src/Fle_Accordion_Group.cpp
 	src/Fle_Stack.cpp
+	src/Fle_TileEx.cpp
 )
 
 set(FLE_HPP_FILES
@@ -41,14 +42,20 @@ set(FLE_HPP_FILES
 	include/FLE/Fle_Accordion.hpp
 	include/FLE/Fle_Accordion_Group.hpp
 	include/FLE/Fle_Stack.hpp
+	include/FLE/Fle_TileEx.hpp
 )
 
 add_library(Fleet ${FLE_CPP_FILES})
 target_include_directories(Fleet PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_link_libraries(Fleet PUBLIC fltk)
 
+set(FLE_DEMO_CPP_FILES
+	demo/src/main.cpp
+	demo/src/tile_ex_test.cxx
+)
+
 if(FLEET_BUILD_DEMO)
-	add_executable(FleetDemo ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-	target_include_directories(FleetDemo PRIVATE ${CMAKE_SOURCE_DIR}/include )
+	add_executable(FleetDemo ${FLE_DEMO_CPP_FILES})
+	target_include_directories(FleetDemo PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/demo/include)
 	target_link_libraries(FleetDemo PRIVATE fltk Fleet)
 endif()

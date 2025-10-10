@@ -1,0 +1,65 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0500
+header_name {.h}
+code_name {.cxx}
+include_guard {}
+decl {\#include "FLE/Fle_TileEx.hpp"} {selected public global
+}
+
+Function {make_test_tileex_wnd()} {open
+} {
+  Fl_Window {} {open
+    xywh {1351 518 480 320} type Double resizable visible
+  } {
+    Fl_Tile {} {open
+      xywh {0 0 480 320} resizable
+      class Fle_TileEx
+    } {
+      Fl_Box {} {
+        xywh {0 0 114 80} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {0 80 114 80} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {114 0 66 144} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {0 160 114 28} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {0 188 75 96} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {75 188 39 56} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {0 284 480 36} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {75 244 200 40} box DOWN_BOX color 11
+      }
+      Fl_Box {} {
+        xywh {114 204 366 40} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {114 144 366 60} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {180 112 300 32} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {180 0 300 32} box DOWN_BOX color 52
+      }
+      Fl_Box {} {
+        xywh {180 32 130 80} box DOWN_BOX color 14
+      }
+      Fl_Box {} {
+        xywh {310 32 170 80} box DOWN_BOX color 6
+      }
+      Fl_Box {} {
+        xywh {275 244 205 40} box DOWN_BOX color 18
+      }
+    }
+  }
+}
