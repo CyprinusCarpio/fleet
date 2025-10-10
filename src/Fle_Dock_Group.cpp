@@ -135,7 +135,7 @@ int Fle_Dock_Group::get_label_width()
 		return 0;
 
 	fl_font(FL_HELVETICA, 14);
-	int lx = 0, ly;
+	int lx = 0, ly = 0;
 	fl_measure(label(), lx, ly);
 
 	return lx;

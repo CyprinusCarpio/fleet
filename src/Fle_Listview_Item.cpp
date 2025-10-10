@@ -379,7 +379,7 @@ void Fle_Listview_Item::get_text_xywh(int& X, int& Y, int& W, int& H)
 		H = 14;
 
 		Fl_Align align = FL_ALIGN_TOP | FL_ALIGN_INSIDE;
-		int mw, mh;
+		int mw = 0, mh = 0;
 		fl_measure(m_name.c_str(), mw, mh, align);
 
 		if (mw > 74) H = 28;
