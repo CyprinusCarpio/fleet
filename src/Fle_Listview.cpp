@@ -994,19 +994,18 @@ int Fle_Listview::handle(int e)
 	int gridX, gridY;
 	Fle_Listview_Item* atItem = get_item_at(ex, ey);
 	
-	if(item_tooltips())
+	if(item_tooltips() && lastAtItem != atItem)
 	{
-		if(e == FL_BEFORE_TOOLTIP)
+		Fl_Tooltip::enter(nullptr);
+		if(atItem)
 		{
-			Fl_Tooltip::override_text(atItem ? atItem->get_tooltip().c_str() : "");
-
-			return 1;
+			copy_tooltip(atItem->get_tooltip().c_str());
 		}
-		if(lastAtItem != atItem)
+		else
 		{
-			Fl_Tooltip::enter(nullptr);
-			Fl_Tooltip::enter(this);
+			copy_tooltip("");
 		}
+		Fl_Tooltip::enter(this);
 	}
 
 	if (dnd())

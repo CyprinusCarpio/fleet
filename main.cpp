@@ -432,6 +432,7 @@ int main(int argc, char** argv)
     listview = new Fle_Listview(0, 0, 0, 0, "");
 
     listview->callback(listview_cb);
+    listview->item_tooltips(true);
 
     listview->set_property_widths({ 82, 82 });
     listview->set_property_order({ 1, 0 });
