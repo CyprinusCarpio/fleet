@@ -134,9 +134,11 @@ void Fle_TileEx::get_max_changes_for_edge(Edge& edge, bool userDrag, int& maxShr
     {
         Fl_Widget* w = child(i);
         if(edge.type == VERTICAL)
-        {
+        {   
             int minW = userDrag ? m_extraData[i].m_minW : m_extraData[i].m_prefW;
             maxShrinkRightOrBottom = std::min(maxShrinkRightOrBottom, w->w() - minW);
+            if(w->x() + w->w() == x() + this->w())
+                continue;
             int maxW = userDrag ? m_extraData[i].m_maxW : m_extraData[i].m_prefW;
             maxGrowRightOrBottom = std::min(maxGrowRightOrBottom, maxW - w->w());
         }
@@ -144,10 +146,21 @@ void Fle_TileEx::get_max_changes_for_edge(Edge& edge, bool userDrag, int& maxShr
         {
             int minH = userDrag ? m_extraData[i].m_minH : m_extraData[i].m_prefH;
             maxShrinkRightOrBottom = std::min(maxShrinkRightOrBottom, w->h() - minH);
+            if(w->y() + w->h() == y() + h())
+                continue;
             int maxH = userDrag ? m_extraData[i].m_maxH : m_extraData[i].m_prefH;
             maxGrowRightOrBottom = std::min(maxGrowRightOrBottom, maxH - w->h());
         }
     }
+
+    if(maxShrinkLeftOrTop < 0)
+        maxShrinkLeftOrTop = 0;
+    if(maxGrowLeftOrTop < 0)
+        maxGrowLeftOrTop = 0;
+    if(maxShrinkRightOrBottom < 0)
+        maxShrinkRightOrBottom = 0;
+    if(maxGrowRightOrBottom < 0)
+        maxGrowRightOrBottom = 0;
 }
 
 Edge Fle_TileEx::get_next_viable_edge(Edge& edge, int delta, bool forShrink, bool userDrag)
@@ -244,6 +257,7 @@ Edge Fle_TileEx::get_next_viable_edge(Edge& edge, int delta, bool forShrink, boo
                 }
                 if(ciMinH < c->h())
                 {
+                    c = ci;
                     if(!forShrink)
                         break;
                 }
@@ -278,7 +292,7 @@ void Fle_TileEx::propagate_resize(Edge& edge, int& delta, bool userDrag)
                 c->resize(c->x(), c->y(), c->w(), c->h() + delta);
         }
         // TODO: implement scaling up of widgets below their pref size
-        
+
         return;
     }
 
