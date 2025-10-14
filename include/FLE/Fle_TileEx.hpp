@@ -5,26 +5,35 @@
 
 #include <vector>
 
-class WidgetExtraData;
+struct WidgetExtraData;
 struct Edge;
+class EdgeList;
+enum class EdgeType {ANY, VERTICAL, HORIZONTAL};
 
 class Fle_TileEx : public Fl_Group
 {
     std::vector<WidgetExtraData> m_extraData;
-
-    Edge find_edge_at(int X, int Y);
-    void get_widgets_at_edge(Edge& edge);
-    void get_max_changes_for_edge(Edge& edge, bool userDrag, int& maxShrinkLeftOrTop, int& maxGrowLeftOrTop, int& maxShrinkRightOrBottom, int& maxGrowRightOrBottom, int recurse = 0);
-    Edge get_next_viable_edge(Edge& edge, int delta, bool forShrink, bool userDrag = true);
-    void propagate_resize(Edge& edge, int& delta, bool userDrag = true);
+    EdgeList* m_edges;
+    bool m_needToFindEdges;
+    
+    void find_edges();
+    Edge* find_edge_at(int x, int y, EdgeType type = EdgeType::ANY);
+    void edges_populate_widgets();
+    Edge* get_prev_edge(Edge* edge);
+    Edge* get_next_edge(Edge* edge);
+    void get_max_changes_for_edge(Edge* edge, bool resizingWindow, int& maxShrinkLeftOrTop, int& maxGrowLeftOrTop, int& maxShrinkRightOrBottom, int& maxGrowRightOrBottom);
+    void propagate_resize(Edge* edge, int& delta, bool resizingWindow, Edge* previousEdge = nullptr);
 
 protected:
     int on_insert(Fl_Widget*, int) override;
     int on_move(int, int) override;
     void on_remove(int) override;
+
+    void draw() override;
     
 public:
     Fle_TileEx(int X, int Y, int W, int H, const char *L = 0);
+    ~Fle_TileEx();
 
     int handle(int e) override;
     void resize(int X, int Y, int W, int H) override;

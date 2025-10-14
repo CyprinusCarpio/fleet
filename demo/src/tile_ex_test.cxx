@@ -44,7 +44,7 @@ Fl_Double_Window* make_test_tileex_wnd() {
         o->box(FL_DOWN_BOX);
         o->color(FL_LIGHT2);
       } // Fl_Box* o
-      { Fl_Box* o = new Fl_Box(75, 244, 200, 40);
+      { Fl_Box* o = new Fl_Box(75, 244, 235, 40);
         o->box(FL_DOWN_BOX);
         o->color((Fl_Color)11);
       } // Fl_Box* o
@@ -72,17 +72,17 @@ Fl_Double_Window* make_test_tileex_wnd() {
         o->box(FL_DOWN_BOX);
         o->color((Fl_Color)6);
       } // Fl_Box* o
-      { Fl_Box* o = new Fl_Box(275, 244, 205, 40);
+      { Fl_Box* o = new Fl_Box(310, 244, 170, 40);
         o->box(FL_DOWN_BOX);
         o->color((Fl_Color)18);
       } // Fl_Box* o
-      o->end();
-      Fl_Group::current()->resizable(o);
       for(int i = 0; i < o->children(); i++)
       {
         Fl_Widget* w = o->child(i);
         o->size_range(w, w->w() / 2, w->h() / 2, w->w() * 2, w->h() * 2, w->w(), w->h());
       }
+      o->end();
+      Fl_Group::current()->resizable(o);
     } // Fle_TileEx* o
     o->end();
   } // Fl_Double_Window* o
