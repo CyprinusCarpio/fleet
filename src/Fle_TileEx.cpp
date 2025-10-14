@@ -3,7 +3,6 @@
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
 
-#include <iostream>
 #include <algorithm>
 
 #include <cassert>
@@ -17,6 +16,15 @@ struct Edge
     int position, start, end;
     std::vector<int> LOTWidgets;
     std::vector<int> BORWidgets;
+};
+
+class EdgeComparator
+{
+public:
+    bool operator()(const Edge* a, const Edge* b) const
+    {
+        return a->position < b->position;
+    }
 };
 
 class EdgeList
@@ -353,67 +361,11 @@ void Fle_TileEx::propagate_resize(Edge* edge, int& delta, bool resizingWindow, E
     int change = std::min(std::abs(delta), maxChange);
     
     if(delta < 0) change = -change;
-    for(Edge& e : m_edges->m_edges)
-    {
-        if(e.type != edge->type && e.position >= edge->start && e.position <= edge->end)
-        {
-            if(e.start == edge->position)
-            {
-                e.start += change;
-            }
-            else if(e.end == edge->position)
-            {
-                e.end += change;
-            }
-        }
-    }
-    edge->position += change;
     delta -= change;
-
+    
     if(change != 0)
     {
-        if(edge->type == EdgeType::VERTICAL)
-        {
-            for(int i : edge->LOTWidgets)
-            {
-                Fl_Widget* W = child(i);
-                W->resize(W->x(), W->y(), W->w() + change, W->h());
-                if(!resizingWindow)
-                {
-                    m_extraData[i].prefW = W->w();
-                }
-            }
-            for(int i : edge->BORWidgets)
-            {
-                Fl_Widget* W = child(i);
-                W->resize(W->x() + change, W->y(), W->w() - change, W->h());
-                if(!resizingWindow)
-                {
-                    m_extraData[i].prefW = W->w();
-                }
-            }
-        }
-        else
-        {
-            for(int i : edge->LOTWidgets)
-            {
-                Fl_Widget* W = child(i);
-                W->resize(W->x(), W->y(), W->w(), W->h() + change);
-                if(!resizingWindow)
-                {
-                    m_extraData[i].prefH = W->h();
-                }
-            }
-            for(int i : edge->BORWidgets)
-            {
-                Fl_Widget* W = child(i);
-                W->resize(W->x(), W->y() + change, W->w(), W->h() - change);
-                if(!resizingWindow)
-                {
-                    m_extraData[i].prefH = W->h();
-                }
-            }
-        }
+        edge_change(edge, change, !resizingWindow);
     }
 
     if(delta != 0)
@@ -424,6 +376,151 @@ void Fle_TileEx::propagate_resize(Edge* edge, int& delta, bool resizingWindow, E
         propagate_resize(nextToProcess, delta, resizingWindow, edge);
         oldDelta -= delta;
         propagate_resize(edge, oldDelta, resizingWindow, edge);
+    }
+}
+
+void Fle_TileEx::propagate_grow(Edge* edge, int delta, std::set<Edge*>& processedEdges, bool correction)
+{
+    if(edge == nullptr) return;
+    if(!correction && processedEdges.count(edge) > 0) return;
+    // the correction bool is to prevent further propagation during a correction AFTER propagation for a given edge
+    assert(edge->position >= 0);
+
+    int maxShrinkLeftOrTop, maxGrowLeftOrTop, maxShrinkRightOrBottom, maxGrowRightOrBottom;
+    get_max_changes_for_edge(edge, true, maxShrinkLeftOrTop, maxGrowLeftOrTop, maxShrinkRightOrBottom, maxGrowRightOrBottom);
+
+    int maxChange;
+    bool maxSizeHit = false;
+    if(delta > 0)
+    {
+        if(maxGrowLeftOrTop < maxShrinkRightOrBottom)
+        {
+            maxChange = maxGrowLeftOrTop;
+            maxSizeHit = true;
+        }
+        else
+        {
+            maxChange = maxShrinkRightOrBottom;
+        }
+    }
+    else
+    {
+        if(maxShrinkLeftOrTop < maxGrowRightOrBottom)
+        {
+            maxChange = maxShrinkLeftOrTop;
+        }
+        else
+        {
+            maxChange = maxGrowRightOrBottom;
+            maxSizeHit = true;
+        }
+    }
+    int change = std::min(std::abs(delta), maxChange);
+    
+    if(delta < 0) change = -change;
+    delta -= change;
+    
+    if(change != 0)
+    {
+        edge_change(edge, change, false);
+
+        processedEdges.insert(edge);
+    }
+
+    if(!correction && delta != 0)
+    {
+        std::set<Edge*, EdgeComparator> edgesToGo;
+
+        if(edge->type == EdgeType::VERTICAL)
+        {
+            for(int i : edge->BORWidgets)
+            {
+                Fl_Widget* W = child(i);
+                Edge* next = find_edge_at(W->x() + W->w(), W->y(), edge->type);
+                if(next)
+                    edgesToGo.insert(next);
+            }
+        }
+        else
+        {
+            for(int i : edge->BORWidgets)
+            {
+                Fl_Widget* W = child(i);
+                Edge* next = find_edge_at(W->x(), W->y() + W->h(), edge->type);
+                if(next)
+                    edgesToGo.insert(next);
+            }
+        }
+
+        for(Edge* e : edgesToGo)
+        {
+            propagate_grow(e, delta, processedEdges);
+        }
+
+        // The propagation may have freed up some space
+        // "propagate" one last time
+        propagate_grow(edge, delta, processedEdges, true);
+    }
+}
+
+void Fle_TileEx::edge_change(Edge* edge, int delta, bool updatePrefSizes)
+{
+    for(Edge& e : m_edges->m_edges)
+    {
+        if(e.type != edge->type && e.position >= edge->start && e.position <= edge->end)
+        {
+            if(e.start == edge->position)
+            {
+                e.start += delta;
+            }
+            else if(e.end == edge->position)
+            {
+                e.end += delta;
+            }
+        }
+    }
+    edge->position += delta;
+    if(edge->type == EdgeType::VERTICAL)
+    {
+        for(int i : edge->LOTWidgets)
+        {
+            Fl_Widget* W = child(i);
+            W->resize(W->x(), W->y(), W->w() + delta, W->h());
+            if(updatePrefSizes)
+            {
+                m_extraData[i].prefW = W->w();
+            }
+        }
+        for(int i : edge->BORWidgets)
+        {
+            Fl_Widget* W = child(i);
+            W->resize(W->x() + delta, W->y(), W->w() - delta, W->h());
+            if(updatePrefSizes)
+            {
+                m_extraData[i].prefW = W->w();
+            }
+        }
+    }
+    else
+    {
+        for(int i : edge->LOTWidgets)
+        {
+            Fl_Widget* W = child(i);
+            W->resize(W->x(), W->y(), W->w(), W->h() + delta);
+            if(updatePrefSizes)
+            {
+                m_extraData[i].prefH = W->h();
+            }
+        }
+        for(int i : edge->BORWidgets)
+        {
+            Fl_Widget* W = child(i);
+            W->resize(W->x(), W->y() + delta, W->w(), W->h() - delta);
+            if(updatePrefSizes)
+            {
+                m_extraData[i].prefH = W->h();
+            }
+        }
     }
 }
 
@@ -496,12 +593,42 @@ void Fle_TileEx::resize(int X, int Y, int W, int H)
     if(oldW != W)
     {
         int delta = W - oldW;
-        propagate_resize(delta < 0 ? m_edges->m_rightEdge : m_edges->m_leftEdge, delta, true);
+        if(delta < 0)
+        {
+            propagate_resize(m_edges->m_rightEdge, delta, true);
+        }
+        else
+        {
+            std::set<Edge*> processedEdges;
+            propagate_grow(m_edges->m_leftEdge, delta, processedEdges);
+
+            int rightEdgePos = m_edges->m_rightEdge->position;
+
+            if(rightEdgePos != W)
+            {
+                edge_change(m_edges->m_rightEdge, rightEdgePos - W, false);
+            }
+        }
     }
     if(oldH != H)
     {
         int delta = H - oldH;
-        propagate_resize(delta < 0 ? m_edges->m_bottomEdge : m_edges->m_topEdge, delta, true);
+        if(delta < 0)
+        {
+            propagate_resize(m_edges->m_bottomEdge, delta, true);
+        }
+        else
+        {
+            std::set<Edge*> processedEdges;
+            propagate_grow(m_edges->m_topEdge, delta, processedEdges);
+
+            int bottomEdgePos = m_edges->m_bottomEdge->position;
+
+            if(bottomEdgePos != H)
+            {
+                edge_change(m_edges->m_bottomEdge, H- bottomEdgePos, false);
+            }
+        }
     }
 }
 

@@ -4,6 +4,7 @@
 #include <FL/Fl_Group.H>
 
 #include <vector>
+#include <set>
 
 struct WidgetExtraData;
 struct Edge;
@@ -23,6 +24,8 @@ class Fle_TileEx : public Fl_Group
     Edge* get_next_edge(Edge* edge);
     void get_max_changes_for_edge(Edge* edge, bool resizingWindow, int& maxShrinkLeftOrTop, int& maxGrowLeftOrTop, int& maxShrinkRightOrBottom, int& maxGrowRightOrBottom);
     void propagate_resize(Edge* edge, int& delta, bool resizingWindow, Edge* previousEdge = nullptr);
+    void propagate_grow(Edge* edge, int delta, std::set<Edge*>& processedEdges, bool correction = false);
+    void edge_change(Edge* edge, int delta, bool updatePrefSizes);
 
 protected:
     int on_insert(Fl_Widget*, int) override;
