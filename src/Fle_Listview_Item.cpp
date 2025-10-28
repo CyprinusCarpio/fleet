@@ -218,7 +218,7 @@ Fl_Color Fle_Listview_Item::bgcolor() const
 void Fle_Listview_Item::set_icon(Fl_Pixmap* small, Fl_Pixmap* big)
 {
 	if (small == nullptr) small = defaultImgSmall;
-	if (big == nullptr) small = defaultImgBig;
+	if (big == nullptr) big = defaultImgBig;
 
 	m_smallIcon = small;
 	m_bigIcon = big;
@@ -302,6 +302,10 @@ void Fle_Listview_Item::draw_item(int index)
 	{
 		m_bigIcon->draw(x() + 21, y());
 	}
+	else if(m_displayMode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
+	{
+		m_bigIcon->draw(x() + 2, y() + 2);
+	}
 	else
 	{
 		m_smallIcon->draw(x(), y() + 2);
@@ -315,7 +319,7 @@ void Fle_Listview_Item::draw_item(int index)
 
 		fl_draw(m_displayName.c_str(), textX, textY, textW, textH, align);
 	}
-	else
+	else if(m_displayMode != FLE_LISTVIEW_DISPLAY_TOOLBOX)
 	{
 		Fl_Align align = FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_CLIP;
 
@@ -363,6 +367,10 @@ bool Fle_Listview_Item::is_inside_drag_area(int X, int Y)
 	{
 		return X >= x() + 15 && X <= x() + w() - 15 && Y >= y() + 15 && Y <= y() + h() - 15;
 	}
+	else if(m_displayMode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
+	{
+		return X >= x() && X <= x() + w() && Y >= y() && Y <= y() + h();
+	}
 
 	return X >= x() && X <= x() + get_label_width() + 16 && Y >= y() && Y <= y() + h();
 }
@@ -383,6 +391,10 @@ void Fle_Listview_Item::get_text_xywh(int& X, int& Y, int& W, int& H)
 		fl_measure(m_name.c_str(), mw, mh, align);
 
 		if (mw > 74) H = 28;
+	}
+	else if(m_displayMode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
+	{
+		return;
 	}
 	else
 	{

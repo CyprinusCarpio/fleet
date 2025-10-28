@@ -45,11 +45,12 @@ enum Fle_Listview_Reason
 	Listview class is used to display a list of items. It is somewhat similar
 	to Fl_Browser, but it supports more display modes and has more features.
 
-	By default, the listview has 4 display modes:
+	By default, the listview has 5 display modes:
 	- FLE_LISTVIEW_DISPLAY_ICONS: items are displayed as 32x32 icons
 	- FLE_LISTVIEW_DISPLAY_SMALL_ICONS: items are displayed vertically as 16x16 icons
 	- FLE_LISTVIEW_DISPLAY_DETAILS: various properties of items are displayed
 	- FLE_LISTVIEW_DISPLAY_LIST: items are displayed horizontally as 16x16 icons
+	- FLE_LISTVIEW_DISPLAY_TOOLBOX: items are displayed as 32x32 icons with no labels drawn
 
 	\par Features:
 

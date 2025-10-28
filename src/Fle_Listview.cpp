@@ -47,6 +47,7 @@ void Fle_Listview::scr_callback(Fl_Widget* w, void* data)
 Fle_Listview::Fle_Listview(int X, int Y, int W, int H, const char* l) : Fl_Group(X, Y, W, H, l),
 m_hscrollbar(0, 0, 0, 0, 0), m_vscrollbar(0, 0, 0, 0, 0)
 {
+	m_displayMode = FLE_LISTVIEW_DISPLAY_DETAILS;
 	m_state = FLE_LISTVIEW_DETAILS_HIGHLIGHT | FLE_LISTVIEW_REDRAW | FLE_LISTVIEW_DND;
 	m_headersHeight = 20;
 	m_focusedItem = -1;
@@ -139,6 +140,15 @@ void Fle_Listview::arrange_items()
 			}
 			columnSum += H;
 			break;
+		case FLE_LISTVIEW_DISPLAY_TOOLBOX:
+			W = 36;
+			H = 36;
+			if (X + W > w() - Fl::scrollbar_size() - (2 * m_margin))
+			{
+				X = 0;
+				Y += 36;
+			}
+			break;
 		}
 
 		item->resize(X, Y, W, H);
@@ -157,6 +167,9 @@ void Fle_Listview::arrange_items()
 		case FLE_LISTVIEW_DISPLAY_DETAILS:
 		case FLE_LISTVIEW_DISPLAY_LIST:
 			Y += 20;
+			break;
+		case FLE_LISTVIEW_DISPLAY_TOOLBOX:
+			X += 36;
 			break;
 		}
 	}
@@ -190,6 +203,7 @@ void Fle_Listview::keyboard_select(int key)
 		if (key == FL_Up)
 			itemToFocus = m_focusedItem - 1;
 		break;
+	case FLE_LISTVIEW_DISPLAY_TOOLBOX:
 	case FLE_LISTVIEW_DISPLAY_ICONS:
 	case FLE_LISTVIEW_DISPLAY_SMALL_ICONS:
 		if (key == FL_Right)
@@ -227,6 +241,11 @@ void Fle_Listview::get_grid_xy_at(int X, int Y, int& gridX, int& gridY)
 	{
 		gridX = (X - x() - m_margin + scrX) / 76;
 		gridY = (Y - y() - m_margin + scrY) / 76;
+	}
+	else if (mode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
+	{
+		gridX = (X - x() - m_margin + scrX) / 36;
+		gridY = (Y - y() - m_margin + scrY) / 36;
 	}
 	else
 	{
@@ -351,10 +370,10 @@ void Fle_Listview::set_focused(Fle_Listview_Item* item, bool focused)
 
 void Fle_Listview::set_focused(int item)
 {
-	// Unfocus current
-	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
 	// Check for bounds and if already focused
 	if (item == m_focusedItem || item > m_items.size() - 1) return;
+	// Unfocus current
+	if (m_focusedItem != -1) m_items[m_focusedItem]->set_focus(false);
 
 	// Focus selected
 	m_focusedItem = item;
@@ -659,13 +678,16 @@ void Fle_Listview::draw()
 
 
 	// Draw frame
-	if (mode == FLE_LISTVIEW_DISPLAY_DETAILS)
+	if(box() != FL_FLAT_BOX)
 	{
-		fl_draw_box(fl_frame(box()), x(), y() + m_headersHeight, w(), h() - m_headersHeight, color());
-	}
-	else
-	{
-		fl_draw_box(fl_frame(box()), x(), y(), w(), h(), color());
+		if (mode == FLE_LISTVIEW_DISPLAY_DETAILS)
+		{
+ 			fl_draw_box(fl_frame(box()), x(), y() + m_headersHeight, w(), h() - m_headersHeight, color());
+		}
+		else
+		{
+			fl_draw_box(fl_frame(box()), x(), y(), w(), h(), color());
+		}
 	}
 
 	// Draw focus rectangle
