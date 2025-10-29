@@ -27,6 +27,7 @@ set(FLE_CPP_FILES
 	src/Fle_Accordion_Group.cpp
 	src/Fle_Stack.cpp
 	src/Fle_TileEx.cpp
+	src/Fle_Property_Sheet.cpp
 )
 
 set(FLE_HPP_FILES
@@ -43,6 +44,7 @@ set(FLE_HPP_FILES
 	include/FLE/Fle_Accordion_Group.hpp
 	include/FLE/Fle_Stack.hpp
 	include/FLE/Fle_TileEx.hpp
+	include/FLE/Fle_Property_Sheet.hpp
 )
 
 add_library(Fleet ${FLE_CPP_FILES})

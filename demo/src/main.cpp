@@ -7,6 +7,9 @@
 #include <FL/Fl_Scheme_Choice.H>
 #include <FL/fl_draw.H>
 #include <FL/fl_show_colormap.H>  // TEST: added by Albrecht-S
+#include <FL/Fl_Spinner.H>
+#include <FL/Fl_Check_Button.H>
+#include <FL/Fl_Multiline_Input.H>
 
 #include <iostream>
 
@@ -19,6 +22,7 @@
 #include "FLE/Fle_Accordion.hpp"
 #include "FLE/Fle_Accordion_Group.hpp"
 #include "FLE/Fle_Stack.hpp"
+#include "FLE/Fle_Property_Sheet.hpp"
 
 #include "tile_ex_test.h"
 
@@ -620,11 +624,25 @@ int main(int argc, char** argv)
 
     vertGroup5->add_band_widget(accordion);
 
-    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Favourites", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 120, 180, false);
-    Fl_Box* favs = new Fl_Box(0, 0, 0, 0, "");
-    favs->box(FL_DOWN_BOX);
-    favs->color(FL_BACKGROUND2_COLOR);
-    vertGroup2->add_band_widget(favs);
+    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Properties", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 120, 180, false);
+    Fle_Property_Sheet* sheet = new Fle_Property_Sheet(0, 0, 0, 0, "");
+    Fl_Spinner* spin1 = new Fl_Spinner(0, 0, 0, 26, "");
+    sheet->add_property_widget(spin1, "X Offset");
+    Fl_Spinner* spin2 = new Fl_Spinner(0, 0, 0, 26, "");
+    sheet->add_property_widget(spin2, "Y Offset");
+    Fl_Check_Button* clamp = new Fl_Check_Button(0, 0, 0, 26, "Clamp");
+    sheet->add_property_widget(clamp, "Options:");
+    Fl_Check_Button* reverse = new Fl_Check_Button(0, 0, 0, 26, "Reverse");
+    sheet->add_property_widget(reverse, " ");
+    Fl_Box* scriptsLabel = new Fl_Box(0, 0, 0, 20, "Script:");
+    scriptsLabel->box(FL_THIN_UP_BOX);
+    scriptsLabel->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+    scriptsLabel->color(FL_BACKGROUND_COLOR);
+    sheet->add_property_widget(scriptsLabel, "");
+    Fl_Multiline_Input* scriptInput = new Fl_Multiline_Input(0, 0, 0, 90, "");
+    scriptInput->value("function add(a, b)\n  return a + b\nend");
+    sheet->add_property_widget(scriptInput, "");
+    vertGroup2->add_band_widget(sheet);
 
     Fle_Dock_Group* toolbar = new Fle_Dock_Group(dh, 6, "Menubar", FLE_DOCK_NO_HOR_LABEL | FLE_DOCK_FLEXIBLE, FLE_DOCK_TOP, FLE_DOCK_BOTTOM, 240, 26, true);
     FlatMenuBar* menu = new FlatMenuBar(0, 0, 0, 0, "");
