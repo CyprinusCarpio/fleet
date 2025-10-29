@@ -3,8 +3,6 @@
 
 #include <FL/Fl_Grid.H>
 
-#include <string>
-
 class Fle_Property_Sheet: public Fl_Grid
 {
     int m_nameColumnWidth;
