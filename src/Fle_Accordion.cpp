@@ -14,6 +14,7 @@ void Fle_Accordion::fit_pack()
     for(int i = 0; i < m_pack.children(); i++)
     {
         Fle_Accordion_Group* c = (Fle_Accordion_Group*)m_pack.child(i);
+        if(!c->visible()) continue;
         sumH += c->h();
     }
 

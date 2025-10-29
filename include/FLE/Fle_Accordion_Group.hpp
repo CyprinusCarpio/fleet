@@ -50,7 +50,16 @@ public:
     bool is_open() const { return m_open; }
     /// Returns the minimum height of the group
     /// \return The minimum height
-    int min_height() const { return m_minH; }   
+    int min_height() const { return m_minH; }
+    /// Sets the minimum height of the group
+    /// \param height The new minimum height
+    void min_height(int height); 
+    /// Returns the maximum height of the group
+    /// \return The maximum height
+    int max_height() const { return m_maxH; }
+    /// Sets the maximum height of the group
+    /// \param height The new maximum height
+    void max_height(int height);
 
     void resize(int X, int Y, int W, int H) override;
     int handle(int e) override;

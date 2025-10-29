@@ -90,7 +90,7 @@ void Fle_Accordion_Group::resize(int X, int Y, int W, int H)
 
 int Fle_Accordion_Group::handle(int event)
 {
-    bool eventInsideDrag = m_open && Fl::event_inside(x(), y() + h() - 5, w(), 5);
+    bool eventInsideDrag = m_open && Fl::event_inside(x(), y() + h() - 5, w(), 5) && m_minH != m_maxH;
 	static int offsetY = 0;
 	int ey = Fl::event_y();
 
@@ -135,4 +135,24 @@ int Fle_Accordion_Group::handle(int event)
     }
 
     return Fl_Group::handle(event);
+}
+
+void Fle_Accordion_Group::min_height(int height)
+{
+    m_minH = height;
+    if(m_child->h() < m_minH)
+    {
+        m_child->resize(x(), y() + 20, w(), m_minH);
+        get_accordion()->fit_pack();
+    }
+}
+
+void Fle_Accordion_Group::max_height(int height)
+{
+    m_maxH = height;
+    if(m_child->h() > m_maxH)
+    {
+        m_child->resize(x(), y() + 20, w(), m_maxH);
+        get_accordion()->fit_pack();
+    }
 }
