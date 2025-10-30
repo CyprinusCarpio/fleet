@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classFle__Listview__Item.html" title="Listview item with various properties." alt="" coords="5,5,145,31"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,5,73,31"/>
+<area shape="rect" id="Node000001" href="$classFle__Property__Sheet.html" title="A container widget for displaying property widgets." alt="" coords="121,5,269,31"/>
+<area shape="poly" id="edge7_Node000000_Node000001" title=" " alt="" coords="87,15,121,15,121,21,87,21"/>
 </map>

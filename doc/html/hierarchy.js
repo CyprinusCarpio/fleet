@@ -1,5 +1,8 @@
 var hierarchy =
 [
+    [ "Edge", "structEdge.html", null ],
+    [ "EdgeComparator", "classEdgeComparator.html", null ],
+    [ "EdgeList", "classEdgeList.html", null ],
     [ "Fl_Button", null, [
       [ "Fle_Flat_Button", "classFle__Flat__Button.html", null ]
     ] ],
@@ -15,15 +18,22 @@ var hierarchy =
         [ "Fle_Toolbar", "classFle__Toolbar.html", null ]
       ] ]
     ] ],
+    [ "Fl_Grid", null, [
+      [ "Fle_Property_Sheet", "classFle__Property__Sheet.html", null ]
+    ] ],
     [ "Fl_Group", null, [
       [ "Fle_Accordion_Group", "classFle__Accordion__Group.html", null ],
       [ "Fle_Dock_Group", "classFle__Dock__Group.html", null ],
       [ "Fle_Dock_Host", "classFle__Dock__Host.html", null ],
-      [ "Fle_Listview", "classFle__Listview.html", null ]
+      [ "Fle_Listview", "classFle__Listview.html", null ],
+      [ "Fle_Stack", "classFle__Stack.html", null ],
+      [ "Fle_TileEx", "classFle__TileEx.html", null ]
     ] ],
     [ "Fl_Scroll", null, [
       [ "Fle_Accordion", "classFle__Accordion.html", null ]
     ] ],
+    [ "Fle_Color_Theme", "structFle__Color__Theme.html", null ],
     [ "Fle_Edge_Helper", "classFle__Edge__Helper.html", null ],
-    [ "Fle_Listview_Item", "classFle__Listview__Item.html", null ]
+    [ "Fle_Listview_Item", "classFle__Listview__Item.html", null ],
+    [ "WidgetExtraData", "structWidgetExtraData.html", null ]
 ];

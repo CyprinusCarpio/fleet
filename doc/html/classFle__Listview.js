@@ -33,6 +33,8 @@ var classFle__Listview =
     [ "handle", "classFle__Listview.html#ad5479e8253a1ed7ed09fdac156894690", null ],
     [ "handle_user_selection", "classFle__Listview.html#a1f97a86c8d6b2d691593c30860ddac59", null ],
     [ "insert_item", "classFle__Listview.html#ad7f18c1a5e3413099d56aded0543f56d", null ],
+    [ "item_tooltips", "classFle__Listview.html#ab92bac05a0c11f13464aefdf090c61e7", null ],
+    [ "item_tooltips", "classFle__Listview.html#a5902ed96c5dc428cfc81bf3033eb89a6", null ],
     [ "keyboard_select", "classFle__Listview.html#aa963f61573178592e306a865ccb44e3f", null ],
     [ "recalc_item_column_width", "classFle__Listview.html#a8339810b8f40fb4cf979e1df3a919080", null ],
     [ "remove_item", "classFle__Listview.html#a9fb267767c54bbe952bc9baae23aebbb", null ],

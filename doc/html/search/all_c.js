@@ -26,5 +26,7 @@ var searchData=
   ['m_5fresizing_23',['m_resizing',['../classFle__Dock__Group.html#a5a0dda3973640e1a2fe11492e612a6b7',1,'Fle_Dock_Group']]],
   ['m_5fstate_24',['m_state',['../classFle__Dock__Group.html#a048d0ed37a2d0251b5e5fc5277e95c87',1,'Fle_Dock_Group']]],
   ['m_5funpintext_25',['m_unpinText',['../classFle__Dock__Group.html#a4c419778b6119ca1cbfe14c2e6eb3965',1,'Fle_Dock_Group']]],
-  ['min_5fheight_26',['min_height',['../classFle__Accordion__Group.html#a910281c0482fad9804b1c71c5c328f42',1,'Fle_Accordion_Group']]]
+  ['max_5fheight_26',['max_height',['../classFle__Accordion__Group.html#a2e5f4a7191898900c8a4cd41ebc2c9eb',1,'Fle_Accordion_Group::max_height() const'],['../classFle__Accordion__Group.html#a5b37f560432fa5918b931edfffd80561',1,'Fle_Accordion_Group::max_height(int height)']]],
+  ['min_5fheight_27',['min_height',['../classFle__Accordion__Group.html#a910281c0482fad9804b1c71c5c328f42',1,'Fle_Accordion_Group::min_height() const'],['../classFle__Accordion__Group.html#a4824fe17a240b93decaf13497534f05a',1,'Fle_Accordion_Group::min_height(int height)']]],
+  ['min_5fsize_5fsum_28',['min_size_sum',['../classFle__Stack.html#af49c943f43eed83714c12d53f8d87625',1,'Fle_Stack']]]
 ];

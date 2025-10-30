@@ -175,6 +175,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a172fc3e3d41c078fb8c2b65b9e04df59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6013b838b12b250d2491e24061c128b4" id="r_a6013b838b12b250d2491e24061c128b4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Listview.html#a6013b838b12b250d2491e24061c128b4">dnd</a> () const</td></tr>
 <tr class="separator:a6013b838b12b250d2491e24061c128b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5902ed96c5dc428cfc81bf3033eb89a6" id="r_a5902ed96c5dc428cfc81bf3033eb89a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Listview.html#a5902ed96c5dc428cfc81bf3033eb89a6">item_tooltips</a> (bool tooltips)</td></tr>
+<tr class="separator:a5902ed96c5dc428cfc81bf3033eb89a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab92bac05a0c11f13464aefdf090c61e7" id="r_ab92bac05a0c11f13464aefdf090c61e7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Listview.html#ab92bac05a0c11f13464aefdf090c61e7">item_tooltips</a> () const</td></tr>
+<tr class="separator:ab92bac05a0c11f13464aefdf090c61e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e11b1810c094ba353ccfe14a0ba5738" id="r_a3e11b1810c094ba353ccfe14a0ba5738"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Listview.html#a3e11b1810c094ba353ccfe14a0ba5738">add_property_name</a> (std::string name)</td></tr>
 <tr class="separator:a3e11b1810c094ba353ccfe14a0ba5738"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1dc2698c8f69d9257e8a25276d7b2a06" id="r_a1dc2698c8f69d9257e8a25276d7b2a06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Listview.html#a1dc2698c8f69d9257e8a25276d7b2a06">set_property_order</a> (std::vector&lt; int &gt; order)</td></tr>
@@ -274,11 +278,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Listview class is used to display a list of items. It is somewhat similar to Fl_Browser, but it supports more display modes and has more features. </p>
-<p>By default, the listview has 4 display modes:</p><ul>
+<p>By default, the listview has 5 display modes:</p><ul>
 <li>FLE_LISTVIEW_DISPLAY_ICONS: items are displayed as 32x32 icons</li>
 <li>FLE_LISTVIEW_DISPLAY_SMALL_ICONS: items are displayed vertically as 16x16 icons</li>
 <li>FLE_LISTVIEW_DISPLAY_DETAILS: various properties of items are displayed</li>
 <li>FLE_LISTVIEW_DISPLAY_LIST: items are displayed horizontally as 16x16 icons</li>
+<li>FLE_LISTVIEW_DISPLAY_TOOLBOX: items are displayed as 32x32 icons with no labels drawn</li>
 </ul>
 <dl class="section user"><dt>Features:</dt><dd></dd></dl>
 <ul>
@@ -317,10 +322,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
 <div class="line">            <span class="keywordflow">break</span>;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassFle__Listview__Item_html"><div class="ttname"><a href="classFle__Listview__Item.html">Fle_Listview_Item</a></div><div class="ttdoc">Listview item with various properties.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.hpp:35</div></div>
-<div class="ttc" id="aclassFle__Listview__Item_html_a6e187ed0af8b6b109f5b96dbbb8ed2ed"><div class="ttname"><a href="classFle__Listview__Item.html#a6e187ed0af8b6b109f5b96dbbb8ed2ed">Fle_Listview_Item::get_name</a></div><div class="ttdeci">const std::string &amp; get_name() const</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:231</div></div>
-<div class="ttc" id="aclassFle__Listview_html"><div class="ttname"><a href="classFle__Listview.html">Fle_Listview</a></div><div class="ttdoc">Listview class is used to display a list of items. It is somewhat similar to Fl_Browser,...</div><div class="ttdef"><b>Definition</b> Fle_Listview.hpp:146</div></div>
-<div class="ttc" id="aclassFle__Listview_html_a6487c52e1b0d27efb6994c9d53a26356"><div class="ttname"><a href="classFle__Listview.html#a6487c52e1b0d27efb6994c9d53a26356">Fle_Listview::get_callback_item</a></div><div class="ttdeci">Fle_Listview_Item * get_callback_item() const</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:867</div></div>
+<div class="ttc" id="aclassFle__Listview__Item_html"><div class="ttname"><a href="classFle__Listview__Item.html">Fle_Listview_Item</a></div><div class="ttdoc">Listview item with various properties.</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.hpp:36</div></div>
+<div class="ttc" id="aclassFle__Listview__Item_html_a6e187ed0af8b6b109f5b96dbbb8ed2ed"><div class="ttname"><a href="classFle__Listview__Item.html#a6e187ed0af8b6b109f5b96dbbb8ed2ed">Fle_Listview_Item::get_name</a></div><div class="ttdeci">const std::string &amp; get_name() const</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:236</div></div>
+<div class="ttc" id="aclassFle__Listview_html"><div class="ttname"><a href="classFle__Listview.html">Fle_Listview</a></div><div class="ttdoc">Listview class is used to display a list of items. It is somewhat similar to Fl_Browser,...</div><div class="ttdef"><b>Definition</b> Fle_Listview.hpp:149</div></div>
+<div class="ttc" id="aclassFle__Listview_html_a6487c52e1b0d27efb6994c9d53a26356"><div class="ttname"><a href="classFle__Listview.html#a6487c52e1b0d27efb6994c9d53a26356">Fle_Listview::get_callback_item</a></div><div class="ttdeci">Fle_Listview_Item * get_callback_item() const</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:926</div></div>
 </div><!-- fragment --><dl class="section user"><dt>Drag and Drop:</dt><dd></dd></dl>
 <p>Drag and drop is optional, and it is enabled by default. To disable drag and drop, call dnd(false). DND operations require the use of callbacks. DND operations rely on the concept of 'drag zones', which are rectangles inside individual item rectangles that typically span just the icon and the text, but not the empty space around the item. This is done so that both dragNdrop and box selection is possible.</p>
 <p>Typical callback for DND: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> listview_cb(Fl_Widget* w, <span class="keywordtype">void</span>* data)</div>
@@ -346,9 +351,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
 <div class="line">        <span class="keywordflow">break</span>;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassFle__Listview__Item_html_a2956ae5ea3a4d3c378b94f847a96a356"><div class="ttname"><a href="classFle__Listview__Item.html#a2956ae5ea3a4d3c378b94f847a96a356">Fle_Listview_Item::bgcolor</a></div><div class="ttdeci">void bgcolor(Fl_Color color)</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:207</div></div>
-<div class="ttc" id="aclassFle__Listview_html_a54f89f5a5aa63bd89231b77d840996f1"><div class="ttname"><a href="classFle__Listview.html#a54f89f5a5aa63bd89231b77d840996f1">Fle_Listview::add_item</a></div><div class="ttdeci">void add_item(Fle_Listview_Item *item)</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:667</div></div>
-<div class="ttc" id="aclassFle__Listview_html_a99d895cd60e7fb379e7e329408db9c46"><div class="ttname"><a href="classFle__Listview.html#a99d895cd60e7fb379e7e329408db9c46">Fle_Listview::get_item_drag_at</a></div><div class="ttdeci">Fle_Listview_Item * get_item_drag_at(int x, int y) const</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:857</div></div>
+<div class="ttc" id="aclassFle__Listview__Item_html_a2956ae5ea3a4d3c378b94f847a96a356"><div class="ttname"><a href="classFle__Listview__Item.html#a2956ae5ea3a4d3c378b94f847a96a356">Fle_Listview_Item::bgcolor</a></div><div class="ttdeci">void bgcolor(Fl_Color color)</div><div class="ttdef"><b>Definition</b> Fle_Listview_Item.cpp:208</div></div>
+<div class="ttc" id="aclassFle__Listview_html_a54f89f5a5aa63bd89231b77d840996f1"><div class="ttname"><a href="classFle__Listview.html#a54f89f5a5aa63bd89231b77d840996f1">Fle_Listview::add_item</a></div><div class="ttdeci">void add_item(Fle_Listview_Item *item)</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:710</div></div>
+<div class="ttc" id="aclassFle__Listview_html_a99d895cd60e7fb379e7e329408db9c46"><div class="ttname"><a href="classFle__Listview.html#a99d895cd60e7fb379e7e329408db9c46">Fle_Listview::get_item_drag_at</a></div><div class="ttdeci">Fle_Listview_Item * get_item_drag_at(int x, int y) const</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:916</div></div>
 </div><!-- fragment --><dl class="section user"><dt>Usage:</dt><dd></dd></dl>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>* lv = <span class="keyword">new</span> <a class="code hl_class" href="classFle__Listview.html">Fle_Listview</a>(10, 10, 400, 300, <span class="stringliteral">&quot;Listview&quot;</span>);</div>
 <div class="line">lv-&gt;callback(listview_cb);</div>
@@ -356,7 +361,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
 <div class="line">lv-&gt;<a class="code hl_function" href="classFle__Listview.html#a54f89f5a5aa63bd89231b77d840996f1">add_item</a>(<span class="keyword">new</span> <a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a>(<span class="stringliteral">&quot;Item1&quot;</span>));</div>
 <div class="line">lv-&gt;<a class="code hl_function" href="classFle__Listview.html#a54f89f5a5aa63bd89231b77d840996f1">add_item</a>(<span class="keyword">new</span> <a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a>(<span class="stringliteral">&quot;Item2&quot;</span>));</div>
 <div class="line">lv-&gt;<a class="code hl_function" href="classFle__Listview.html#a54f89f5a5aa63bd89231b77d840996f1">add_item</a>(<span class="keyword">new</span> <a class="code hl_class" href="classFle__Listview__Item.html">Fle_Listview_Item</a>(<span class="stringliteral">&quot;Item3&quot;</span>));</div>
-<div class="ttc" id="aclassFle__Listview_html_a8d87c4ed7efc2c1cce73e0b153a822da"><div class="ttname"><a href="classFle__Listview.html#a8d87c4ed7efc2c1cce73e0b153a822da">Fle_Listview::set_display_mode</a></div><div class="ttdeci">void set_display_mode(Fle_Listview_Display_Mode mode)</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:877</div></div>
+<div class="ttc" id="aclassFle__Listview_html_a8d87c4ed7efc2c1cce73e0b153a822da"><div class="ttname"><a href="classFle__Listview.html#a8d87c4ed7efc2c1cce73e0b153a822da">Fle_Listview::set_display_mode</a></div><div class="ttdeci">void set_display_mode(Fle_Listview_Display_Mode mode)</div><div class="ttdef"><b>Definition</b> Fle_Listview.cpp:936</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a54f89f5a5aa63bd89231b77d840996f1" name="a54f89f5a5aa63bd89231b77d840996f1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a54f89f5a5aa63bd89231b77d840996f1">&#9670;&#160;</a></span>add_item()</h2>
@@ -840,7 +845,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
       </table>
 </div><div class="memdoc">
 <p>Get sort direction (ascending or descending or none)</p>
-<dl class="section return"><dt>Returns</dt><dd>Sort direction: -1 = none, 0 = ascending, 1 = descending </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Sort direction: -1 = none, 0 = descending, 1 = ascending </dd></dl>
 
 </div>
 </div>
@@ -892,6 +897,58 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>draw</b> () override<
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">item</td><td>Pointer to the item </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab92bac05a0c11f13464aefdf090c61e7" name="ab92bac05a0c11f13464aefdf090c61e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab92bac05a0c11f13464aefdf090c61e7">&#9670;&#160;</a></span>item_tooltips() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Fle_Listview::item_tooltips </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get item tooltips flag</p>
+<dl class="section return"><dt>Returns</dt><dd>Item tooltips </dd></dl>
+
+</div>
+</div>
+<a id="a5902ed96c5dc428cfc81bf3033eb89a6" name="a5902ed96c5dc428cfc81bf3033eb89a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5902ed96c5dc428cfc81bf3033eb89a6">&#9670;&#160;</a></span>item_tooltips() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Fle_Listview::item_tooltips </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>tooltips</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set item tooltips flag When it's set to true, individual items will have tooltips</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tooltips</td><td>Item tooltips </td></tr>
   </table>
   </dd>
 </dl>

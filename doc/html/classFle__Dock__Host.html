@@ -139,6 +139,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6ad871e12867e23471017701e34c8549"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89d1a2f410cceb2dd666f40033fcf8c3" id="r_a89d1a2f410cceb2dd666f40033fcf8c3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Dock__Host.html#a89d1a2f410cceb2dd666f40033fcf8c3">set_preview_color</a> (const Fl_Color &amp;color)</td></tr>
 <tr class="separator:a89d1a2f410cceb2dd666f40033fcf8c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a120a32a2062db46879595f242ee35100" id="r_a120a32a2062db46879595f242ee35100"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Dock__Host.html#a120a32a2062db46879595f242ee35100">set_preview_timeout</a> (float timeout)</td></tr>
+<tr class="separator:a120a32a2062db46879595f242ee35100"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47857988f10779841d8de7112b152c9f" id="r_a47857988f10779841d8de7112b152c9f"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Dock__Host.html#a47857988f10779841d8de7112b152c9f">get_preview_timeout</a> () const</td></tr>
+<tr class="separator:a47857988f10779841d8de7112b152c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b5ad741a57b6ef296a1c1d29e770a71" id="r_a1b5ad741a57b6ef296a1c1d29e770a71"><td class="memItemLeft" align="right" valign="top">int const *const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFle__Dock__Host.html#a1b5ad741a57b6ef296a1c1d29e770a71">save_layout</a> (int &amp;size)</td></tr>
 <tr class="memdesc:a1b5ad741a57b6ef296a1c1d29e770a71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Layout save and load functions.  <br /></td></tr>
 <tr class="separator:a1b5ad741a57b6ef296a1c1d29e770a71"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -194,9 +198,9 @@ Friends</h2></td></tr>
 <div class="line"> </div>
 <div class="line">dh-&gt;<a class="code hl_function" href="classFle__Dock__Host.html#ab6f22a625d0ec7e6000890392f05bc8f">add_work_widget</a>(listview);</div>
 <div class="ttc" id="aclassFle__Dock__Group_html"><div class="ttname"><a href="classFle__Dock__Group.html">Fle_Dock_Group</a></div><div class="ttdoc">Represents a dockable group widget within a Fle_Dock_Host.</div><div class="ttdef"><b>Definition</b> Fle_Dock_Group.hpp:102</div></div>
-<div class="ttc" id="aclassFle__Dock__Group_html_ac863e00a42a4e8dad603661200226124"><div class="ttname"><a href="classFle__Dock__Group.html#ac863e00a42a4e8dad603661200226124">Fle_Dock_Group::add_band_widget</a></div><div class="ttdeci">bool add_band_widget(Fl_Widget *widget, int oX=-1, int oY=-1, int oW=-1, int oH=-1)</div><div class="ttdef"><b>Definition</b> Fle_Dock_Group.cpp:818</div></div>
+<div class="ttc" id="aclassFle__Dock__Group_html_ac863e00a42a4e8dad603661200226124"><div class="ttname"><a href="classFle__Dock__Group.html#ac863e00a42a4e8dad603661200226124">Fle_Dock_Group::add_band_widget</a></div><div class="ttdeci">bool add_band_widget(Fl_Widget *widget, int oX=-1, int oY=-1, int oW=-1, int oH=-1)</div><div class="ttdef"><b>Definition</b> Fle_Dock_Group.cpp:816</div></div>
 <div class="ttc" id="aclassFle__Dock__Host_html_a022d1774ec8e0763a7ed9837c5489800"><div class="ttname"><a href="classFle__Dock__Host.html#a022d1774ec8e0763a7ed9837c5489800">Fle_Dock_Host::Fle_Dock_Group</a></div><div class="ttdeci">friend class Fle_Dock_Group</div><div class="ttdef"><b>Definition</b> Fle_Dock_Host.hpp:148</div></div>
-<div class="ttc" id="aclassFle__Dock__Host_html_ab6f22a625d0ec7e6000890392f05bc8f"><div class="ttname"><a href="classFle__Dock__Host.html#ab6f22a625d0ec7e6000890392f05bc8f">Fle_Dock_Host::add_work_widget</a></div><div class="ttdeci">bool add_work_widget(Fl_Widget *widget)</div><div class="ttdef"><b>Definition</b> Fle_Dock_Host.cpp:1036</div></div>
+<div class="ttc" id="aclassFle__Dock__Host_html_ab6f22a625d0ec7e6000890392f05bc8f"><div class="ttname"><a href="classFle__Dock__Host.html#ab6f22a625d0ec7e6000890392f05bc8f">Fle_Dock_Host::add_work_widget</a></div><div class="ttdeci">bool add_work_widget(Fl_Widget *widget)</div><div class="ttdef"><b>Definition</b> Fle_Dock_Host.cpp:1037</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a21a55290c4ec288ebfb39ce6f1ec8afc" name="a21a55290c4ec288ebfb39ce6f1ec8afc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a21a55290c4ec288ebfb39ce6f1ec8afc">&#9670;&#160;</a></span>Fle_Dock_Host()</h2>
@@ -438,6 +442,32 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a47857988f10779841d8de7112b152c9f" name="a47857988f10779841d8de7112b152c9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47857988f10779841d8de7112b152c9f">&#9670;&#160;</a></span>get_preview_timeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float Fle_Dock_Host::get_preview_timeout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Gets the preview timeout. </p><dl class="section return"><dt>Returns</dt><dd>The timeout value in seconds. </dd></dl>
+
+</div>
+</div>
 <a id="ab9b3d5f2e54f3649316f9894cabddc12" name="ab9b3d5f2e54f3649316f9894cabddc12"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab9b3d5f2e54f3649316f9894cabddc12">&#9670;&#160;</a></span>handle()</h2>
 
@@ -646,6 +676,38 @@ Friends</h2></td></tr>
 <p>Set the color of preview displayed when user tries to attach a group Sets the color used for drawing the docking preview rectangle. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">color</td><td>The Fl_Color value. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a120a32a2062db46879595f242ee35100" name="a120a32a2062db46879595f242ee35100"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a120a32a2062db46879595f242ee35100">&#9670;&#160;</a></span>set_preview_timeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Fle_Dock_Host::set_preview_timeout </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>timeout</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Sets the timeout (in seconds) for the preview rectangle. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">timeout</td><td>The timeout value in seconds. </td></tr>
   </table>
   </dd>
 </dl>

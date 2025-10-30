@@ -10,6 +10,9 @@ var dir_815ead0c86eed492e795c5e46ad72b60 =
     [ "Fle_Listview.hpp", "Fle__Listview_8hpp_source.html", null ],
     [ "Fle_Listview_Item.hpp", "Fle__Listview__Item_8hpp_source.html", null ],
     [ "Fle_Orientable_Flex.hpp", "Fle__Orientable__Flex_8hpp_source.html", null ],
+    [ "Fle_Property_Sheet.hpp", "Fle__Property__Sheet_8hpp_source.html", null ],
     [ "Fle_Schemes.hpp", "Fle__Schemes_8hpp_source.html", null ],
+    [ "Fle_Stack.hpp", "Fle__Stack_8hpp_source.html", null ],
+    [ "Fle_TileEx.hpp", "Fle__TileEx_8hpp_source.html", null ],
     [ "Fle_Toolbar.hpp", "Fle__Toolbar_8hpp_source.html", null ]
 ];

@@ -8,6 +8,7 @@ var classFle__Listview__Item =
     [ "get_listview", "classFle__Listview__Item.html#ab49c023c2fe041e34d6707b54b5d1fe1", null ],
     [ "get_name", "classFle__Listview__Item.html#a6e187ed0af8b6b109f5b96dbbb8ed2ed", null ],
     [ "get_text_xywh", "classFle__Listview__Item.html#ab6da2d9098f2137f21cf52efdd184773", null ],
+    [ "get_tooltip", "classFle__Listview__Item.html#a519e17b64d78e1dcc479551fd5b720cf", null ],
     [ "is_greater", "classFle__Listview__Item.html#a44db9a5e182d9112ab8b3a6333b3c5c7", null ],
     [ "is_inside_drag_area", "classFle__Listview__Item.html#a6ba2d90c979ee760ba106f2375ca6250", null ],
     [ "is_selected", "classFle__Listview__Item.html#a83cd20998ce6bfd1a767740e83f36e51", null ],
@@ -17,6 +18,7 @@ var classFle__Listview__Item =
     [ "set_icon", "classFle__Listview__Item.html#a919aa203df2c620851c868944ef85165", null ],
     [ "set_name", "classFle__Listview__Item.html#a65a9add8f061fbd920ca83b5b2cadd94", null ],
     [ "set_selected", "classFle__Listview__Item.html#a257162ce373e37efeaa06e17ed392d01", null ],
+    [ "set_tooltip", "classFle__Listview__Item.html#a33624471bb56778709c7d7a03dc486c3", null ],
     [ "textcolor", "classFle__Listview__Item.html#adee2821bccee11b7de1137b23ea0bf61", null ],
     [ "textcolor", "classFle__Listview__Item.html#a4de8365280927abd3d5ebf3a5b4c2d55", null ]
 ];

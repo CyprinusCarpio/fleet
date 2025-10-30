@@ -1,11 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,80,85,105"/>
-<area shape="rect" id="Node000001" href="$classFle__Accordion__Group.html" title="An accordion group widget." alt="" coords="133,5,292,31"/>
-<area shape="poly" id="edge7_Node000000_Node000001" title=" " alt="" coords="76,70,132,40,163,28,165,33,134,44,79,75"/>
-<area shape="rect" id="Node000002" href="$classFle__Dock__Group.html" title="Represents a dockable group widget within a Fle_Dock_Host." alt="" coords="149,55,277,80"/>
-<area shape="poly" id="edge8_Node000000_Node000002" title=" " alt="" coords="99,82,148,74,149,80,99,87"/>
-<area shape="rect" id="Node000003" href="$classFle__Dock__Host.html" title="Manages a central work area and surrounding dockable areas." alt="" coords="153,104,272,129"/>
-<area shape="poly" id="edge9_Node000000_Node000003" title=" " alt="" coords="99,98,154,106,153,111,99,103"/>
-<area shape="rect" id="Node000004" href="$classFle__Listview.html" title="Listview class is used to display a list of items. It is somewhat similar to Fl_Browser,..." alt="" coords="161,153,264,179"/>
-<area shape="poly" id="edge10_Node000000_Node000004" title=" " alt="" coords="80,110,134,138,168,151,166,156,132,143,78,115"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,31,91,56"/>
+<area shape="rect" id="Node000001" href="$classFle__Colors__Choice.html" title="A color theme choice widget." alt="" coords="144,5,285,31"/>
+<area shape="poly" id="edge2_Node000000_Node000001" title=" " alt="" coords="104,32,143,26,144,31,105,38"/>
+<area shape="rect" id="Node000002" href="$classFle__Scheme__Choice.html" title="A scheme choice widget." alt="" coords="139,55,291,80"/>
+<area shape="poly" id="edge3_Node000000_Node000002" title=" " alt="" coords="104,49,138,54,138,59,104,54"/>
 </map>
