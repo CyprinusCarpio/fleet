@@ -175,7 +175,7 @@ void Fle_Dock_Group::create_detached_window()
 {
 	if (m_state & FLE_DOCK_VERTICAL)
 	{
-		m_detachedWindow = new Fle_Detached_Window(get_breadth(), get_size(), label());
+		m_detachedWindow = new Fle_Detached_Window(get_breadth(), get_min_size(), label());
 		m_detachedWindow->end();
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
@@ -185,7 +185,7 @@ void Fle_Dock_Group::create_detached_window()
 	}
 	if (m_state & FLE_DOCK_HORIZONTAL)
 	{
-		m_detachedWindow = new Fle_Detached_Window(get_size(), get_breadth(), label());
+		m_detachedWindow = new Fle_Detached_Window(get_min_size(), get_breadth(), label());
 		m_detachedWindow->end();
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
