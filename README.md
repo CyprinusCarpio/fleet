@@ -14,7 +14,23 @@ A complex group that allows the program user to change it's appearance by moving
 - `Fle_Dock_Group`  
 A container for any FLTK widget that allows it to be attached/detached to a `Fle_Dock_Host`. There are vertical and horizontal dock groups.
 - `Fle_Listview`  
-A traditional list view widget supporting 4 display modes by default: icons, small icons, list, details. Populated by `Fle_Listview_Item` or it's subclasses.
+A traditional list view widget supporting 5 display modes by default: icons, small icons, list, details, toolbox. Populated by `Fle_Listview_Item` or it's subclasses.
+- `Fle_Accordion`   
+A simple widget used to vertically position many groups that can be individually opened/closed.
+- `Fle_Accordion_Group`     
+A group to use in a accordion widget. Can be resized by the user by dragging.
+- `Fle_Orientable_Flex`     
+A simple extension of `Fl_Flex` that can change it's orientation.
+- `Fle_Property_Sheet`  
+A container widget typically used to contain various valuator/input widgets. Useful as a accordion group.
+- `Fle_Stack`   
+A alternative to `Fl_Flex` that tries to maintain child widgets at their preferred sizes.
+- `Fle_Toolbar`     
+A simple toolbar widget, used to contain various tools. Has separators. Can be oriented both horizontally and vertically.
+- `Fle_TileEx`      
+A alternative to `Fl_Tile` with the ability to set preferred and maximal sizes for child widgets.
+
+Below are short overviews of a selection of those widgets:
 
 #### Docking in-depth
 FLEET brings the widget docking ability known from other toolkits to FLTK. At the core of this design is the `Fle_Dock_Host`, which governs the positioning, scale and behaviour of the attached groups, and contains the **work widget** in the middle. The dock host can allow attaching of groups in 4 **directions**: top, right, bottom, left. The directions are divided into **lines** of dock groups. A dock group has a few key properties:
@@ -42,22 +58,37 @@ Currently, the docking implementation is incompatible with with the server side 
 #### Listview
 ![image](./listview.png)
 
-The listview has 4 display modes: icons, small icons, list and details. More can be added in a subclass. The items can be sorted in ascending/descending order or be left unsorted. Items can be added, inserted at a specified position and removed. The listview produces several callbacks that cover most use cases, such as item selected/deselected/reselected, item added/removed, DND event begin and end.
+The listview has 5 display modes: icons, small icons, list, details and toolbox. More can be added in a subclass. The items can be sorted in ascending/descending order or be left unsorted. Items can be added, inserted at a specified position and removed. The listview produces several callbacks that cover most use cases, such as item selected/deselected/reselected, item added/removed, DND event begin and end.
 
 #### Accordion
 ![image](./accordion.png)
 
 A simple container widget that is useful for containing lots of widgets in a small area. The widgets are contained in individual, vertically positioned groups that can be opened or closed. Resizing the groups is made possible with dragging on their borders.
 
+#### Toolbar
+![image](./toolbar.png)
+
+The ubiquitous, simple toolbar is useful for displaying a range of tool widgets. Tools can be added/inserted, and separators can be added to distinguish various tool groups. Can be oriented both vertically and horizontally.
+
+#### Property sheet
+![image](./property_sheet.png)
+
+Used to contain various valuator/input widgets related to each other. Can be used on it's own or as a accordion group to create complex property panes.
+
+#### Theming
+![image](./themes.png)
+
+FLEET adds 2 now widget schemes, and a impressive list of color themes! FLTK can no longer be accused of looking like it's stuck in the 90s. Two choice widgets, for widget scheme and for color themes are provided.
+
 #### Code style
-The preferred style for FLEET development is Allman style indentation, snake_case and no `auto` keyword.
+The preferred style for FLEET development is Allman style indentation, no lambda functions, snake_case and no `auto` keyword.
 
 #### Usage
 FLEET is meant to be used as a statically linked submodule in your project. To include it in your compilation, simply use the `add_subdirectory` function in your CMakeLists.txt, and link against `Fleet`, like so:
 ```
 add_subdirectory(fleet)
 ...
-target_link_libraries(FleetUsingProject PRIVATE fltk Fleet)
+target_link_libraries(FleetUsingProject PRIVATE fltk::fltk Fleet)
 ```
 
 Also, FLEET has a demo application (target `FleetDemo`) that contains several of the included widgets in a program that emulates the layout and appearance, but not function of various file explorer programs.

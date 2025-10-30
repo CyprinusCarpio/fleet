@@ -702,7 +702,7 @@ void Fle_TileEx::on_remove(int index)
     m_needToFindEdges = true;
 }
 
-void Fle_TileEx::draw()
+/*void Fle_TileEx::draw()
 {
     if(m_needToFindEdges)
     {
@@ -724,4 +724,4 @@ void Fle_TileEx::draw()
             fl_rectf(e.start - 2, e.position - 2, e.end - e.start, 4);
         }
     }
-}
+}*/
