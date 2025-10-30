@@ -20,9 +20,10 @@ void Fle_Property_Sheet::draw()
 {
     Fl_Grid::draw();
 
-    // Draw over the remaining line
-    fl_color(color());
-    fl_rectf(x() + m_nameColumnWidth + 3, y() + m_heightSum + (rows() * 1) + 2, 2, h() - m_heightSum - (rows() * 1) - 6);
+    // Draw over the line below last widget
+    fl_push_clip(x(), y() + m_heightSum + rows() + 2, w(), h() - m_heightSum - rows() - 5);
+    fl_draw_box(box(), x(), y(), w(), h(), color());
+    fl_pop_clip();
 }
 
 void Fle_Property_Sheet::add_property_widget(Fl_Widget* w, const char* name)
