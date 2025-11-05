@@ -446,6 +446,8 @@ int main(int argc, char** argv)
     listview->add_property_name("Owner");
     //listview->set_display_mode(FLE_LISTVIEW_DISPLAY_TOOLBOX);
     //listview->single_selection(true);
+    //listview->color(FL_BACKGROUND_COLOR);
+    //listview->box(FL_FLAT_BOX);
 
     {
         Test_Listview_Item* item;

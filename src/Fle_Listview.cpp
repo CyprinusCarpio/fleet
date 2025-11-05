@@ -141,12 +141,12 @@ void Fle_Listview::arrange_items()
 			columnSum += H;
 			break;
 		case FLE_LISTVIEW_DISPLAY_TOOLBOX:
-			W = 36;
-			H = 36;
+			W = 32;
+			H = 32;
 			if (X + W > w() - Fl::scrollbar_size() - (2 * m_margin))
 			{
 				X = 0;
-				Y += 36;
+				Y += 32;
 			}
 			break;
 		}
@@ -169,7 +169,7 @@ void Fle_Listview::arrange_items()
 			Y += 20;
 			break;
 		case FLE_LISTVIEW_DISPLAY_TOOLBOX:
-			X += 36;
+			X += 32;
 			break;
 		}
 	}
@@ -244,8 +244,8 @@ void Fle_Listview::get_grid_xy_at(int X, int Y, int& gridX, int& gridY)
 	}
 	else if (mode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
 	{
-		gridX = (X - x() - m_margin + scrX) / 36;
-		gridY = (Y - y() - m_margin + scrY) / 36;
+		gridX = (X - x() - m_margin + scrX) / 32;
+		gridY = (Y - y() - m_margin + scrY) / 32;
 	}
 	else
 	{
@@ -601,7 +601,7 @@ int Fle_Listview::get_sorted_by_property() const
 
 void Fle_Listview::draw_background()
 {
-	fl_draw_box(FL_DOWN_BOX, x(), y(), w(), h(), color());
+	fl_draw_box(box(), x(), y(), w(), h(), color());
 }
 
 void Fle_Listview::draw()
@@ -1060,7 +1060,7 @@ int Fle_Listview::handle(int e)
 			if (atItem->is_selected() && Fl::event_ctrl()) selected = false;
 			handle_user_selection(atItem, selected, true, itemDrag);
 		}
-		else if (ret != 1)
+		else if (ret != 1 && m_displayMode != FLE_LISTVIEW_DISPLAY_TOOLBOX) // Always keep one tool selected
 		{
 			// Clear selection
 			deselect_all();

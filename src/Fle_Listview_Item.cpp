@@ -288,8 +288,15 @@ void Fle_Listview_Item::draw_item(int index)
 	}
 	if (m_selected) 
 	{
-		fl_color(FL_SELECTION_COLOR);
-		fl_rectf(textX,	textY, textW, textH);
+		if(m_displayMode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
+		{
+			fl_draw_box(FL_THIN_DOWN_BOX, x(), y(), w(), h(), FL_LIGHT2);
+		}
+		else
+		{
+			fl_color(FL_SELECTION_COLOR);
+			fl_rectf(textX,	textY, textW, textH);
+		}
 	}
 	else if (m_bgcolor != 0xFFFFFFFF)
 	{
@@ -304,7 +311,7 @@ void Fle_Listview_Item::draw_item(int index)
 	}
 	else if(m_displayMode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
 	{
-		m_bigIcon->draw(x() + 2, y() + 2);
+		m_bigIcon->draw(x(), y());
 	}
 	else
 	{
@@ -394,7 +401,10 @@ void Fle_Listview_Item::get_text_xywh(int& X, int& Y, int& W, int& H)
 	}
 	else if(m_displayMode == FLE_LISTVIEW_DISPLAY_TOOLBOX)
 	{
-		return;
+		X += 3;
+		W -= 6;
+		Y += 3;
+		H -= 6;
 	}
 	else
 	{
