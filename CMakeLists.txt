@@ -49,7 +49,7 @@ set(FLE_HPP_FILES
 
 add_library(Fleet ${FLE_CPP_FILES})
 target_include_directories(Fleet PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_link_libraries(Fleet PUBLIC fltk)
+target_link_libraries(Fleet PUBLIC fltk::fltk)
 
 set(FLE_DEMO_CPP_FILES
 	demo/src/main.cpp
@@ -59,5 +59,5 @@ set(FLE_DEMO_CPP_FILES
 if(FLEET_BUILD_DEMO)
 	add_executable(FleetDemo ${FLE_DEMO_CPP_FILES})
 	target_include_directories(FleetDemo PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/demo/include)
-	target_link_libraries(FleetDemo PRIVATE fltk Fleet)
+	target_link_libraries(FleetDemo PRIVATE fltk::fltk Fleet)
 endif()
