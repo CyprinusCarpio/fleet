@@ -800,7 +800,7 @@ void Fle_Listview::clear_items()
 	m_selected.clear();
 	m_vscrollbar.value(0);
 	m_hscrollbar.value(0);
-	set_focused(-1);
+	m_focusedItem = -1;
 	set_redraw(true);
 	listview_redraw();
 }
@@ -1303,6 +1303,11 @@ int Fle_Listview::handle(int e)
 		{
 			set_focused(0);
 		}
+		return 1;
+	}
+	else if(e == FL_UNFOCUS)
+	{
+		redraw();
 		return 1;
 	}
 	else if (e == FL_KEYDOWN && Fl::focus() == this)
