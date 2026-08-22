@@ -5,7 +5,6 @@
 #include <FL/Fl_Tooltip.H>
 
 #include <algorithm>
-#include <iostream>
 
 bool intersect(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
 {
@@ -15,7 +14,7 @@ bool intersect(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, in
 	if (bx1 > bx2) std::swap(bx1, bx2);
 	if (by1 > by2) std::swap(by1, by2);
 
-	if (ax2 < bx1 || ax1 > bx2 || ay2 < by1 || ay1 > by2)
+	if (ax2 < bx1 || ax1 >= bx2 || ay2 < by1 || ay1 >= by2)
 	{
 		return false;
 	}
@@ -833,6 +832,17 @@ void Fle_Listview::deselect_all(int otherThan)
 	listview_redraw();
 }
 
+void Fle_Listview::invert_selection()
+{
+	set_redraw(false);
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		select_item(i, !m_items[i]->is_selected());
+	}
+	set_redraw(true);
+	listview_redraw();
+}
+
 void Fle_Listview::select_item(int index, bool selected)
 {
 	if(index > m_items.size() - 1) return;
@@ -1060,7 +1070,7 @@ int Fle_Listview::handle(int e)
 			if (atItem->is_selected() && Fl::event_ctrl()) selected = false;
 			handle_user_selection(atItem, selected, true, itemDrag);
 		}
-		else if (ret != 1 && m_displayMode != FLE_LISTVIEW_DISPLAY_TOOLBOX) // Always keep one tool selected
+		else if (ret != 1 && m_displayMode != FLE_LISTVIEW_DISPLAY_TOOLBOX && !Fl::event_ctrl()) // Always keep one tool selected
 		{
 			// Clear selection
 			deselect_all();
@@ -1332,6 +1342,12 @@ int Fle_Listview::handle(int e)
 				{
 					select_item(i, true);
 				}
+			}
+			break;
+		case 'i':
+			if (Fl::event_ctrl() && !single_selection())
+			{
+				invert_selection();
 			}
 			break;
 		}

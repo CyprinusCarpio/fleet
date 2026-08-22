@@ -294,6 +294,8 @@ public:
 	///
 	/// \param otherThan Index of the item that should not be deselected
 	void deselect_all(int otherThan = -1);
+	/// Inverts the selection
+	void invert_selection();
 	/// Sets the selection status of an item
 	///
 	/// \param index Index of the item
