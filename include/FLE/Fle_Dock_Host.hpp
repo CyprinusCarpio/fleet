@@ -6,7 +6,7 @@
 
 #include <FLE/Fle_Dock_Group.hpp>
 
-#define Fle_GRIP_SIZE 3 ///< Defines the sensitive pixel width/height for edge detection (resizing grips). 
+#define FLE_GRIP_SIZE 3 ///< Defines the sensitive pixel width/height for edge detection (resizing grips). 
 
 /// Callback function type for notifying when the host's minimum size changes.
 /// \param host Pointer to the Fle_Dock_Host whose minimum size changed.
@@ -14,72 +14,7 @@
 /// \param minH The new calculated minimum height.
 typedef void (Fle_Dock_Host_Min_Size_Callback)(Fle_Dock_Host*, int, int);
 
-/// \class Fle_Edge_Helper
-/// \brief Internal helper class to represent interactive edges for resizing.
-///
-/// This class stores information about a draggable edge within the Fle_Dock_Host.
-/// Edges can exist between the work area and docked groups, between two adjacent
-/// groups in the same line, or between two adjacent lines of groups. It simplifies
-/// event handling for resizing operations by encapsulating the edge's position,
-/// orientation, and the associated groups or lines.
-class Fle_Edge_Helper
-{
-	/// TODO: maybe there's a better way than using a helper class? 
-protected:
-	friend class Fle_Dock_Host;
-	/// x, y - starting point 
-	/// l - length, going to right/bottom  (Note: Corrected comment from 'y - length')
-	/// v - vertical 
-	int x, y, l;
-	bool v; ///< True if the edge is vertical, false if horizontal.
-	Fle_Dock_Group* group_a; ///< Pointer to the first group involved in a group-group edge resize.  Null otherwise.
-	Fle_Dock_Group* group_b; ///< Pointer to the second group involved in a group-group edge resize.  Null otherwise.
-
-	/// This defines the edge between lines line_it and line_it + 1 
-	std::list<std::list<Fle_Dock_Group*>>::iterator line_it; ///< Iterator pointing to the first line in a line-line edge resize. 
-	std::list<std::list<Fle_Dock_Group*>>* direction; ///< Pointer to the list of lines for a line-line edge resize. 
-
-	/// Checks if the given coordinates are close to this edge.
-	/// \param X The X coordinate to check.
-	/// \param Y The Y coordinate to check.
-	/// \return True if the coordinates are within Fle_GRIP_SIZE pixels of the edge.
-	const bool is_close(int X, int Y)
-	{
-		if (v && Y >= y && Y < y + l && std::abs(X - x) <= Fle_GRIP_SIZE) // Corrected Y range check
-		{
-			return true;
-		}
-		else if (!v && X >= x && X < x + l && std::abs(Y - y) <= Fle_GRIP_SIZE) // Corrected Y range check and orientation check
-			return true;
-
-		return false;
-	}
-
-
-	/// Constructors are protected deliberately 
-	/// Constructor for work area edges.
-	/// \param X Starting X coordinate.
-	/// \param Y Starting Y coordinate.
-	/// \param L Length of the edge.
-	/// \param V True if vertical, false if horizontal.
-	Fle_Edge_Helper(int X, int Y, int L, bool V);
-	/// Constructor for edges between two groups.
-	/// \param X Starting X coordinate.
-	/// \param Y Starting Y coordinate.
-	/// \param L Length/Breadth associated with the edge (often group breadth).
-	/// \param V True if vertical, false if horizontal.
-	/// \param A Pointer to the first group.
-	/// \param B Pointer to the second group.
-	Fle_Edge_Helper(int X, int Y, int L, bool V, Fle_Dock_Group* A, Fle_Dock_Group* B);
-	/// Constructor for edges between two lines.
-	/// \param X Starting X coordinate.
-	/// \param Y Starting Y coordinate.
-	/// \param L Length of the edge.
-	/// \param V True if vertical, false if horizontal.
-	/// \param IT Iterator to the first line.
-	/// \param D Pointer to the list containing the lines.
-	Fle_Edge_Helper(int X, int Y, int L, bool V, std::list<std::list<Fle_Dock_Group*>>::iterator IT, std::list<std::list<Fle_Dock_Group*>>* D);
-};
+class Fle_Edge_Helper;
 
 /** \class Fle_Dock_Host
 	\brief Manages a central work area and surrounding dockable areas.
@@ -154,6 +89,8 @@ class Fle_Dock_Host : public Fl_Group
 	int m_breadthRight;          ///< Total width of all docked groups in the right area. 
 	int m_breadthBottom;         ///< Total height of all docked groups in the bottom area. 
 	int m_breadthLeft;           ///< Total width of all docked groups in the left area. 
+	int m_breadthInnerTop;       ///< Total height of all docked groups in the inner top area.
+	int m_breadthInnerBottom;    ///< Total height of all docked groups in the inner bottom area.
 	int m_workWidgetMinW;        ///< Minimum width constraint for the work widget. 
 	int m_workWidgetMinH;        ///< Minimum height constraint for the work widget. 
 	int m_oldMinW;               ///< Previously calculated minimum width for the host. 
@@ -174,14 +111,19 @@ class Fle_Dock_Host : public Fl_Group
 	/// The outer list stores the lines, and inner list stores the pointers to
 	/// actual dock groups.  All dock groups in a line have the same breadth and
 	/// flexible status. 
-	/// Horizontal lines have priority over vertical lines, like so: 
-	/// ---
-	/// | |
-	/// ---
-	std::list<std::list<Fle_Dock_Group*>> m_topLines;     ///< Lines of groups docked at the top. 
-	std::list<std::list<Fle_Dock_Group*>> m_rightLines;   ///< Lines of groups docked on the right. 
-	std::list<std::list<Fle_Dock_Group*>> m_bottomLines;  ///< Lines of groups docked at the bottom. 
-	std::list<std::list<Fle_Dock_Group*>> m_leftLines;    ///< Lines of groups docked on the left. 
+	/// The dock directions are laid out like so:
+	/// AAAAA
+	/// BCCCB
+	/// B   B
+	/// BCCCB
+	/// AAAAA
+	/// A - horizontal directions, B - vertical directions, C - inner horizontal directions
+	std::list<std::list<Fle_Dock_Group*>> m_topLines;         ///< Lines of groups docked at the top. 
+	std::list<std::list<Fle_Dock_Group*>> m_rightLines;       ///< Lines of groups docked on the right. 
+	std::list<std::list<Fle_Dock_Group*>> m_bottomLines;      ///< Lines of groups docked at the bottom. 
+	std::list<std::list<Fle_Dock_Group*>> m_leftLines;        ///< Lines of groups docked on the left. 
+	std::list<std::list<Fle_Dock_Group*>> m_innerTopLines;    ///< Lines of groups docked on the left. 
+	std::list<std::list<Fle_Dock_Group*>> m_innerBottomLines; ///< Lines of groups docked on the left. 
 
 	std::list<Fle_Dock_Group*> m_detachedGroups; ///< List of currently detached (floating) groups. 
 	std::list<Fle_Dock_Group*> m_hiddenGroups;   ///< List of currently hidden groups. 
@@ -198,11 +140,15 @@ class Fle_Dock_Host : public Fl_Group
 	/// \param oldBreadthTop Optional previous top breadth for delta calculation.
 	/// \param oldBreadthBottom Optional previous bottom breadth for delta calculation.
 	void reposition_vertical_groups(int oldBreadthTop = -1, int oldBreadthBottom = -1);
+	/// Repositions group docked in inner horizontal directions. Always called after reposition_vertical_groups
+	/// \param oldBreadthLeft
+	/// \param oldBreadthRight
+	void reposition_inner_horizontal_groups(int oldBreadthLeft = -1, int oldBreadthRight = -1);
 	/// Adjusts the sizes of groups within a line to fit available space, respecting minimum sizes. May move groups to new lines if necessary. 
 	/// \param line Pointer to the list of groups in the line.
 	/// \param isVerticalGroup True if the line contains vertically oriented groups (left/right docking).
 	/// \param alreadyFixed Optional list to track groups moved during squeezing to prevent double processing.
-	void squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, bool isVerticalGroup, std::list<Fle_Dock_Group*>* alreadyFixed = nullptr);
+	void squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, bool isVertical, bool isInner, std::list<Fle_Dock_Group*>* alreadyFixed = nullptr);
 	/// Shifts the position of all groups within a line horizontally or vertically. 
 	/// \param line Pointer to the list of groups in the line.
 	/// \param offset The amount to shift (positive or negative).
@@ -285,6 +231,10 @@ class Fle_Dock_Host : public Fl_Group
 	/// \param Y Screen Y coordinate.
 	/// \return True if the host is visible at the coordinates, false otherwise.
 	bool is_host_visible_at(int X, int Y);
+	/// Helper function to get lines from a direction
+	/// \param direction direction
+	/// \return Pointer to the list of lines in the direction
+	std::list<std::list<Fle_Dock_Group*>>* get_lines(int direction);
 
 protected:
 	/// Draws the host, including the docking preview if active.

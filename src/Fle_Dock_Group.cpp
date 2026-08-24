@@ -106,14 +106,14 @@ void Fle_Dock_Group::position_everything()
 {
 	// Decoration buttons are not present on the horizontal group
 	// and on toolbar groups attached vertically
-	if (m_state & FLE_DOCK_VERTICAL && (m_state & FLE_DOCK_TOOLBAR) == false &&  m_closeButton && m_pinButton)
+	if (m_closeButton && m_closeButton->visible())
 	{
 		m_closeButton->resize(x() + w() - 17, y() + 2, 16, 16);
 		m_pinButton->resize(x() + w() - 35, y() + 2, 16, 16);
 	}
 	if (m_bandWidget)
 	{
-		if (m_state & FLE_DOCK_VERTICAL)
+		if ((m_closeButton && m_closeButton->visible()) || (m_state & FLE_DOCK_TOOLBAR && m_state & FLE_DOCK_VERTICAL))
 		{
 			m_bandWidget->resize(x() + m_bandOffsetX, y() + m_decorationSize + m_bandOffsetY, w() - m_bandOffsetX - m_bandOffsetW, h() - m_decorationSize - m_bandOffsetY - m_bandOffsetH);
 		}
@@ -146,29 +146,7 @@ void Fle_Dock_Group::try_attach_to_host(int X, int Y)
 	int addedToDirection = m_host->try_attach(this, X, Y, !detachable());
 
 	if (addedToDirection != 0)
-	{
 		delete_detached_wnd();
-
-		// A toolbar group may be attached to all directions
-		// check if the state needs updating
-		if (is_toolbar())
-		{
-			if (m_state & FLE_DOCK_VERTICAL && (addedToDirection == FLE_DOCK_TOP || addedToDirection == FLE_DOCK_BOTTOM))
-			{
-				m_state &= ~FLE_DOCK_VERTICAL;
-				m_state |= FLE_DOCK_HORIZONTAL;
-
-				position_everything();
-			}
-			if (m_state & FLE_DOCK_HORIZONTAL && (addedToDirection == FLE_DOCK_LEFT || addedToDirection == FLE_DOCK_RIGHT))
-			{
-				m_state &= ~FLE_DOCK_HORIZONTAL;
-				m_state |= FLE_DOCK_VERTICAL;
-
-				position_everything();
-			}
-		}
-	}
 }
 
 void Fle_Dock_Group::create_detached_window()
@@ -282,10 +260,13 @@ void Fle_Dock_Group::set_vertical(bool vertical)
 
 	if (m_state != oldState)
 	{
-		// Swap band widget offsets
-		int o = m_bandOffsetY;
-		m_bandOffsetY = m_bandOffsetX;
-		m_bandOffsetX = o;
+		if(m_state & FLE_DOCK_TOOLBAR)
+		{
+			// Swap band widget offsets
+			int o = m_bandOffsetY;
+			m_bandOffsetY = m_bandOffsetX;
+			m_bandOffsetX = o;
+		}
 
 		position_everything();
 
@@ -449,7 +430,7 @@ int Fle_Dock_Group::handle(int e)
 			menu[1].deactivate();
 
 		bool shouldShowMenu = false;
-		if (m_state & FLE_DOCK_VERTICAL)
+		if (m_closeButton)
 		{
 			if((is_toolbar() && Fl::event_x() <= x() + w() && Fl::event_y() <= y() + m_decorationSize) ||
 			   (!is_toolbar() && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - 38))
@@ -457,7 +438,7 @@ int Fle_Dock_Group::handle(int e)
 				shouldShowMenu = true;
 			}
 		}
-		else if (m_state & FLE_DOCK_HORIZONTAL && Fl::event_x() <= x() + m_decorationSize + get_label_width())
+		else if (!m_closeButton && Fl::event_x() <= x() + m_decorationSize + get_label_width())
 		{
 			shouldShowMenu = true;
 		}
@@ -761,7 +742,7 @@ void Fle_Dock_Group::draw()
 {
 	Fl_Group::draw(); // draw buttons
 
-	if (m_state & FLE_DOCK_VERTICAL)
+	if (m_state & FLE_DOCK_VERTICAL || m_direction == FLE_DOCK_INNER_TOP || m_direction == FLE_DOCK_INNER_BOTTOM)
 	{
 		if (is_toolbar())
 		{

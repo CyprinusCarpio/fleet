@@ -20,7 +20,9 @@ enum Fle_Dock_Directions
     FLE_DOCK_RIGHT = 1 << 1, ///< Dock to the right edge.
     FLE_DOCK_BOTTOM = 1 << 2, ///< Dock to the bottom edge.
     FLE_DOCK_LEFT = 1 << 3, ///< Dock to the left edge.
-    FLE_DOCK_ALLDIRS = 15      ///< Allow docking to all edges.
+    FLE_DOCK_INNER_TOP = 1 << 4, ///< Dock above work widget.
+    FLE_DOCK_INNER_BOTTOM = 1 << 5, ///< Dock below work widget.
+    FLE_DOCK_ALLDIRS = 63      ///< Allow docking to all edges.
 };
 
 /// \enum Fle_Dock_State
@@ -54,8 +56,8 @@ enum Fle_Dock_State
 class Fle_Detached_Window : public Fl_Double_Window
 {
 private:
-
     friend class Fle_Dock_Group;
+
 #ifdef FLTK_USE_WAYLAND
     bool m_resizeAllowed; ///< Internal flag to control resizing.
     float m_screenScale;  ///< Stores the screen scale factor for Wayland display handling. 

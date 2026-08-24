@@ -566,7 +566,7 @@ int main(int argc, char** argv)
 	win->end();
 	win->resizable(dh);
 
-    vertGroup1 = new Fle_Dock_Group(dh, 1, "Folders", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 120, 180, false);
+    vertGroup1 = new Fle_Dock_Group(dh, 1, "Folders", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT | FLE_DOCK_INNER_TOP | FLE_DOCK_INNER_BOTTOM, 120, 180, false);
     Fl_Tree* tree = make_tree();
 	vertGroup1->add_band_widget(tree);
 
@@ -613,7 +613,7 @@ int main(int argc, char** argv)
     stack->add(stack2, 30, 30);
     vertGroup4->add_band_widget(stack);
 
-    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Accordion", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 75, 180, false);
+    Fle_Dock_Group* vertGroup5 = new Fle_Dock_Group(dh, 3, "Accordion", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT | FLE_DOCK_INNER_TOP | FLE_DOCK_INNER_BOTTOM, 75, 180, false);
     Fle_Accordion* accordion = new Fle_Accordion(0, 0, 0, 0, "");
     
 
@@ -626,7 +626,7 @@ int main(int argc, char** argv)
 
     vertGroup5->add_band_widget(accordion);
 
-    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Properties", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT, 120, 180, false);
+    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Properties", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT | FLE_DOCK_INNER_TOP | FLE_DOCK_INNER_BOTTOM, 120, 180, false);
     Fle_Property_Sheet* sheet = new Fle_Property_Sheet(0, 0, 0, 0, "");
     Fl_Spinner* spin1 = new Fl_Spinner(0, 0, 0, 26, "");
     sheet->add_property_widget(spin1, "X Offset");
