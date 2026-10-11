@@ -136,19 +136,18 @@ class Fle_Dock_Host : public Fl_Group
 	void position_work_widget();
 	/// Recalculates the total breadth occupied by docked groups in each direction. 
 	void recalculate_direction_breadths();
-	/// Repositions groups docked on the left and right sides, adjusting for changes in top/bottom breadths. 
+	/// Repositions docked groups in vertical and inner horizontal directions. 
 	/// \param oldBreadthTop Optional previous top breadth for delta calculation.
 	/// \param oldBreadthBottom Optional previous bottom breadth for delta calculation.
-	void reposition_vertical_groups(int oldBreadthTop = -1, int oldBreadthBottom = -1);
-	/// Repositions group docked in inner horizontal directions. Always called after reposition_vertical_groups
-	/// \param oldBreadthLeft
-	/// \param oldBreadthRight
-	void reposition_inner_horizontal_groups(int oldBreadthLeft = -1, int oldBreadthRight = -1);
+	/// \param oldBreadthLeft Optional previous left breadth for delta calculation.
+	/// \param oldBreadthRight Optional previous right breadth for delta calculation.
+	void reposition_docked_groups(int oldBreadthTop = -1, int oldBreadthBottom = -1, int oldBreadthLeft = -1, int oldBreadthRight = -1);
 	/// Adjusts the sizes of groups within a line to fit available space, respecting minimum sizes. May move groups to new lines if necessary. 
 	/// \param line Pointer to the list of groups in the line.
 	/// \param isVerticalGroup True if the line contains vertically oriented groups (left/right docking).
 	/// \param alreadyFixed Optional list to track groups moved during squeezing to prevent double processing.
-	void squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, bool isVertical, bool isInner, std::list<Fle_Dock_Group*>* alreadyFixed = nullptr);
+	/// \return Returns true if new lines were added.
+	bool squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, bool isVertical, bool isInner, std::list<Fle_Dock_Group*>* alreadyFixed = nullptr);
 	/// Shifts the position of all groups within a line horizontally or vertically. 
 	/// \param line Pointer to the list of groups in the line.
 	/// \param offset The amount to shift (positive or negative).

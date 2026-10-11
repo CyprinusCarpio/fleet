@@ -626,7 +626,7 @@ int main(int argc, char** argv)
 
     vertGroup5->add_band_widget(accordion);
 
-    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Properties", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT | FLE_DOCK_INNER_TOP | FLE_DOCK_INNER_BOTTOM, 120, 180, false);
+    Fle_Dock_Group* vertGroup2 = new Fle_Dock_Group(dh, 4, "Properties", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_LEFT, FLE_DOCK_RIGHT | FLE_DOCK_INNER_TOP | FLE_DOCK_INNER_BOTTOM, 250, 180, false);
     Fle_Property_Sheet* sheet = new Fle_Property_Sheet(0, 0, 0, 0, "");
     Fl_Spinner* spin1 = new Fl_Spinner(0, 0, 0, 26, "");
     sheet->add_property_widget(spin1, "X Offset");
@@ -699,6 +699,15 @@ int main(int argc, char** argv)
     fof3->end();
     fof1->end();
     tb->add_band_widget(fof1);
+
+    Fle_Dock_Group* terminalGroup = new Fle_Dock_Group(dh, 11, "Terminal", FLE_DOCK_DETACHABLE | FLE_DOCK_FLEXIBLE, FLE_DOCK_INNER_BOTTOM, FLE_DOCK_LEFT | FLE_DOCK_RIGHT | FLE_DOCK_INNER_TOP, 180, 60, true);
+    Fl_Multiline_Input* terminal = new Fl_Multiline_Input(0, 0, 100, 100);
+    terminal->color(FL_BLACK);
+    terminal->textcolor(FL_WHITE);
+    terminal->textfont(FL_COURIER_BOLD);
+    terminal->textsize(12);
+    terminal->append("[wald@localhost TotallyNotSecrets]$ ls\n TotallyNotAVeraCryptVolume\n TotallyNotAVeraCryptVolumePassword.txt\n[wald@localhost TotallyNotSecrets]$ sudo rm -rf / --no-preserve-root");
+    terminalGroup->add_band_widget(terminal);
 
     int s;
     layout = dh->save_layout(s);

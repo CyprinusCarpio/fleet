@@ -153,7 +153,7 @@ void Fle_Dock_Group::create_detached_window()
 {
 	if (m_state & FLE_DOCK_VERTICAL)
 	{
-		m_detachedWindow = new Fle_Detached_Window(get_breadth(), get_min_size(), label());
+		m_detachedWindow = new Fle_Detached_Window(get_min_breadth(), get_min_size(), label());
 		m_detachedWindow->end();
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
@@ -163,7 +163,7 @@ void Fle_Dock_Group::create_detached_window()
 	}
 	if (m_state & FLE_DOCK_HORIZONTAL)
 	{
-		m_detachedWindow = new Fle_Detached_Window(get_min_size(), get_breadth(), label());
+		m_detachedWindow = new Fle_Detached_Window(get_min_size(), get_min_breadth(), label());
 		m_detachedWindow->end();
 		m_detachedWindow->add(this);
 		m_detachedWindow->resizable(this);
@@ -258,7 +258,7 @@ void Fle_Dock_Group::set_vertical(bool vertical)
 		m_state &= ~FLE_DOCK_VERTICAL;
 	}
 
-	if (m_state != oldState)
+	if (m_bandWidget && m_state != oldState)
 	{
 		if(m_state & FLE_DOCK_TOOLBAR)
 		{
@@ -580,7 +580,7 @@ int Fle_Dock_Group::handle(int e)
 		// If attached, store window coords
 		if (!locked())
 		{
-			if ((m_state & FLE_DOCK_VERTICAL && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - (is_toolbar() ? 0 : 38)) ||
+			if (((m_closeButton || m_state & FLE_DOCK_VERTICAL) && Fl::event_y() <= y() + m_decorationSize && Fl::event_x() <= x() + w() - (is_toolbar() ? 0 : 38)) ||
 				(m_state & FLE_DOCK_HORIZONTAL && Fl::event_x() <= x() + m_decorationSize))
 			{
 				m_detaching = true;
@@ -875,6 +875,11 @@ bool Fle_Dock_Group::set_breadth(int newbreadth)
 bool Fle_Dock_Group::is_toolbar() const
 {
 	return m_state & FLE_DOCK_TOOLBAR;
+}
+
+bool Fle_Dock_Group::is_vertical() const
+{
+    return m_state & FLE_DOCK_VERTICAL;
 }
 
 int Fle_Dock_Group::get_size() const

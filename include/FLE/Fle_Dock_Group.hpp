@@ -270,6 +270,9 @@ public:
     /// Checks if the group is a toolbar type. 
     /// \return True if the FLE_DOCK_TOOLBAR flag is set.
     bool is_toolbar() const;
+    /// Checks if the group is vertical (orientation). 
+    /// \return True if the FLE_DOCK_VERTICAL flag is set.
+    bool is_vertical() const;
     /// Sets the locked state of the group. 
     /// \param l True to lock the group, false to unlock.
     void locked(bool l);

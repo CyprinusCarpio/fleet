@@ -101,10 +101,12 @@ void Fle_Dock_Host::recalculate_direction_breadths()
 
 // This needs to be done after adding/removing/moving horizontal groups
 // so as they don't overlap with the vertical groups.
-void Fle_Dock_Host::reposition_vertical_groups(int _oldBreadthTop, int _oldBreadthBottom)
+void Fle_Dock_Host::reposition_docked_groups(int _oldBreadthTop, int _oldBreadthBottom, int _oldBreadthLeft, int _oldBreadthRight)
 {
 	int oldBreadthTop = m_breadthTop;
 	int oldBreadthBottom = m_breadthBottom;
+	int oldBreadthLeft = m_breadthLeft;
+	int oldBreadthRight = m_breadthRight;
 
 	recalculate_direction_breadths();
 
@@ -114,11 +116,31 @@ void Fle_Dock_Host::reposition_vertical_groups(int _oldBreadthTop, int _oldBread
 	if (_oldBreadthBottom != -1)
 		oldBreadthBottom = _oldBreadthBottom;
 
-	std::list<std::list<std::list<Fle_Dock_Group*>>*> directionsToFix;
-	if (m_activeDirections & FLE_DOCK_LEFT) directionsToFix.push_back(&m_leftLines);
-	if (m_activeDirections & FLE_DOCK_RIGHT) directionsToFix.push_back(&m_rightLines);
+	if(_oldBreadthLeft != -1)
+		oldBreadthLeft = _oldBreadthLeft;
+	
+	if(_oldBreadthRight != -1)
+		oldBreadthRight = _oldBreadthRight;
 
-	for (std::list<std::list<Fle_Dock_Group*>>* direction : directionsToFix)
+	bool horizontalChanged = oldBreadthTop != m_breadthTop || oldBreadthBottom != m_breadthBottom;
+	bool verticalChanged = oldBreadthLeft != m_breadthLeft || oldBreadthRight != m_breadthRight;
+
+	std::list<std::list<std::list<Fle_Dock_Group*>>*> verticalDirectionsToFix;
+	std::list<std::list<std::list<Fle_Dock_Group*>>*> innerHorizontalDirectionsToFix;
+	if(horizontalChanged)
+	{
+		if (m_activeDirections & FLE_DOCK_LEFT) verticalDirectionsToFix.push_back(&m_leftLines);
+		if (m_activeDirections & FLE_DOCK_RIGHT) verticalDirectionsToFix.push_back(&m_rightLines);
+	}
+	if(verticalChanged)
+	{
+		if (m_activeDirections & FLE_DOCK_INNER_TOP) innerHorizontalDirectionsToFix.push_back(&m_innerTopLines);
+		if (m_activeDirections & FLE_DOCK_INNER_BOTTOM) innerHorizontalDirectionsToFix.push_back(&m_innerBottomLines);
+	}
+
+	bool addedVerticalLines = false;
+
+	for (std::list<std::list<Fle_Dock_Group*>>* direction : verticalDirectionsToFix)
 	{
 		// We need to keep track of groups moved to another line in order
 		// not to move/resize them twice
@@ -178,16 +200,80 @@ void Fle_Dock_Host::reposition_vertical_groups(int _oldBreadthTop, int _oldBread
 				}
 			}
 
-			if (lineNeedsSqueezing) squeeze_groups_in_line(line, true, false, &alreadyFixed);
+			if (lineNeedsSqueezing && squeeze_groups_in_line(line, true, false, &alreadyFixed))
+			{
+				addedVerticalLines = true;
+			}
+		}
+	}
+
+	if(!addedVerticalLines && !verticalChanged)
+		return;
+	
+	for (std::list<std::list<Fle_Dock_Group*>>* direction : innerHorizontalDirectionsToFix)
+	{
+		// We need to keep track of groups moved to another line in order
+		// not to move/resize them twice
+		std::list<Fle_Dock_Group*> alreadyFixed;
+
+		for(std::list<std::list<Fle_Dock_Group*>>::iterator it = direction->begin(); it != direction->end(); it++)
+		{
+			std::list<Fle_Dock_Group*>* line = &(*it);
+
+			// If the new left or right breadth is smaller, then just scale up
+			// the left or right group in this line and position it correctly
+			// ret val of set_size ignored because a group can't be too big
+			if (oldBreadthLeft > m_breadthLeft)
+			{
+				Fle_Dock_Group* group = *line->begin();
+				group->position(m_breadthLeft + x(), group->y());
+				group->set_size(oldBreadthLeft - m_breadthLeft + group->get_size());
+				continue;
+			}
+			if (oldBreadthRight > m_breadthRight)
+			{
+				Fle_Dock_Group* group = line->back();
+				group->set_size(oldBreadthRight - m_breadthRight + group->get_size());
+				continue;
+			}
+
+			// If the new breadth is bigger, it may be enough to just scale
+			// down the left or right group, if not, squeeze the line
+			bool lineNeedsSqueezing = false;
+
+			// If left breadth is expanded, we need to reposition the left group in a line
+			if (oldBreadthLeft < m_breadthLeft)
+			{
+				int d = m_breadthLeft - oldBreadthLeft;
+				Fle_Dock_Group* group = *line->begin();
+
+				// Check if it was fixed already as part of moving it into another line
+				if(std::find(alreadyFixed.begin(), alreadyFixed.end(), group) == alreadyFixed.end())
+				{
+					group->position(m_breadthLeft + x(), group->y());
+					if (!group->set_size(group->get_size() - d))
+					{
+						lineNeedsSqueezing = true;
+					}
+				}
+			}
+			if (oldBreadthRight < m_breadthRight)
+			{
+				int d = m_breadthRight - oldBreadthRight;
+				Fle_Dock_Group* group = line->back();
+				if (std::find(alreadyFixed.begin(), alreadyFixed.end(), group) == alreadyFixed.end() && !group->set_size(group->get_size() - d))
+				{
+					lineNeedsSqueezing = true;
+				}
+			}
+
+			if(lineNeedsSqueezing)
+				squeeze_groups_in_line(line, true, false, &alreadyFixed);
 		}
 	}
 }
 
-void Fle_Dock_Host::reposition_inner_horizontal_groups(int oldBreadthLeft, int oldBreadthRight)
-{
-}
-
-void Fle_Dock_Host::squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, bool isVertical, bool isInner, std::list<Fle_Dock_Group*>* alreadyFixed)
+bool Fle_Dock_Host::squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, bool isVertical, bool isInner, std::list<Fle_Dock_Group*>* alreadyFixed)
 {
 	int availableSpaceInLine = w();
 	if (isVertical)
@@ -211,7 +297,7 @@ void Fle_Dock_Host::squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, boo
 	if (line->size() == 1 && smallestSizeSum > availableSpaceInLine)
 	{
 		// TODO: What now?
-		return;
+		return false;
 	}
 
 	if (alreadyFixed != nullptr && smallestSizeSum > availableSpaceInLine)
@@ -236,7 +322,8 @@ void Fle_Dock_Host::squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, boo
 		
 		// After we got rid of the smallest group, try this func again
 		squeeze_groups_in_line(line, isVertical, isInner, alreadyFixed);
-		return;
+
+		return true;
 	}
 
 	// Position the groups so that they dont overlap and
@@ -279,7 +366,7 @@ void Fle_Dock_Host::squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, boo
 			if (it == line->rbegin())
 			{
 				// If this was the last group we don't need to reposition anything
-				return;
+				return false;
 			}
 			break;
 		}
@@ -308,6 +395,8 @@ void Fle_Dock_Host::squeeze_groups_in_line(std::list<Fle_Dock_Group*>* line, boo
 	}
 
 	line_reset_preferred_sizes(line);
+
+	return false;
 }
 
 void Fle_Dock_Host::line_change_offset_in_host(std::list<Fle_Dock_Group*>* line, int offset)
@@ -448,33 +537,37 @@ void Fle_Dock_Host::remove_empty_lines(int direction)
 				break;
 			}
 		}
-		if (lineErased)
+
+		if (!lineErased)
+			continue;
+	
+		for (std::list<Fle_Dock_Group*>::iterator ita = it->begin(); ita != it->end(); ita++)
 		{
-			for (std::list<Fle_Dock_Group*>::iterator ita = it->begin(); ita != it->end(); ita++)
+			Fle_Dock_Group* g = *ita;
+			switch (direction)
 			{
-				Fle_Dock_Group* g = *ita;
-				switch (direction)
-				{
-				case FLE_DOCK_TOP:
-				case FLE_DOCK_INNER_TOP:
-					g->position(g->x(), g->y() - d);
-					break;
-				case FLE_DOCK_RIGHT:
-					g->position(g->x() + d, g->y());
-					break;
-				case FLE_DOCK_BOTTOM:
-				case FLE_DOCK_INNER_BOTTOM:
-					g->position(g->x(), g->y() + d);
-					break;
-				case FLE_DOCK_LEFT:
-					g->position(g->x() - d, g->y());
-					break;			
-				}
+			case FLE_DOCK_TOP:
+			case FLE_DOCK_INNER_TOP:
+				g->position(g->x(), g->y() - d);
+				break;
+			case FLE_DOCK_RIGHT:
+				g->position(g->x() + d, g->y());
+				break;
+			case FLE_DOCK_BOTTOM:
+			case FLE_DOCK_INNER_BOTTOM:
+				g->position(g->x(), g->y() + d);
+				break;
+			case FLE_DOCK_LEFT:
+				g->position(g->x() - d, g->y());
+				break;			
 			}
 		}
 	}
 
-	reposition_vertical_groups(oldBreadthTop, oldBreadthBottom);
+	if(!lineErased)
+		return;
+
+	reposition_docked_groups(oldBreadthTop, oldBreadthBottom, oldBreadthLeft, oldBreadthRight);
 
 	position_work_widget();
 	find_edges();
@@ -748,20 +841,14 @@ int Fle_Dock_Host::handle(int e)
 		// type 2 and 3
 		for (std::list<Fle_Edge_Helper>::iterator it = m_edges.begin(); it != m_edges.end(); it++)
 		{
-			if (it->group_a != nullptr && it->is_close(ex, ey)) // type 2
-			{
-				window()->cursor(it->v ? FL_CURSOR_WE : FL_CURSOR_NS);
-				return 1;
-			}
-
-			if (it->direction != nullptr && it->is_close(ex, ey)) // type 3
+			if ((it->group_a != nullptr && it->is_close(ex, ey)) ||
+				(it->direction != nullptr && it->is_close(ex, ey)))
 			{
 				window()->cursor(it->v ? FL_CURSOR_WE : FL_CURSOR_NS);
 				return 1;
 			}
 		}
 		// type 2 and 3 end
-
 	}
 	else if (e == FL_PUSH && Fl::event_button() == FL_LEFT_MOUSE)
 	{
@@ -790,7 +877,10 @@ int Fle_Dock_Host::handle(int e)
 		// type 2 and 3:
 		for (std::list<Fle_Edge_Helper>::iterator it = m_edges.begin(); it != m_edges.end(); it++)
 		{
-			if (it->group_a != nullptr && it->is_close(ex, ey)) // type 2
+			if(!it->is_close(ex, ey))
+				continue;
+
+			if (it->group_a != nullptr) // type 2
 			{
 				group1 = it->group_a;
 				group2 = it->group_b;
@@ -798,7 +888,7 @@ int Fle_Dock_Host::handle(int e)
 				offsetY = ey;
 				return 1;
 			}
-			if (it->direction != nullptr && it->is_close(ex, ey)) // type 3
+			if (it->direction != nullptr) // type 3
 			{
 				line_it = it->line_it;
 				type3direction = it->direction;
@@ -822,159 +912,137 @@ int Fle_Dock_Host::handle(int e)
 	else if (e == FL_DRAG)
 	{
 		int d = 0;
-		// type 1:
-		std::list<std::list<Fle_Dock_Group*>>* lines = get_lines(scalingDirection);
 		switch (scalingDirection)
 		{
-		case FLE_DOCK_TOP:
-		case FLE_DOCK_INNER_TOP:
+			case FLE_DOCK_TOP:
+			case FLE_DOCK_INNER_TOP:
 			d = Fl::event_y() - offsetY;
 			break;
-		case FLE_DOCK_LEFT:
+			case FLE_DOCK_LEFT:
 			d = Fl::event_x() - offsetX;
 			break;
-		case FLE_DOCK_RIGHT:
+			case FLE_DOCK_RIGHT:
 			d = Fl::event_x() - offsetX;
 			d *= -1;
 			break;
-		case FLE_DOCK_BOTTOM:
-		case FLE_DOCK_INNER_BOTTOM:
+			case FLE_DOCK_BOTTOM:
+			case FLE_DOCK_INNER_BOTTOM:
 			d = Fl::event_y() - offsetY;
 			d *= -1;
 			break;
 		}
-
+		
+		// type 1:
+		std::list<std::list<Fle_Dock_Group*>>* lines = get_lines(scalingDirection);
 		if (lines)
 		{
 			// Find the flexible line closest to the work group, change it's breadth
 			// and reposition the non flexible groups closer to the work group if any
 			for (std::list<std::list<Fle_Dock_Group*>>::reverse_iterator it = lines->rbegin(); it != lines->rend(); it++)
 			{
-				if ((*it->begin())->flexible())
+				if (!(*it->begin())->flexible())
+					continue;
+				
+				// Change the breadths of the groups in this line
+				int lineMinBreadth = 0;
+				int lineBreadth = 0;
+				for (std::list<Fle_Dock_Group*>::iterator itg = it->begin(); itg != it->end(); itg++)
 				{
-					// Change the breadths of the groups in this line
-					int lineMinBreadth = 0;
-					int lineBreadth = 0;
-					for (std::list<Fle_Dock_Group*>::iterator itg = it->begin(); itg != it->end(); itg++)
-					{
-						if ((*itg)->get_min_breadth() > lineMinBreadth)
-							lineMinBreadth = (*itg)->get_min_breadth();
-						if ((*itg)->get_breadth() > lineBreadth)
-							lineBreadth = (*itg)->get_breadth();
-					}
-
-					if (lineBreadth + d < lineMinBreadth) // Continue on to scaling other flexible lines
-						continue;
-
-					line_set_breadth(&(*it), lineBreadth + d, false);
-
-					for (std::list<Fle_Dock_Group*>::iterator itg = it->begin(); itg != it->end(); itg++)
-					{
-						if (scalingDirection == FLE_DOCK_BOTTOM || scalingDirection == FLE_DOCK_INNER_BOTTOM)
-						{
-							(*itg)->position((*itg)->x(), (*itg)->y() - d);
-						}
-						else if (scalingDirection == FLE_DOCK_RIGHT)
-						{
-							(*itg)->position((*itg)->x() - d, (*itg)->y());
-						}
-					}
-					
-					// Now reposition the groups in lines closer to the work group by reversing the loop
-					if (it != lines->rbegin())
-					{
-						for (std::list<std::list<Fle_Dock_Group*>>::reverse_iterator itr = std::prev(it);;)
-						{
-							for (std::list<Fle_Dock_Group*>::iterator itg = itr->begin(); itg != itr->end(); itg++)
-							{
-								switch (scalingDirection)
-								{
-								case FLE_DOCK_TOP:
-								case FLE_DOCK_INNER_TOP:
-									(*itg)->position((*itg)->x(), (*itg)->y() + d);
-									break;
-								case FLE_DOCK_LEFT:
-									(*itg)->position((*itg)->x() + d, (*itg)->y());
-									break;
-								case FLE_DOCK_RIGHT:
-									(*itg)->position((*itg)->x() - d, (*itg)->y());
-									break;
-								case FLE_DOCK_BOTTOM:
-								case FLE_DOCK_INNER_BOTTOM:
-									(*itg)->position((*itg)->x(), (*itg)->y() - d);
-									break;
-								}
-							}
-
-							if (itr == lines->rbegin()) break;
-							itr--;
-						}
-					}
-					// Now finalize the rescale
-					if (scalingDirection == FLE_DOCK_TOP || scalingDirection == FLE_DOCK_BOTTOM)
-					{
-						reposition_vertical_groups();
-					}
-					else
-						recalculate_direction_breadths();
-						//reposition_inner_horizontal_groups();
-
-					position_work_widget();
-					//find_edges();
-					calculate_min_size();
-
-					offsetX = Fl::event_x();
-					offsetY = Fl::event_y();
-
-					return 1;
+					if ((*itg)->get_min_breadth() > lineMinBreadth)
+						lineMinBreadth = (*itg)->get_min_breadth();
+					if ((*itg)->get_breadth() > lineBreadth)
+						lineBreadth = (*itg)->get_breadth();
 				}
+
+				if (lineBreadth + d < lineMinBreadth) // Continue on to scaling other flexible lines
+					continue;
+
+				line_set_breadth(&(*it), lineBreadth + d, false);
+
+				for (std::list<Fle_Dock_Group*>::iterator itg = it->begin(); itg != it->end(); itg++)
+				{
+					if (scalingDirection == FLE_DOCK_BOTTOM || scalingDirection == FLE_DOCK_INNER_BOTTOM)
+					{
+						(*itg)->position((*itg)->x(), (*itg)->y() - d);
+					}
+					else if (scalingDirection == FLE_DOCK_RIGHT)
+					{
+						(*itg)->position((*itg)->x() - d, (*itg)->y());
+					}
+				}
+				
+				// Now reposition the groups in lines closer to the work group by reversing the loop
+				if (it != lines->rbegin())
+				{
+					for (std::list<std::list<Fle_Dock_Group*>>::reverse_iterator itr = std::prev(it);;)
+					{
+						for (std::list<Fle_Dock_Group*>::iterator itg = itr->begin(); itg != itr->end(); itg++)
+						{
+							switch (scalingDirection)
+							{
+							case FLE_DOCK_TOP:
+							case FLE_DOCK_INNER_TOP:
+								(*itg)->position((*itg)->x(), (*itg)->y() + d);
+								break;
+							case FLE_DOCK_LEFT:
+								(*itg)->position((*itg)->x() + d, (*itg)->y());
+								break;
+							case FLE_DOCK_RIGHT:
+								(*itg)->position((*itg)->x() - d, (*itg)->y());
+								break;
+							case FLE_DOCK_BOTTOM:
+							case FLE_DOCK_INNER_BOTTOM:
+								(*itg)->position((*itg)->x(), (*itg)->y() - d);
+								break;
+							}
+						}
+
+						if (itr == lines->rbegin()) break;
+						itr--;
+					}
+				}
+
+				reposition_docked_groups();
+				position_work_widget();
+				calculate_min_size();
+
+				offsetX = Fl::event_x();
+				offsetY = Fl::event_y();
+
+				return 1;
 			}
 		} // type 1 end
 		
 		// type 2:
 		if (group1 != nullptr)
 		{
+			bool isVertical = false;
+
 			if (group1->get_direction() == FLE_DOCK_RIGHT || group1->get_direction() == FLE_DOCK_LEFT)
 			{
 				d = Fl::event_y() - offsetY;
-				// Check if new sizes would be less than min sizes
-				if(group1->get_min_size() <= group1->get_size() + d && group2->get_min_size() <= group2->get_size() - d)
-				{
-					group1->set_size(group1->get_size() + d);
-					group2->position(group2->x(), group2->y() + d);
-					group2->set_size(group2->get_size() - d);
-
-					group1->update_preferred_size();
-					group2->update_preferred_size();
-
-					offsetX = Fl::event_x();
-					offsetY = Fl::event_y();
-
-					//find_edges();
-
-					return 1;
-				}
+				isVertical = true;
 			}
 			else
-			{
 				d = Fl::event_x() - offsetX;
-				// Check if new sizes would be less than min sizes
-				if (group1->get_min_size() <= group1->get_size() + d && group2->get_min_size() <= group2->get_size() - d)
+
+			// Check if new sizes would be less than min sizes
+			if(group1->get_min_size() <= group1->get_size() + d && group2->get_min_size() <= group2->get_size() - d)
+			{
+				group1->set_size(group1->get_size() + d);
+				if(isVertical)
 				{
-					group1->set_size(group1->get_size() + d);
-					group2->position(group2->x() + d, group2->y());
-					group2->set_size(group2->get_size() - d);
-
-					group1->update_preferred_size();
-					group2->update_preferred_size();
-
-					offsetX = Fl::event_x();
-					offsetY = Fl::event_y();
-
-					//find_edges();
-
-					return 1;
+					group2->position(group2->x(), group2->y() + d);
 				}
+				else
+					group2->position(group2->x() + d, group2->y());
+
+				group2->set_size(group2->get_size() - d);
+				group1->update_preferred_size();
+				group2->update_preferred_size();
+				offsetX = Fl::event_x();
+				offsetY = Fl::event_y();
+				return 1;
 			}
 		} // type 2 end
 
@@ -1025,47 +1093,43 @@ int Fle_Dock_Host::handle(int e)
 				}
 			}
 			
-			if(availableBreadth >= d)
+			if(availableBreadth < d)
+				return Fl_Group::handle(e);
+			
+			for (std::list<std::list<Fle_Dock_Group*>>::iterator it = line_it; it != type3direction->end(); it++)
 			{
-				for (std::list<std::list<Fle_Dock_Group*>>::iterator it = line_it; it != type3direction->end(); it++)
+				if (it == line_it)
 				{
-					if (it == line_it)
+					// Prevent scaling below min breadth
+					if (line_set_breadth(&(*it), (*it->begin())->get_breadth() + d, false) == 0)
 					{
-						// Prevent scaling below min breadth
-						if (line_set_breadth(&(*it), (*it->begin())->get_breadth() + d, false) == 0)
-						{
-							return 1;
-						}
-						if (direction == FLE_DOCK_BOTTOM || direction == FLE_DOCK_RIGHT || direction == FLE_DOCK_INNER_BOTTOM)
-							line_change_offset_in_host(&(*it), d);
+						return 1;
 					}
-					else
-					{
-						// If top or left, move first, else scale first
-						if (direction == FLE_DOCK_TOP || direction == FLE_DOCK_LEFT || direction == FLE_DOCK_INNER_TOP)
-							line_change_offset_in_host(&(*it), d);
+					if (direction == FLE_DOCK_BOTTOM || direction == FLE_DOCK_RIGHT || direction == FLE_DOCK_INNER_BOTTOM)
+						line_change_offset_in_host(&(*it), d);
 
-						// Scale it if its flexible
-						if ((*it->begin())->flexible())
-						{
-							int r = line_set_breadth(&(*it), (*it->begin())->get_breadth() - d, true);
-							d -= r;
-						}
-
-						// If right or bottom move now
-						if (direction == FLE_DOCK_BOTTOM || direction == FLE_DOCK_RIGHT || direction == FLE_DOCK_INNER_BOTTOM)
-							line_change_offset_in_host(&(*it), d);
-
-						if (d == 0) break;
-					}
+					continue;
 				}
-
-				offsetX = Fl::event_x();
-				offsetY = Fl::event_y();
-
-				return 1;
+				// If top or left, move first, else scale first
+				if (direction == FLE_DOCK_TOP || direction == FLE_DOCK_LEFT || direction == FLE_DOCK_INNER_TOP)
+					line_change_offset_in_host(&(*it), d);
+				
+				// Scale it if its flexible
+				if ((*it->begin())->flexible())
+				{
+					int r = line_set_breadth(&(*it), (*it->begin())->get_breadth() - d, true);
+					d -= r;
+				}
+				// If right or bottom move now
+				if (direction == FLE_DOCK_BOTTOM || direction == FLE_DOCK_RIGHT || direction == FLE_DOCK_INNER_BOTTOM)
+					line_change_offset_in_host(&(*it), d);
+				if (d == 0) break;
 			}
 
+			offsetX = Fl::event_x();
+			offsetY = Fl::event_y();
+			
+			return 1;
 		} // type 3 end
 
 	} // FL_DRAG
@@ -1127,179 +1191,172 @@ bool Fle_Dock_Host::add_dock_group(Fle_Dock_Group* group, int direction, int new
 		return true;
 	}
 
-	if (m_activeDirections & direction)
+	if (m_activeDirections & direction == false)
+		return false;
+	
+	std::list<std::list<Fle_Dock_Group*>>* lines = get_lines(direction);
+
+	bool isVertical = direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT;
+	bool isInner = direction == FLE_DOCK_INNER_TOP || direction == FLE_DOCK_INNER_BOTTOM;
+
+	group->set_vertical(isVertical);
+
+	// Find suitable line
+	std::list<Fle_Dock_Group*>* line = nullptr;
+
+	// We need to keep track of the space to see if we need to make a new line
+	// so as not to force a dock group to resize below it's minimal size
+	int availableSpaceInLine = 0;
+
+	if (isVertical)
 	{
-		std::list<std::list<Fle_Dock_Group*>>* lines = get_lines(direction);
+		// Top and bottom directions may take away some space
+		availableSpaceInLine = h() - m_breadthTop - m_breadthBottom;
+	}
+	else
+	{
+		availableSpaceInLine = w();
 
-		bool isVertical = direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT;
-		bool isInner = direction == FLE_DOCK_INNER_TOP || direction == FLE_DOCK_INNER_BOTTOM;
+		if(isInner)
+			availableSpaceInLine -= m_breadthLeft + m_breadthRight;
+	}
 
-		// Find suitable line
-		std::list<Fle_Dock_Group*>* line = nullptr;
+	int lineBreadth = 0;
 
-		// We need to keep track of the space to see if we need to make a new line
-		// so as not to force a dock group to resize below it's minimal size
-		int availableSpaceInLine = 0;
+	// TODO: What if minimal size of the newly added group is more than the available space?
 
-		if (isVertical)
+	// Find a line with the same dock group breadth and flexibility as the new dock group
+	// It also needs to have enough space provided other groups in it are set to their min
+	// sizes. A group can be below it's min size due to window rescaling, in such a case we
+	// need to scale it back up IF there is enough space for all of them AND the new group.
+	// If not, leave that line alone and use some other one.
+
+	if(newline == 0)
+	{
+		for (std::list<std::list<Fle_Dock_Group*>>::iterator it = lines->begin(); it != lines->end(); it++)
 		{
-			// Top and bottom directions may take away some space
-			availableSpaceInLine = h() - m_breadthTop - m_breadthBottom;
-		}
-		else
-		{
-			availableSpaceInLine = w();
-
-			if(isInner)
-				availableSpaceInLine -= m_breadthLeft + m_breadthRight;
-		}
-
-		int lineBreadth = 0;
-
-		// TODO: What if minimal size of the newly added group is more than the available space?
-
-		// Find a line with the same dock group breadth and flexibility as the new dock group
-		// It also needs to have enough space provided other groups in it are set to their min
-		// sizes. A group can be below it's min size due to window rescaling, in such a case we
-		// need to scale it back up IF there is enough space for all of them AND the new group.
-		// If not, leave that line alone and use some other one.
-
-		if(newline == 0)
-		{
-			for (std::list<std::list<Fle_Dock_Group*>>::iterator it = lines->begin(); it != lines->end(); it++)
+			std::list<Fle_Dock_Group*>* l = &(*it);
+			if (l->empty())
 			{
-				std::list<Fle_Dock_Group*>* l = &(*it);
-				if (l->empty())
+				line = l;
+				break;
+			}
+
+			// A vertical toolbar group cannot be in the same line as non-toolbar groups
+			if (isVertical && group->is_toolbar() != l->back()->is_toolbar())
+				continue;
+			
+			if((l->back()->flexible() && group->flexible() && group->get_min_breadth() <= l->back()->get_breadth()) ||
+			   (!group->flexible() && !l->back()->flexible() && group->get_breadth() == l->back()->get_breadth()))
+			{
+				int spaceAvailableInThisLine = availableSpaceInLine;
+				for (std::list<Fle_Dock_Group*>::iterator ita = l->begin(); ita != l->end(); ita++)
+				{
+					spaceAvailableInThisLine -= (*ita)->get_min_size();
+				}
+				if (spaceAvailableInThisLine >= group->get_min_size())
 				{
 					line = l;
+					lineBreadth = line->back()->get_breadth();
 					break;
 				}
-
-				// A vertical toolbar group cannot be in the same line as non-toolbar groups
-				if (isVertical && group->is_toolbar() != l->back()->is_toolbar())
-					continue;
-
-				if((l->back()->flexible() && group->flexible() && group->get_min_breadth() <= l->back()->get_breadth()) ||
-				   (!group->flexible() && !l->back()->flexible() && group->get_breadth() == l->back()->get_breadth()))
-				{
-					int spaceAvailableInThisLine = availableSpaceInLine;
-
-					for (std::list<Fle_Dock_Group*>::iterator ita = l->begin(); ita != l->end(); ita++)
-					{
-						spaceAvailableInThisLine -= (*ita)->get_min_size();
-					}
-
-					if (spaceAvailableInThisLine >= group->get_min_size())
-					{
-						line = l;
-						lineBreadth = line->back()->get_breadth();
-						break;
-					}
-				}
 			}
 		}
-		else if (newline > 1) // insert a new line between others
+	}
+	else if (newline > 1) // insert a new line between others
+	{
+		std::list<std::list<Fle_Dock_Group*>>::iterator addedLine = lines->insert(std::next(lines->begin(), newline - 1), std::list<Fle_Dock_Group*>());
+		line = &(*addedLine);
+		lineBreadth = group->get_breadth();
+		// Move the lines after this one
+		for (std::list<std::list<Fle_Dock_Group*>>::iterator it = std::next(addedLine); it != lines->end(); it++)
 		{
-			std::list<std::list<Fle_Dock_Group*>>::iterator addedLine = lines->insert(std::next(lines->begin(), newline - 1), std::list<Fle_Dock_Group*>());
-			line = &(*addedLine);
-			lineBreadth = group->get_breadth();
-
-			// Move the lines after this one
-			for (std::list<std::list<Fle_Dock_Group*>>::iterator it = std::next(addedLine); it != lines->end(); it++)
-			{
-				line_change_offset_in_host(&(*it), lineBreadth);
-			}
+			line_change_offset_in_host(&(*it), lineBreadth);
 		}
-		if (line == nullptr)
-		{
-			lines->push_back(std::list<Fle_Dock_Group*>());
-			line = &lines->back();
-			lineBreadth = group->get_breadth();
-		}
+	}
+	if (line == nullptr)
+	{
+		lines->push_back(std::list<Fle_Dock_Group*>());
+		line = &lines->back();
+		lineBreadth = group->get_breadth();
+	}
 
-		// Find the right offset in line for the new group
-		// setting the other groups in that line to their
-		// minimal size.
-		int offsetInLine = 0;
-		for (std::list<Fle_Dock_Group*>::iterator it = line->begin(); it != line->end(); it++)
-		{
-			(*it)->set_size((*it)->get_min_size());
-			if (isVertical)
-			{
-				(*it)->position((*it)->x(), m_breadthTop + offsetInLine + y());
-			}
-			else
-			{
-				(*it)->position(offsetInLine + x() + isInner ? m_breadthLeft : 0, (*it)->y());
-			}
-			offsetInLine += (*it)->get_size();
-		}
-
-		availableSpaceInLine -= offsetInLine;
-
-		// Now find the right offset for this line
-		int offsetInHost = 0;
-		if (direction == FLE_DOCK_LEFT || direction == FLE_DOCK_TOP || direction == FLE_DOCK_INNER_TOP)
-		{
-			if(isInner)
-				offsetInHost += m_breadthTop;
-			
-			for (std::list<std::list<Fle_Dock_Group*>>::iterator it = lines->begin(); it != lines->end(); it++)
-			{
-				std::list<Fle_Dock_Group*>* l = &(*it);
-				if (l == line) break;
-				offsetInHost += l->back()->get_breadth();
-			}
-		}
-		else if (direction == FLE_DOCK_RIGHT || direction == FLE_DOCK_BOTTOM || direction == FLE_DOCK_INNER_BOTTOM)
-		{
-			offsetInHost = direction == FLE_DOCK_RIGHT ? w() : h();
-
-			if(isInner)
-				offsetInHost -= m_breadthBottom;
-
-			for (std::list<std::list<Fle_Dock_Group*>>::iterator it = lines->begin(); it != lines->end(); it++)
-			{
-				std::list<Fle_Dock_Group*>* l = &(*it);
-				if (l == line) break;
-				offsetInHost -= l->back()->get_breadth();
-			}
-			if (line->size() > 0)
-			{
-				offsetInHost -= line->back()->get_breadth();
-			}
-			else
-				offsetInHost -= group->get_breadth();
-		}
-
-		line->push_back(group);
-
-		add(group);
-		group->set_vertical(isVertical);
-
+	// Find the right offset in line for the new group
+	// setting the other groups in that line to their
+	// minimal size.
+	int offsetInLine = 0;
+	for (std::list<Fle_Dock_Group*>::iterator it = line->begin(); it != line->end(); it++)
+	{
+		(*it)->set_size((*it)->get_min_size());
 		if (isVertical)
 		{
-			group->resize(x() + offsetInHost, y() + offsetInLine + m_breadthTop, lineBreadth, availableSpaceInLine);
-			recalculate_direction_breadths();
-			//reposition_inner_horizontal_groups();
+			(*it)->position((*it)->x(), m_breadthTop + offsetInLine + y());
 		}
 		else
 		{
-			group->resize(x() + offsetInLine + isInner ? m_breadthLeft : 0, y() + offsetInHost, availableSpaceInLine, lineBreadth);
-			reposition_vertical_groups();
+			(*it)->position(offsetInLine + x() + isInner ? m_breadthLeft : 0, (*it)->y());
 		}
+		offsetInLine += (*it)->get_size();
+	}
 
-		// Erase group from hidden list
-		m_hiddenGroups.remove(group);
+	availableSpaceInLine -= offsetInLine;
 
-		calculate_min_size();
-		find_edges();
-		position_work_widget();
+	// Now find the right offset for this line
+	int offsetInHost = 0;
+	if (direction == FLE_DOCK_LEFT || direction == FLE_DOCK_TOP || direction == FLE_DOCK_INNER_TOP)
+	{
+		if(isInner)
+			offsetInHost += m_breadthTop;
+		
+		for (std::list<std::list<Fle_Dock_Group*>>::iterator it = lines->begin(); it != lines->end(); it++)
+		{
+			std::list<Fle_Dock_Group*>* l = &(*it);
+			if (l == line) break;
+			offsetInHost += l->back()->get_breadth();
+		}
+	}
+	else
+	{
+		offsetInHost = direction == FLE_DOCK_RIGHT ? w() : h();
 
-		return true;
-	}	
+		if(isInner)
+			offsetInHost -= m_breadthBottom;
 
-	return false;
+		for (std::list<std::list<Fle_Dock_Group*>>::iterator it = lines->begin(); it != lines->end(); it++)
+		{
+			std::list<Fle_Dock_Group*>* l = &(*it);
+			if (l == line) break;
+			offsetInHost -= l->back()->get_breadth();
+		}
+		if (line->size() > 0)
+		{
+			offsetInHost -= line->back()->get_breadth();
+		}
+		else
+			offsetInHost -= group->get_breadth();
+	}
+
+	line->push_back(group);
+
+	add(group);
+
+	if (isVertical)
+	{
+		group->resize(x() + offsetInHost, y() + offsetInLine + m_breadthTop, lineBreadth, availableSpaceInLine);
+	}
+	else
+		group->resize(x() + offsetInLine + isInner ? m_breadthLeft : 0, y() + offsetInHost, availableSpaceInLine, lineBreadth);
+
+	reposition_docked_groups();
+
+	// Erase group from hidden list
+	m_hiddenGroups.remove(group);
+
+	calculate_min_size();
+	find_edges();
+	position_work_widget();
+
+	return true;
 }
 
 void Fle_Dock_Host::detach(Fle_Dock_Group* group)
@@ -2119,94 +2176,97 @@ int Fle_Dock_Host::try_attach(Fle_Dock_Group* group, int screenX, int screenY, b
 	bool needCalcMinSize = false;
 
 	// Case 1:
-	if (group->get_allowed_directions() & FLE_DOCK_TOP && Y > y() + m_breadthTop && Y < y() + m_breadthTop + group->get_min_breadth())
+	int dirs[6] // Bounds checks. Also used in cases 2 and 3 after modification.
 	{
+		group->get_allowed_directions() & FLE_DOCK_TOP && Y > y() + m_breadthTop && Y < y() + m_breadthTop + group->get_min_breadth() ? FLE_DOCK_TOP : 0,
+		group->get_allowed_directions() & FLE_DOCK_BOTTOM && Y > y() + h() - m_breadthBottom - group->get_min_breadth() && Y < y() + h() - m_breadthBottom ? FLE_DOCK_BOTTOM : 0,
+		group->get_allowed_directions() & FLE_DOCK_LEFT && X > x() + m_breadthLeft && X < x() + m_breadthLeft + group->get_min_breadth() ? FLE_DOCK_LEFT : 0,
+		group->get_allowed_directions() & FLE_DOCK_RIGHT && X > x() + w() - m_breadthRight - group->get_min_breadth() && X < x() + w() - m_breadthRight ? FLE_DOCK_RIGHT : 0,
+		group->get_allowed_directions() & FLE_DOCK_INNER_TOP && X > x() + m_breadthLeft && X < x() + w() - m_breadthRight && Y > y() + m_breadthTop + m_breadthInnerTop && Y < y() + m_breadthTop + m_breadthInnerTop + group->get_min_breadth() ? FLE_DOCK_INNER_TOP : 0,
+		group->get_allowed_directions() & FLE_DOCK_INNER_BOTTOM && X > x() + m_breadthLeft && X < x() + w() - m_breadthRight && Y > y() + h() - m_breadthBottom - m_breadthInnerBottom - group->get_min_breadth() && Y < y() + h() - m_breadthBottom - m_breadthInnerBottom ? FLE_DOCK_INNER_BOTTOM : 0
+	};
+
+	for (int i = 0; i < 6; i++)
+	{
+		if(dirs[i] == 0)
+			continue;
+
 		if (preview)
 		{
-			m_previewX = x();
-			m_previewY = y() + m_breadthTop;
-			m_previewW = w();
-			m_previewH = group->get_breadth();
+			int groupBreadth = group->get_breadth();
+			if(group->is_vertical() && i > 3)
+			{
+				groupBreadth = group->get_size();
+			}
+			
+			switch(i)
+			{
+			case 0:
+				m_previewX = x();
+				m_previewY = y() + m_breadthTop;
+				m_previewW = w();
+				m_previewH = groupBreadth;
+				break;
+			case 1:
+				m_previewX = x();
+				m_previewY = y() + h() - m_breadthBottom - groupBreadth;
+				m_previewW = w();
+				m_previewH = groupBreadth;
+				break;
+			case 2:
+				m_previewX = x() + m_breadthLeft;
+				m_previewY = y() + m_breadthTop;
+				m_previewW = groupBreadth;
+				m_previewH = h() - m_breadthTop - m_breadthBottom;
+				break;
+			case 3:
+				m_previewX = x() + w() - m_breadthRight - groupBreadth;
+				m_previewY = y() + m_breadthTop;
+				m_previewW = groupBreadth;
+				m_previewH = h() - m_breadthTop - m_breadthBottom;
+				break;
+			case 4:
+				m_previewX = x() + m_breadthLeft;
+				m_previewY = y() + m_breadthTop + m_breadthInnerTop;
+				m_previewW = w() - m_breadthLeft - m_breadthRight;
+				m_previewH = groupBreadth;
+				break;
+			case 5:
+				m_previewX = x() + m_breadthLeft;
+				m_previewY = y() + h() - m_breadthBottom - m_breadthInnerBottom - groupBreadth;
+				m_previewW = w() - m_breadthLeft - m_breadthRight;
+				m_previewH = groupBreadth;
+				break;
+			}
+
 			return 0;
 		}
-		add_dock_group(group, FLE_DOCK_TOP, 1);
-		addedToDirection = FLE_DOCK_TOP;
-	}
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_BOTTOM && Y > y() + h() - m_breadthBottom - group->get_min_breadth() && Y < y() + h() - m_breadthBottom)
-	{
-		if (preview)
-		{
-			m_previewX = x();
-			m_previewY = y() + h() - m_breadthBottom - group->get_breadth();
-			m_previewW = w();
-			m_previewH = group->get_breadth();
-			return 0;
-		}
-		add_dock_group(group, FLE_DOCK_BOTTOM, 1);
-		addedToDirection = FLE_DOCK_BOTTOM;
-	}
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_LEFT && X > x() + m_breadthLeft && X < x() + m_breadthLeft + group->get_min_breadth())
-	{
-		if (preview)
-		{
-			m_previewX = x() + m_breadthLeft;
-			m_previewY = y() + m_breadthTop;
-			m_previewW = group->get_breadth();
-			m_previewH = h() - m_breadthTop - m_breadthBottom;
-			return 0;
-		}
-		add_dock_group(group, FLE_DOCK_LEFT, 1);
-		addedToDirection = FLE_DOCK_LEFT;
-	}
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_RIGHT && X > x() + w() - m_breadthRight - group->get_min_breadth() && X < x() + w() - m_breadthRight)
-	{
-		if (preview)
-		{
-			m_previewX = x() + w() - m_breadthRight - group->get_breadth();
-			m_previewY = y() + m_breadthTop;
-			m_previewW = group->get_breadth();
-			m_previewH = h() - m_breadthTop - m_breadthBottom;
-			return 0;
-		}
-		add_dock_group(group, FLE_DOCK_RIGHT, 1);
-		addedToDirection = FLE_DOCK_RIGHT;
-	}
-	if(addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_INNER_TOP && X > x() + m_breadthLeft && X < x() + w() - m_breadthRight
-      && Y > y() + m_breadthTop && Y < y() + m_breadthTop + group->get_min_breadth())
-	{
-		if(preview)
-		{
-			m_previewX = x() + m_breadthLeft;
-			m_previewY = y() + m_breadthTop;
-			m_previewW = w() - m_breadthLeft - m_breadthRight;
-			m_previewH = group->get_breadth();
-			return 0;
-		}
-		add_dock_group(group, FLE_DOCK_INNER_TOP, 1);
-		addedToDirection = FLE_DOCK_INNER_TOP;
-	}
-	if(addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_INNER_BOTTOM && X > x() + m_breadthLeft && X < x() + w() - m_breadthRight
-      && Y > y() + h() - m_breadthBottom - group->get_min_breadth() && Y < y() + h() - m_breadthBottom)
-	{
-		if(preview)
-		{
-			m_previewX = x() + m_breadthLeft;
-			m_previewY = y() + h() - m_breadthBottom - group->get_min_breadth();
-			m_previewW = w() - m_breadthLeft - m_breadthRight;
-			m_previewH = group->get_breadth();
-			return 0;
-		}
-		add_dock_group(group, FLE_DOCK_INNER_BOTTOM, 1);
-		addedToDirection = FLE_DOCK_INNER_BOTTOM;
+		add_dock_group(group, dirs[i], 1);
+		addedToDirection = dirs[i];
+		break;
 	}
 
 	// Case 2 and 3 are handled in a different function
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_TOP) addedToDirection = try_attach_case2n3(FLE_DOCK_TOP, group, X, Y, needCalcMinSize, preview);
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_BOTTOM) addedToDirection = try_attach_case2n3(FLE_DOCK_BOTTOM, group, X, Y, needCalcMinSize, preview);
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_LEFT) addedToDirection = try_attach_case2n3(FLE_DOCK_LEFT, group, X, Y, needCalcMinSize, preview);
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_RIGHT) addedToDirection = try_attach_case2n3(FLE_DOCK_RIGHT, group, X, Y, needCalcMinSize, preview);
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_INNER_TOP) addedToDirection = try_attach_case2n3(FLE_DOCK_INNER_TOP, group, X, Y, needCalcMinSize, preview);
-	if (addedToDirection == 0 && group->get_allowed_directions() & FLE_DOCK_INNER_BOTTOM) addedToDirection = try_attach_case2n3(FLE_DOCK_BOTTOM, group, X, Y, needCalcMinSize, preview);
+	if(addedToDirection == 0)
+	{
+		dirs[0] = group->get_allowed_directions() & FLE_DOCK_TOP && Y > y() && Y < y() + m_breadthTop ? FLE_DOCK_TOP : 0;
+		dirs[1] = group->get_allowed_directions() & FLE_DOCK_BOTTOM && Y > y() + h() - m_breadthBottom && Y < y() + h() ? FLE_DOCK_BOTTOM : 0;
+		dirs[2] = group->get_allowed_directions() & FLE_DOCK_LEFT && X > x() && X < x() + m_breadthLeft ? FLE_DOCK_LEFT : 0;
+		dirs[3] = group->get_allowed_directions() & FLE_DOCK_RIGHT && X > x() + w() - m_breadthRight && X < x() + w() ? FLE_DOCK_RIGHT : 0;
+		dirs[4] = group->get_allowed_directions() & FLE_DOCK_INNER_TOP && Y > y() + m_breadthTop && Y < y() + m_breadthTop + m_breadthInnerTop ? FLE_DOCK_INNER_TOP : 0;
+		dirs[5] = group->get_allowed_directions() & FLE_DOCK_INNER_BOTTOM && Y > y() + h() - m_breadthBottom - m_breadthInnerBottom && Y < y() + h() - m_breadthBottom ? FLE_DOCK_INNER_BOTTOM : 0;
+		
+		for (int i = 0; i < 6; i++)
+		{
+			if (dirs[i] == 0)
+				continue;
+			
+			addedToDirection = try_attach_case2n3(dirs[i], group, X, Y, needCalcMinSize, preview);
+
+			if(addedToDirection != 0)
+				break;
+		}
+	}
 
 	if (preview)
 	{
@@ -2250,18 +2310,21 @@ int Fle_Dock_Host::try_attach(Fle_Dock_Group* group, int screenX, int screenY, b
 int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int X, int Y, bool& needCalcMinSize, bool preview)
 {
 	std::list<std::list<Fle_Dock_Group*>>* lines = get_lines(direction);
-	bool isVertical = direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT;
-	bool isInner = direction == FLE_DOCK_INNER_TOP || direction == FLE_DOCK_INNER_BOTTOM;
-
+	
 	if (lines->empty())
 		return 0;
 
+	bool isVertical = direction == FLE_DOCK_LEFT || direction == FLE_DOCK_RIGHT;
+	bool isInner = direction == FLE_DOCK_INNER_TOP || direction == FLE_DOCK_INNER_BOTTOM;
 	int addedToDirection = 0;
-	int lineCounter = 0; //case 2
-	std::list<Fle_Dock_Group*>* line = nullptr; // case 3
 
+	std::list<Fle_Dock_Group*>* line = nullptr;
+
+	int lineCounter = 0; // used for case 2
+	
 	for (std::list<std::list<Fle_Dock_Group*>>::iterator it = lines->begin(); it != lines->end(); it++)
 	{
+		// handle case 2 first
 		if(it != std::prev(lines->end()))
 		{
 			int groupGripDist = 0;
@@ -2283,7 +2346,7 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 				groupGripDist = std::abs(((*it->begin())->x() + (*it->begin())->get_breadth() - X));
 				break;
 			}
-			// handle case 2 first
+			lineCounter++;
 			if (groupGripDist <= FLE_GRIP_SIZE)
 			{
 				if (preview)
@@ -2291,12 +2354,14 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 					switch (direction)
 					{
 					case FLE_DOCK_TOP:
+					case FLE_DOCK_INNER_TOP:
 						m_previewX = x();
 						m_previewY = (*it->begin())->y() + (*it->begin())->get_breadth();
 						m_previewW = w();
 						m_previewH = group->get_breadth();
 						break;
 					case FLE_DOCK_BOTTOM:
+					case FLE_DOCK_INNER_BOTTOM:
 						m_previewX = x();
 						m_previewY = (*it->begin())->y() - group->get_breadth();
 						m_previewW = w();
@@ -2315,21 +2380,24 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 						m_previewH = h() - m_breadthTop - m_breadthBottom;
 						break;
 					}
-					
-					if(isInner)
+				
+					if (isInner)
 					{
 						m_previewX += m_breadthLeft;
 						m_previewW -= m_breadthLeft + m_breadthRight;
-					}
 
+						if(group->is_vertical())
+							m_previewH = group->get_size();
+					}
+				
 					return 0;
 				}
+				
 				addedToDirection = direction;
-				add_dock_group(group, direction, lineCounter + 2);
-				break;
+				add_dock_group(group, direction, lineCounter + 1);
+			
+				return addedToDirection;
 			}
-
-			lineCounter++;
 		}
 
 		if ((isVertical && (X > (*it->begin())->x() && X < (*it->begin())->x() + (*it->begin())->get_breadth())) ||
@@ -2343,276 +2411,292 @@ int Fle_Dock_Host::try_attach_case2n3(int direction, Fle_Dock_Group* group, int 
 		}
 	}
 
-	// if line != nullptr then case 2 was N/A
-	if (addedToDirection == 0 && line != nullptr && group->flexible() == (*line->begin())->flexible() && group->get_min_breadth() <= (*line->begin())->get_breadth())
-	{
-		int availableSpaceInLine = w();
+	int groupMinBreadth = group->get_min_breadth();
 
+	if(isInner && group->is_vertical())
+		groupMinBreadth = group->get_size();
+	
+	if (addedToDirection != 0 || line == nullptr || group->flexible() != (*line->begin())->flexible() || groupMinBreadth > (*line->begin())->get_breadth())
+		return addedToDirection;
+
+	int availableSpaceInLine = w();
+	int innerOffset = 0;
+
+	if (isVertical)
+	{
+		availableSpaceInLine = h() - m_breadthTop - m_breadthBottom;
+	}
+	else if (isInner)
+	{
+		innerOffset = m_breadthLeft;
+		availableSpaceInLine -= innerOffset + m_breadthRight;
+	}
+
+	for (Fle_Dock_Group *group : *line)
+	{
+		availableSpaceInLine -= group->get_min_size();
+	}
+
+	int groupMinSize = group->get_min_size();
+	
+	if(isInner && group->is_vertical())
+		groupMinSize = group->get_min_breadth();
+
+	if (availableSpaceInLine < groupMinSize)
+		return 0;
+
+	// We'll use the coords of otherGroup to position this new one
+	Fle_Dock_Group *otherGroup = *line->begin();
+
+	std::list<Fle_Dock_Group *>::iterator newGroup = line->end();
+	int newGroupOffset = -1;
+	int eventOffset = 0;
+
+	// Calculate the event offset in line
+	if (isVertical)
+	{
+		eventOffset = Y - y() - m_breadthTop;
+	}
+	else
+	{
+		eventOffset = X - x() - innerOffset;
+	}
+
+	// Find the group at the event coords
+	for (std::list<Fle_Dock_Group *>::iterator it = line->begin(); it != line->end(); it++)
+	{
+		Fle_Dock_Group *g = *it;
+
+		// Edge case: if this is the first group we want to be able to add before it
+		if (it == line->begin())
+		{
+			if ((!isVertical && X > g->x() && X < g->x() + (g->get_min_size() / 2)) ||
+				(isVertical && Y > g->y() && Y < g->y() + (g->get_min_size() / 2)))
+			{
+				// Add before this group
+				newGroup = line->insert(it, group);
+				break;
+			}
+		}
+		if ((!isVertical && X < g->x() + g->w()) ||
+			(isVertical && Y < g->y() + g->h()))
+		{
+			// Add after this group
+			newGroup = line->insert(std::next(it), group);
+			break;
+		}
+	}
+
+	if (newGroup == line->end())
+		return 0;
+
+	// Now that the line is divided into two by the new group, sum the
+	// sizes
+	int minSizeBefore = 0;
+	int sizeBefore = 0;
+	for (std::list<Fle_Dock_Group *>::iterator it = line->begin(); it != newGroup; it++)
+	{
+		minSizeBefore += (*it)->get_min_size();
+		sizeBefore += (*it)->get_size();
+	}
+	int minSizeAfter = 0;
+	int sizeAfter = 0;
+	for (std::list<Fle_Dock_Group *>::iterator it = std::next(newGroup); it != line->end(); it++)
+	{
+		minSizeAfter += (*it)->get_min_size();
+		sizeAfter += (*it)->get_size();
+	}
+
+	int removeFromBefore = 0;
+	int removeFromAfter = 0;
+	int newGroupSize = groupMinSize;
+	int lineLength = isVertical ? h() - m_breadthTop - m_breadthBottom : w();
+	if(isInner) lineLength -= innerOffset + m_breadthRight;
+	bool triedToGoBelowMinSize = false;
+
+	// Now find the offset in line as close to the event offset as possible
+	if (sizeBefore == 0)
+	{
+		// We're adding the new group to the beginning of the line
+		newGroupOffset = innerOffset;
+		removeFromAfter = newGroupSize;
+	}
+	else if (minSizeBefore >= eventOffset)
+	{
+		newGroupOffset = minSizeBefore + innerOffset;
+		removeFromBefore = sizeBefore - minSizeBefore;
+		removeFromAfter = newGroupSize - removeFromBefore;
+	}
+	else
+	{
+		// Calculate the offset closest to the event offset
+		newGroupOffset = eventOffset;
+
+		// Check if this offset would cause the after groups to go below min size
+		if (sizeAfter > 0 && newGroupOffset > lineLength - minSizeAfter - newGroupSize)
+		{
+			newGroupOffset = lineLength - minSizeAfter - newGroupSize;
+			removeFromBefore += sizeBefore - newGroupOffset;
+			removeFromAfter = sizeAfter - minSizeAfter;
+		}
+		// By this point we've established that we won't resize before groups below min size
+		else
+		{
+			removeFromBefore = sizeBefore - newGroupOffset;
+			removeFromAfter = newGroupSize - (sizeBefore - newGroupOffset);
+		}
+		if (newGroupOffset > lineLength - newGroupSize)
+		{
+			newGroupOffset = lineLength - newGroupSize;
+			removeFromBefore = newGroupSize;
+			triedToGoBelowMinSize = true;
+		}
+	}
+
+	// Make the group fill the available space
+	if (newGroup == std::prev(line->end()) && !triedToGoBelowMinSize)
+	{
+		newGroupSize = lineLength - (sizeBefore - removeFromBefore);
+	}
+	else if (removeFromAfter < 0)
+	{
+		newGroupSize = lineLength - (sizeBefore - removeFromBefore) - (sizeAfter);
+	}
+
+	// If preview, calculate it's xywh and ret
+	if (preview)
+	{
 		if (isVertical)
 		{
-			availableSpaceInLine = h() - m_breadthTop - m_breadthBottom;
+			m_previewX = otherGroup->x();
+			m_previewY = newGroupOffset + m_breadthTop + y();
+			m_previewW = otherGroup->get_breadth();
+			m_previewH = newGroupSize;
 		}
-		else if(isInner)
+		else
 		{
-			availableSpaceInLine -= m_breadthLeft + m_breadthRight;
+			m_previewX = newGroupOffset + x() + innerOffset;
+			m_previewY = otherGroup->y();
+			m_previewW = newGroupSize;
+			m_previewH = otherGroup->get_breadth();
 		}
 
-		for (Fle_Dock_Group* group : *line)
+		// We've added a element to the line list, need to erase it
+		line->erase(newGroup);
+		return 0;
+	}
+
+	// Position and size all groups in line
+	// before, in reverse:
+	if (removeFromBefore > 0)
+	{
+		for (std::list<Fle_Dock_Group *>::iterator ita = std::prev(newGroup);;)
 		{
-			availableSpaceInLine -= group->get_min_size();
-		}
+			if (removeFromBefore <= 0)
+				break;
 
-		if (availableSpaceInLine >= group->get_min_size())
-		{
-			// We'll use the coords of otherGroup to position this new one
-			Fle_Dock_Group* otherGroup = *line->begin();
+			Fle_Dock_Group *g = *ita;
 
-			std::list<Fle_Dock_Group*>::iterator newGroup = line->end();
-			int newGroupOffset = -1;
-			int eventOffset = 0;
-
-			// Calculate the event offset in line
-			if (isVertical)
+			int deltaMin = g->get_size() - g->get_min_size();
+			int oldSize = g->get_size();
+			if (removeFromBefore > deltaMin)
 			{
-				eventOffset = Y - y() - m_breadthTop;
+				g->set_size(g->get_min_size());
 			}
 			else
 			{
-				eventOffset = X - x();
+				g->set_size(g->get_size() - removeFromBefore);
 			}
-
-			// Find the group at the event coords
-			for (std::list<Fle_Dock_Group*>::iterator it = line->begin(); it != line->end(); it++)
+			// If this group was scaled down towards its min size, move
+			// groups after it
+			if (oldSize != g->get_size() && ita != std::prev(newGroup))
 			{
-				Fle_Dock_Group* g = *it;
-				
-				// Edge case: if this is the first group we want to be able to add before it
-				if(it == line->begin())
-				{
-					if ((!isVertical && X > g->x() && X < g->x() + (g->get_min_size() / 2)) ||
-						 (isVertical && Y > g->y() && Y < g->y() + (g->get_min_size() / 2)))
-					{
-						// Add before this group
-						newGroup = line->insert(it, group);
-						break;
-					}
-				}
-				if ((!isVertical && X < g->x() + g->w()) ||
-					 (isVertical && Y < g->y() + g->h()))
-				{
-					// Add after this group
-					newGroup = line->insert(std::next(it), group);
-					break;
-				}
-			}
-
-			if (newGroup == line->end()) return 0;
-
-			// Now that the line is divided into two by the new group, sum the
-			// sizes
-			int minSizeBefore = 0;
-			int sizeBefore = 0;
-			for (std::list<Fle_Dock_Group*>::iterator it = line->begin(); it != newGroup; it++)
-			{
-				minSizeBefore += (*it)->get_min_size();
-				sizeBefore += (*it)->get_size();
-			}
-			int minSizeAfter = 0;
-			int sizeAfter = 0;
-			for (std::list<Fle_Dock_Group*>::iterator it = std::next(newGroup); it != line->end(); it++)
-			{
-				minSizeAfter += (*it)->get_min_size();
-				sizeAfter += (*it)->get_size();
-			}
-
-			int removeFromBefore = 0;
-			int removeFromAfter = 0;
-			int newGroupSize = group->get_min_size();
-			int lineLength = isVertical ? h() - m_breadthTop - m_breadthBottom : w();
-			bool triedToGoBelowMinSize = false;
-
-			// Now find the offset in line as close to the event offset as possible
-			if (sizeBefore == 0)
-			{
-				// We're adding the new group to the beginning of the line
-				newGroupOffset = 0;
-				removeFromAfter = newGroupSize;
-			}
-			else if(minSizeBefore >= eventOffset)
-			{
-				newGroupOffset = minSizeBefore;
-				removeFromBefore = sizeBefore - minSizeBefore;
-				removeFromAfter = newGroupSize - removeFromBefore;
-			}
-			else
-			{
-				// Calculate the offset closest to the event offset
-				newGroupOffset = eventOffset;
-
-				// Check if this offset would cause the after groups to go below min size
-				if (sizeAfter > 0 && newGroupOffset > lineLength - minSizeAfter - newGroupSize)
-				{
-					newGroupOffset = lineLength - minSizeAfter - newGroupSize;
-					removeFromBefore += sizeBefore - newGroupOffset;
-					removeFromAfter = sizeAfter - minSizeAfter;
-				}
-				// By this point we've established that we won't resize before groups below min size
-				else
-				{
-					removeFromBefore = sizeBefore - newGroupOffset;
-					removeFromAfter = newGroupSize - (sizeBefore - newGroupOffset);
-				}
-				if (newGroupOffset > lineLength - newGroupSize)
-				{
-					newGroupOffset = lineLength - newGroupSize;
-					removeFromBefore = newGroupSize;
-					triedToGoBelowMinSize = true;
-				}
-			}
-
-			// Make the group fill the available space
-			if (newGroup == std::prev(line->end()) && !triedToGoBelowMinSize)
-			{
-				newGroupSize = lineLength - (sizeBefore - removeFromBefore);
-			}
-			else if(removeFromAfter < 0)
-			{
-				newGroupSize = lineLength - (sizeBefore - removeFromBefore) - (sizeAfter);
-			}
-
-			// If preview, calculate it's xywh and ret
-			if (preview)
-			{
-				if (isVertical)
-				{
-					m_previewX = otherGroup->x();
-					m_previewY = newGroupOffset + m_breadthTop + y();
-					m_previewW = otherGroup->get_breadth();
-					m_previewH = newGroupSize;
-				}
-				else
-				{
-					m_previewX = newGroupOffset + x();
-					m_previewY = otherGroup->y();
-					m_previewW = newGroupSize;
-					m_previewH = otherGroup->get_breadth();
-				}
-
-				// We've added a element to the line list, need to erase it
-				line->erase(newGroup);
-				return 0;
-			}
-
-			// Position and size all groups in line
-			// before, in reverse:
-			if(removeFromBefore > 0)
-			{
-				for (std::list<Fle_Dock_Group*>::iterator ita = std::prev(newGroup);;)
-				{
-					if (removeFromBefore <= 0) break;
-
-					Fle_Dock_Group* g = *ita;
-
-					int deltaMin = g->get_size() - g->get_min_size();
-					int oldSize = g->get_size();
-					if (removeFromBefore > deltaMin)
-					{
-						g->set_size(g->get_min_size());
-					}
-					else
-					{
-						g->set_size(g->get_size() - removeFromBefore);
-					}
-					// If this group was scaled down towards its min size, move
-					// groups after it
-					if (oldSize != g->get_size() && ita != std::prev(newGroup))
-					{
-						for (std::list<Fle_Dock_Group*>::iterator itb = std::next(ita); itb != newGroup; itb++)
-						{
-							if (!isVertical)
-							{
-								(*itb)->position((*itb)->x() - (oldSize - g->get_size()), (*itb)->y());
-							}
-							else
-							{
-								(*itb)->position((*itb)->x(), (*itb)->y() - (oldSize - g->get_size()));
-							}
-						}
-					}
-					removeFromBefore -= deltaMin;
-
-					if (ita == line->begin()) break;
-					ita--;
-				}
-			}
-			// after, in normal order:
-			if (removeFromAfter > 0)
-			{
-				// First, move the groups to make room for the new one.
-				for (std::list<Fle_Dock_Group*>::iterator ita = std::next(newGroup); ita != line->end(); ita++)
+				for (std::list<Fle_Dock_Group *>::iterator itb = std::next(ita); itb != newGroup; itb++)
 				{
 					if (!isVertical)
 					{
-						(*ita)->position((*ita)->x() + removeFromAfter, (*ita)->y());
+						(*itb)->position((*itb)->x() - (oldSize - g->get_size()), (*itb)->y());
 					}
 					else
 					{
-						(*ita)->position((*ita)->x(), (*ita)->y() + removeFromAfter);
+						(*itb)->position((*itb)->x(), (*itb)->y() - (oldSize - g->get_size()));
 					}
 				}
-				// Second, resize them so that they fit.
-				for (std::list<Fle_Dock_Group*>::iterator ita = std::next(newGroup); ita != line->end(); ita++)
-				{
-					if (removeFromAfter <= 0) break;
-
-					Fle_Dock_Group* g = *ita;
-
-					int deltaMin = g->get_size() - g->get_min_size();
-					int oldSize = g->get_size();
-					if (removeFromAfter > deltaMin)
-					{
-						g->set_size(g->get_min_size());
-					}
-					else
-					{
-						g->set_size(g->get_size() - removeFromAfter);
-					}
-					// If this group was scaled down towards its min size, move
-					// groups after it
-					if (oldSize != g->get_size() && ita != std::prev(line->end()))
-					{
-						for (std::list<Fle_Dock_Group*>::iterator itb = std::next(ita); itb != line->end(); itb++)
-						{
-							if (!isVertical)
-							{
-								(*itb)->position((*itb)->x() - (oldSize - g->get_size()), (*itb)->y());
-							}
-							else
-							{
-								(*itb)->position((*itb)->x(), (*itb)->y() - (oldSize - g->get_size()));
-							}
-						}
-					}
-					removeFromAfter -= deltaMin;
-				}
 			}
+			removeFromBefore -= deltaMin;
 
-			add(group);
-			addedToDirection = direction;
-			if (isVertical)
-			{
-				group->resize(otherGroup->x(), newGroupOffset + m_breadthTop + y(), otherGroup->get_breadth(), newGroupSize);
-			}
-			else
-				group->resize(newGroupOffset + x(), otherGroup->y(), newGroupSize, otherGroup->get_breadth());
-			
-			needCalcMinSize = true;
-
-			group->set_vertical(isVertical);
-
-			line_reset_preferred_sizes(line);
+			if (ita == line->begin())
+				break;
+			ita--;
 		}
 	}
+	// after, in normal order:
+	if (removeFromAfter > 0)
+	{
+		// First, move the groups to make room for the new one.
+		for (std::list<Fle_Dock_Group *>::iterator ita = std::next(newGroup); ita != line->end(); ita++)
+		{
+			if (!isVertical)
+			{
+				(*ita)->position((*ita)->x() + removeFromAfter, (*ita)->y());
+			}
+			else
+			{
+				(*ita)->position((*ita)->x(), (*ita)->y() + removeFromAfter);
+			}
+		}
+		// Second, resize them so that they fit.
+		for (std::list<Fle_Dock_Group *>::iterator ita = std::next(newGroup); ita != line->end(); ita++)
+		{
+			if (removeFromAfter <= 0)
+				break;
+
+			Fle_Dock_Group *g = *ita;
+
+			int deltaMin = g->get_size() - g->get_min_size();
+			int oldSize = g->get_size();
+			if (removeFromAfter > deltaMin)
+			{
+				g->set_size(g->get_min_size());
+			}
+			else
+			{
+				g->set_size(g->get_size() - removeFromAfter);
+			}
+			// If this group was scaled down towards its min size, move
+			// groups after it
+			if (oldSize != g->get_size() && ita != std::prev(line->end()))
+			{
+				for (std::list<Fle_Dock_Group *>::iterator itb = std::next(ita); itb != line->end(); itb++)
+				{
+					if (!isVertical)
+					{
+						(*itb)->position((*itb)->x() - (oldSize - g->get_size()), (*itb)->y());
+					}
+					else
+					{
+						(*itb)->position((*itb)->x(), (*itb)->y() - (oldSize - g->get_size()));
+					}
+				}
+			}
+			removeFromAfter -= deltaMin;
+		}
+	}
+
+	add(group);
+	addedToDirection = direction;
+	if (isVertical)
+	{
+		group->resize(otherGroup->x(), newGroupOffset + m_breadthTop + y(), otherGroup->get_breadth(), newGroupSize);
+	}
+	else
+		group->resize(newGroupOffset + x() + innerOffset, otherGroup->y(), newGroupSize, otherGroup->get_breadth());
+
+	needCalcMinSize = true;
+
+	group->set_vertical(isVertical);
+
+	line_reset_preferred_sizes(line);
 
 	return addedToDirection;
 }
